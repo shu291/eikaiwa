@@ -339,18 +339,34 @@ const LEVELS = [
 ];
 
 /* ---------- 2. 保存まわり ---------- */
-const LS = {cfg:'talkie.cfg', log:'talkie.sessions', ph:'talkie.phrases'};
+const LS = {cfg:'talkie.cfg', log:'talkie.sessions', ph:'talkie.phrases', use:'talkie.usage'};
 const load = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } };
 const save = (k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){ toast('保存できませんでした'); } };
 
 const cfg = Object.assign({
   apiKey:'', model:'gemini-2.5-flash', voiceURI:'', rate:0.92,
-  autoSpeak:true, autoSend:true, showJa:false, level:'b', name:'', turns:8
+  autoSpeak:true, autoSend:true, showJa:false, level:'b', name:'', turns:8,
+  handsFree:true, silence:4.5
 }, load(LS.cfg,{}));
 const saveCfg = ()=> save(LS.cfg,cfg);
 
 let sessions = load(LS.log,[]);       // {id,ts,scene,level,turns,words,sec,msgs,report}
 let phrases  = load(LS.ph,[]);        // {id,en,ja,scene,ts,box}
+
+/* AIに送った回数を数える（無料枠の目安を自分で把握するため） */
+let usage = load(LS.use,{day:'',n:0,min:[],hist:{}});
+function bumpUsage(){
+  const d=todayKey();
+  if(usage.day!==d){ usage.hist=usage.hist||{}; if(usage.day) usage.hist[usage.day]=usage.n; usage={day:d,n:0,min:[],hist:usage.hist}; }
+  usage.n++;
+  const now=Date.now();
+  usage.min=(usage.min||[]).filter(t=>now-t<60000); usage.min.push(now);
+  save(LS.use,usage);
+}
+const useToday  = ()=> usage.day===todayKey()? usage.n : 0;
+const useMinute = ()=>{ const now=Date.now(); return (usage.min||[]).filter(t=>now-t<60000).length; };
+const LIMITS = {'gemini-2.5-flash':{rpm:10,rpd:250},'gemini-2.5-flash-lite':{rpm:15,rpd:1000},'gemini-flash-latest':{rpm:10,rpd:250}};
+const limit = ()=> LIMITS[cfg.model] || {rpm:10,rpd:250};
 
 /* ---------- 3. 小道具 ---------- */
 const $ = s=>document.querySelector(s);
@@ -379,46 +395,84 @@ function pickVoice(){
       || voices.find(v=>/en-US/i.test(v.lang) && /Samantha|Google US|Ava|Allison/i.test(v.name))
       || voices.find(v=>/en-US/i.test(v.lang)) || voices[0] || null;
 }
-function speak(text,rate){
-  if(!('speechSynthesis' in window)) return;
+let speakSeq=0;
+function speak(text,rate,onDone){
+  const done=()=>{ try{ onDone&&onDone(); }catch(e){} };
+  if(!('speechSynthesis' in window)){ done(); return; }
   try{
     speechSynthesis.cancel();
+    const my=++speakSeq, t0=Date.now();
     const u=new SpeechSynthesisUtterance(String(text).replace(/[*_`#]/g,''));
     const v=pickVoice(); if(v){ u.voice=v; u.lang=v.lang; } else u.lang='en-US';
     u.rate=rate||cfg.rate; u.pitch=1;
+    let fired=false, watch=null;
+    const fin=()=>{ if(fired) return; fired=true; clearInterval(watch); if(my===speakSeq) done(); };
+    u.onend=fin; u.onerror=fin;
+    // onend が来ないブラウザ（Safari など）用の見張り
+    watch=setInterval(()=>{
+      if(fired||my!==speakSeq){ clearInterval(watch); return; }
+      if(Date.now()-t0>900 && !speechSynthesis.speaking && !speechSynthesis.pending) fin();
+    },350);
     speechSynthesis.speak(u);
-  }catch(e){}
+  }catch(e){ done(); }
 }
-const stopSpeak = ()=>{ try{ speechSynthesis.cancel(); }catch(e){} };
+const stopSpeak = ()=>{ speakSeq++; try{ speechSynthesis.cancel(); }catch(e){} };
 
 /* ---------- 5. 音声認識（無料・ブラウザ標準） ---------- */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const srAvailable = !!SR;
-let rec=null, recMode=null;
+let rec=null, recFinish=null, recStopping=false, silT=null;
+/* ブラウザ標準の音声認識は「少し黙るとすぐ切れる」ので、
+   continuous で開きっぱなしにして、無音の長さは自分のタイマーで測る。 */
 function startRec(lang, onFinal, onInterim, onEnd){
   if(!SR){ toast('このブラウザは音声認識に非対応です。文字で入力してください'); onEnd&&onEnd(); return; }
   stopSpeak();
-  try{ rec&&rec.abort(); }catch(e){}
-  rec=new SR();
-  rec.lang=lang; rec.interimResults=true; rec.continuous=false; rec.maxAlternatives=1;
-  let finalTxt='';
-  rec.onresult=e=>{
-    let interim='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      const t=e.results[i][0].transcript;
-      if(e.results[i].isFinal) finalTxt+=t; else interim+=t;
-    }
-    onInterim&&onInterim((finalTxt+interim).trim());
-  };
-  rec.onerror=e=>{
-    if(e.error==='not-allowed') toast('マイクが許可されていません（ブラウザの設定を確認）');
-    else if(e.error==='no-speech') toast('聞き取れませんでした。もう一度どうぞ');
-    else if(e.error!=='aborted') toast('音声認識エラー: '+e.error);
-  };
-  rec.onend=()=>{ onEnd&&onEnd(); if(finalTxt.trim()) onFinal&&onFinal(finalTxt.trim()); };
-  try{ rec.start(); }catch(e){ onEnd&&onEnd(); }
+  if(recFinish) recFinish();
+  let finalTxt='', heard=false, ended=false, restarts=0;
+  const t0=Date.now();
+  recStopping=false;
+  const gap = ()=> Math.round((cfg.silence||4.5)*1000);          // 話したあとの無音
+  const firstGap = ()=> Math.max(gap()+2500, 7000);              // まだ一言も出ていないとき
+  const arm = ms=>{ clearTimeout(silT); silT=setTimeout(()=>finish(), ms); };
+  function finish(){
+    if(ended) return; ended=true; recStopping=true; recFinish=null;
+    clearTimeout(silT);
+    try{ rec&&rec.stop(); }catch(e){}
+    onEnd&&onEnd();
+    const t=finalTxt.trim(); if(t) onFinal&&onFinal(t);
+  }
+  recFinish=finish;
+  function mk(){
+    const r=new SR();
+    r.lang=lang; r.interimResults=true; r.continuous=true; r.maxAlternatives=1;
+    r.onresult=e=>{
+      let interim='';
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const tx=e.results[i][0].transcript;
+        if(e.results[i].isFinal) finalTxt+=(finalTxt?' ':'')+tx.trim(); else interim+=tx;
+      }
+      const cur=(finalTxt+' '+interim).trim();
+      if(cur){ heard=true; onInterim&&onInterim(cur); }
+      arm(heard? gap() : firstGap());
+    };
+    r.onerror=e=>{
+      if(e.error==='not-allowed'){ toast('マイクが許可されていません（ブラウザの設定を確認）'); finish(); }
+      else if(e.error==='audio-capture'){ toast('マイクが見つかりません'); finish(); }
+      else if(e.error==='no-speech'){ /* 自前タイマーに任せるので無視 */ }
+      else if(e.error!=='aborted'){ toast('音声認識エラー: '+e.error); }
+    };
+    r.onend=()=>{
+      if(ended||recStopping) return;
+      // Chrome は数秒で勝手に切るので、無音タイマーが鳴るまでは繋ぎ直す
+      if(restarts++>60 || Date.now()-t0>150000){ finish(); return; }
+      try{ rec=mk(); rec.start(); }catch(e){ finish(); }
+    };
+    return r;
+  }
+  try{ rec=mk(); rec.start(); arm(firstGap()); }
+  catch(e){ recFinish=null; onEnd&&onEnd(); }
 }
-function stopRec(){ try{ rec&&rec.stop(); }catch(e){} }
+function stopRec(){ if(recFinish) recFinish(); else { recStopping=true; clearTimeout(silT); try{ rec&&rec.stop(); }catch(e){} } }
 
 /* ---------- 6. Gemini（無料枠 / キーは端末内だけに保存） ---------- */
 const hasKey = ()=> !!cfg.apiKey.trim();
@@ -428,11 +482,13 @@ async function gemini({system, contents, schema, temp=0.9}){
   const body={ contents, generationConfig:{ temperature:temp } };
   if(system) body.systemInstruction={parts:[{text:system}]};
   if(schema){ body.generationConfig.responseMimeType='application/json'; body.generationConfig.responseSchema=schema; }
+  bumpUsage();
+  if(useMinute()>=limit().rpm) toast(`1分あたりの目安（${limit().rpm}回）に達しました。少し待つと安定します`);
   const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!res.ok){
     const t=await res.text().catch(()=> '');
     if(res.status===400 && /API key/i.test(t)) throw new Error('APIキーが正しくないようです（設定で確認）');
-    if(res.status===429) throw new Error('無料枠の上限に一時的に達しました。少し待つか、モデルをflash-liteに変えてください');
+    if(res.status===429) throw new Error(`無料枠の上限です（今日 ${useToday()}回目）。1分ほど待つか、設定で flash-lite に変えてください`);
     if(res.status===403) throw new Error('APIキーが無効か、権限がありません');
     throw new Error('通信エラー ('+res.status+')');
   }
@@ -524,6 +580,7 @@ function renderSetup(m){
       <div><b>${st.today}</b><span>今日の発話</span></div>
       <div><b>${sessions.length}</b><span>会話した回数</span></div>
     </div>
+    ${hasKey()?`<p class="muted" style="margin:10px 0 0">AIとの通信 今日 ${useToday()} 回（無料枠の目安 ${limit().rpd} 回／日・<b>超えても課金されません</b>）</p>`:''}
   </div>
   <div>
     <h2 style="font-size:15px;margin:4px 0 10px">場面をえらぶ</h2>
@@ -677,7 +734,7 @@ async function nextAiTurn(first){
       if(last && r.feedback) last.fb=r.feedback;
       c.hints=(r.hints||[]).slice(0,3); c.showHints=false;
       paintMsgs();
-      if(cfg.autoSpeak) speak(r.reply);
+      afterAiSpoke(r.reply);
       if(r.done) setTimeout(()=>{ if(app.chat && !app.chat.ended) finishChat(); },1400);
     }else{
       // 台本モード
@@ -690,7 +747,7 @@ async function nextAiTurn(first){
       c.hints=line.hints; c.showHints=false;
       c.step++;
       paintMsgs();
-      if(cfg.autoSpeak) speak(line.en);
+      afterAiSpoke(line.en);
     }
   }catch(e){
     app.busy=false;
@@ -705,7 +762,7 @@ async function sendMsg(text){
   const c=app.chat; if(!c || c.ended) return;
   const t=String(text||'').trim(); if(!t) return;
   if(app.busy){ toast('AIが考えています…'); return; }
-  stopSpeak();
+  stopSpeak(); stopRec();
   c.msgs.push({role:'me', en:t});
   c.showHints=false; c.hints=null;
   $('#txt').value=''; autoGrow();
@@ -855,14 +912,27 @@ txt.addEventListener('keydown',e=>{
   if(e.key==='Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); sendMsg(txt.value); }
 });
 function setMicUI(btn,on){ btn.classList.toggle('rec',on); }
-$('#micEn').onclick=()=>{
+function listenEn(){
   const b=$('#micEn');
-  if(b.classList.contains('rec')){ stopRec(); return; }
-  setMicUI(b,true); txt.placeholder='聞いています…話してください';
+  if(!b || b.classList.contains('rec')) return;
+  setMicUI(b,true); txt.placeholder=`聞いています…（${(cfg.silence||4.5).toFixed(1)}秒だまると送信）`;
   startRec('en-US',
     fin=>{ txt.value=fin; autoGrow(); if(cfg.autoSend) setTimeout(()=>sendMsg(fin),250); },
     itr=>{ txt.value=itr; autoGrow(); },
     ()=>{ setMicUI(b,false); txt.placeholder='英語で入力 / マイクで話す'; });
+}
+/* AIが話し終わったら、そのまま自分の番にする（ハンズフリー） */
+function afterAiSpoke(text){
+  const go=()=>{
+    if(!cfg.handsFree) return;
+    if(!app.chat || app.chat.ended || app.busy) return;
+    if(txt.value.trim()) return;                    // 手で打っている途中なら邪魔しない
+    setTimeout(()=>{ if(app.chat && !app.chat.ended && !app.busy && !txt.value.trim()) listenEn(); },400);
+  };
+  if(cfg.autoSpeak) speak(text,null,go); else go();
+}
+$('#micEn').onclick=()=>{
+  if($('#micEn').classList.contains('rec')) stopRec(); else listenEn();
 };
 $('#micJa').onclick=()=>{
   const b=$('#micJa');
@@ -1033,14 +1103,41 @@ function renderSettings(m){
     <h2>会話のしかた</h2>
     <div class="sw"><div class="l">相手のセリフを自動で読み上げる<small>オフにすると🔊ボタンだけで再生</small></div>
       <button class="toggle ${cfg.autoSpeak?'on':''}" data-t="autoSpeak"></button></div>
+    <div class="sw"><div class="l">ハンズフリー（連続会話）<small>相手が話し終わったら、自動でマイクが入ります</small></div>
+      <button class="toggle ${cfg.handsFree?'on':''}" data-t="handsFree"></button></div>
     <div class="sw"><div class="l">話し終わったら自動で送信<small>オフにすると内容を直してから送れます</small></div>
       <button class="toggle ${cfg.autoSend?'on':''}" data-t="autoSend"></button></div>
+    <label class="f">何秒だまったら「話し終わり」とみなすか　<span id="silV">${cfg.silence.toFixed(1)}秒</span></label>
+    <input class="f" id="silence" type="range" min="2" max="10" step="0.5" value="${cfg.silence}">
+    <p class="muted" style="margin:4px 0 0;font-size:11.5px">長くすると、言葉に詰まっても勝手に送信されません。まだ一度も声を出していないときは、これ＋2.5秒（最低7秒）待ちます。</p>
     <div class="sw"><div class="l">日本語訳を最初から表示<small>オフだと「日本語で見る」を押したときだけ</small></div>
       <button class="toggle ${cfg.showJa?'on':''}" data-t="showJa"></button></div>
     <label class="f">1回の会話の長さ（自分が話す回数の目安）</label>
     <input class="f" id="turns" type="number" min="3" max="30" value="${cfg.turns}">
     <label class="f">呼んでほしい名前（任意）</label>
     <input class="f" id="name" placeholder="Shu" value="${esc(cfg.name)}">
+  </div>
+
+  <div class="card">
+    <h2>📊 無料枠の使いかた</h2>
+    <div class="stat" style="margin-bottom:10px">
+      <div><b>${useToday()}</b><span>今日つかった回数</span></div>
+      <div><b>${useMinute()}</b><span>この1分</span></div>
+      <div><b>${Math.max(0,limit().rpd-useToday())}</b><span>今日の残り目安</span></div>
+    </div>
+    <div class="bar"><i style="width:${Math.min(100,useToday()/limit().rpd*100)}%"></i></div>
+    <p class="muted" style="margin:8px 0 10px">いまのモデル <b>${esc(cfg.model)}</b> の無料枠の目安：<b>1分に${limit().rpm}回</b>／<b>1日に${limit().rpd}回</b></p>
+    <p class="muted" style="margin:0 0 10px">
+      <b>何回ぶん使うの？</b><br>
+      ・あなたが1回話す → <b>1回</b>／・ヒントを出す → <b>1回</b>／・日本語→英語 → <b>1回</b>／・終わりのレポート → <b>1回</b><br>
+      つまり <b>8往復の会話ぜんぶで だいたい10回</b>。1日に250回なら <b>25会話くらい</b>できます。ふつうに練習するぶんには、まず足りなくなりません。
+    </p>
+    <p class="muted" style="margin:0">
+      上限を超えても<b>お金は一切かかりません</b>。「今は使えません」と断られるだけで、少し待つか翌日になれば元に戻ります。
+      上の数字はこのアプリが数えた目安です。Googleが決めた本当の枠は
+      <a href="https://aistudio.google.com/rate-limit" target="_blank" rel="noopener">AI Studio の Rate limits</a> で確認できます（アカウントによって少し違います）。
+      足りないときは設定のモデルを <b>flash-lite</b> にすると枠が広がります。
+    </p>
   </div>
 
   <div class="card">
@@ -1069,6 +1166,7 @@ function renderSettings(m){
   $('#rate').oninput=e=>{ cfg.rate=parseFloat(e.target.value); $('#rateV').textContent=cfg.rate.toFixed(2); saveCfg(); };
   $('#test').onclick=()=>speak("Hi there! What can I get started for you today?");
   m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{ cfg[b.dataset.t]=!cfg[b.dataset.t]; saveCfg(); render(); });
+  $('#silence').oninput=e=>{ cfg.silence=parseFloat(e.target.value); $('#silV').textContent=cfg.silence.toFixed(1)+'秒'; saveCfg(); };
   $('#turns').onchange=e=>{ cfg.turns=Math.max(3,Math.min(30,+e.target.value||8)); saveCfg(); };
   $('#name').onchange=e=>{ cfg.name=e.target.value.trim(); saveCfg(); };
   $('#exp').onclick=()=>{
