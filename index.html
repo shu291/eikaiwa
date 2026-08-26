@@ -3,7 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#4f46e5">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Talkie">
+<meta name="description" content="対話型の英会話練習アプリ。完全無料。">
 <title>Talkie — じぶん英会話</title>
 <style>
 :root{
@@ -414,7 +421,7 @@ const LEVELS = [
 ];
 
 /* ---------- 2. 保存まわり ---------- */
-const LS = {cfg:'talkie.cfg', log:'talkie.sessions', ph:'talkie.phrases', use:'talkie.usage'};
+const LS = {cfg:'talkie.cfg', log:'talkie.sessions', ph:'talkie.phrases', use:'talkie.usage', weak:'talkie.weak'};
 const load = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } };
 const save = (k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){ toast('保存できませんでした'); } };
 
@@ -422,13 +429,49 @@ const cfg = Object.assign({
   apiKey:'', model:'gemini-2.5-flash', voiceURI:'', rate:0.92,
   autoSpeak:true, autoSend:true, showJa:false, level:'b', name:'', turns:8,
   handsFree:true, silence:4.5,
-  free:{char:'sam', topic:'auto', topicCustom:'', mission:'auto', len:'normal'}
+  free:{char:'sam', topic:'auto', topicCustom:'', mission:'auto', len:'normal'},
+  goal:12, quizMode:'mix', autoLevel:true
 }, load(LS.cfg,{}));
 cfg.free=Object.assign({char:'sam',topic:'auto',topicCustom:'',mission:'auto',len:'normal'},cfg.free||{});
 const saveCfg = ()=> save(LS.cfg,cfg);
 
 let sessions = load(LS.log,[]);       // {id,ts,scene,level,turns,words,sec,msgs,report}
-let phrases  = load(LS.ph,[]);        // {id,en,ja,scene,ts,box}
+let phrases  = load(LS.ph,[]);        // {id,en,ja,scene,ts,box,due,seen,ok}
+let weak     = load(LS.weak,[]);      // {id,cat,you,better,why_ja,ts}
+
+/* 間隔反復：正解するたびに次に会う日が伸びる（ミスノートと同じ考え方） */
+const SRS_DAYS=[0,1,3,7,16,35,70];
+const DAY=86400000;
+function srsInit(p){
+  if(p.box==null) p.box=0;
+  if(p.due==null) p.due=p.ts||Date.now();
+  if(p.seen==null) p.seen=0;
+  if(p.ok==null) p.ok=0;
+  return p;
+}
+phrases.forEach(srsInit);
+function srsAnswer(p,correct){
+  p.seen=(p.seen||0)+1;
+  if(correct){
+    p.ok=(p.ok||0)+1;
+    p.box=Math.min(SRS_DAYS.length-1,(p.box||0)+1);
+    p.due=Date.now()+SRS_DAYS[p.box]*DAY;
+  }else{
+    // 間違えたものは大きく戻して「その日のうちにもう一度」出す
+    p.box=Math.max(0,(p.box||0)-2);
+    p.due=Date.now()+10*60*1000;
+  }
+  p.last=Date.now();
+}
+const dueList = ()=> phrases.filter(p=>(p.due||0)<=Date.now());
+const learned = ()=> phrases.filter(p=>(p.box||0)>=4).length;
+function nextDueLabel(){
+  if(!phrases.length) return '';
+  const f=phrases.map(p=>p.due||0).filter(d=>d>Date.now()).sort((a,b)=>a-b)[0];
+  if(!f) return '';
+  const d=Math.ceil((f-Date.now())/DAY);
+  return d<=1? '次の復習はあした' : `次の復習は${d}日後`;
+}
 
 /* AIに送った回数を数える（無料枠の目安を自分で把握するため） */
 let usage = load(LS.use,{day:'',n:0,min:[],hist:{}});
@@ -603,7 +646,8 @@ const WORD_SCHEMA = S({
 const REPORT_SCHEMA = S({
   score:{type:'integer'}, summary_ja:{type:'string'},
   good_points:{type:'array',items:{type:'string'}},
-  fixes:{type:'array',items:S({you:{type:'string'},better:{type:'string'},why_ja:{type:'string'}},['you','better','why_ja'])},
+  fixes:{type:'array',items:S({you:{type:'string'},better:{type:'string'},why_ja:{type:'string'},
+    cat:{type:'string',enum:['tense','article','preposition','word-order','plural','vocab','expression','question','other']}},['you','better','why_ja'])},
   phrases:{type:'array',items:S({en:{type:'string'},ja:{type:'string'}},['en','ja'])},
   next_goal_ja:{type:'string'}
 },['score','summary_ja','good_points','fixes','phrases','next_goal_ja']);
@@ -662,13 +706,27 @@ function renderSetup(m){
    </div>`:''}
   <div class="card">
     <h2>今日の調子</h2>
-    <div class="stat">
-      <div><b>${st.streak}</b><span>連続日数</span></div>
-      <div><b>${st.today}</b><span>今日の発話</span></div>
-      <div><b>${sessions.length}</b><span>会話した回数</span></div>
+    <div class="row" style="gap:16px">
+      ${ring(st.today, cfg.goal)}
+      <div class="grow">
+        <div style="font-size:14px;font-weight:700">${st.today>=cfg.goal?'🎉 今日の目標クリア！':`あと ${cfg.goal-st.today} 回 話すと目標達成`}</div>
+        <div class="muted" style="font-size:12.5px;margin-top:3px">${st.streak>0?`🔥 ${st.streak}日つづいています`:'今日から始めましょう'} ・ 通算 ${sessions.length}会話</div>
+        ${st.today===0&&st.streak>0?`<div class="muted" style="font-size:12px;margin-top:5px">今日まだ話していません。1回でも話せば連続記録は続きます。</div>`:''}
+      </div>
     </div>
-    ${hasKey()?`<p class="muted" style="margin:10px 0 0">AIとの通信 今日 ${useToday()} 回（無料枠の目安 ${limit().rpd} 回／日・<b>超えても課金されません</b>）</p>`:''}
+    ${hasKey()?`<p class="muted" style="margin:12px 0 0">AIとの通信 今日 ${useToday()} 回（無料枠の目安 ${limit().rpd} 回／日・<b>超えても課金されません</b>）</p>`:''}
   </div>
+  ${dueList().length?`<div class="card" style="border-color:color-mix(in srgb,var(--accent) 40%,var(--line))">
+    <h2>📒 そろそろ忘れそうなフレーズが ${dueList().length}個</h2>
+    <p class="muted" style="margin:0 0 10px">前に覚えたフレーズの復習どきです。1〜2分で終わります。</p>
+    <button class="btn block" id="goReview">▶︎ 今日の復習をやる</button>
+  </div>`:''}
+  ${(()=>{const sg=levelSuggestion(); return sg?`<div class="card">
+    <h2>${sg.up?'⬆️ レベルを上げませんか？':'⬇️ レベルを下げませんか？'}</h2>
+    <p class="muted" style="margin:0 0 10px">${esc(sg.why)}</p>
+    <div class="row"><button class="btn grow sm" id="lvGo">「${esc(sg.to.t)}」にする</button>
+      <button class="btn ghost sm" id="lvNo">このままでいい</button></div>
+  </div>`:''; })()}
   <div>
     <h2 style="font-size:15px;margin:4px 0 10px">場面をえらぶ</h2>
     <div class="scenes" id="scenes">
@@ -694,6 +752,9 @@ function renderSetup(m){
     ${srAvailable?'':' ／ ⚠️ このブラウザは音声認識に非対応（文字入力で練習できます）'}
   </p>`;
   const gk=$('#goKey'); if(gk) gk.onclick=()=>{ app.tab='set'; render(); };
+  const gr=$('#goReview'); if(gr) gr.onclick=()=>{ app.tab='phrase'; phMode='list'; render(); setTimeout(()=>{ const b=$('#qzDue'); if(b) b.click(); },40); };
+  const lg=$('#lvGo'); if(lg) lg.onclick=()=>{ const sg=levelSuggestion(); if(sg){ cfg.level=sg.to.id; saveCfg(); toast('むずかしさを「'+sg.to.t+'」にしました'); render(); } };
+  const ln=$('#lvNo'); if(ln) ln.onclick=()=>{ cfg.autoLevel=false; saveCfg(); render(); };
   $('#scenes').onclick=e=>{ const b=e.target.closest('[data-s]'); if(!b) return; pick.scene=b.dataset.s; render(); };
   $('#lvl').onclick=e=>{ const b=e.target.closest('[data-l]'); if(!b) return; cfg.level=b.dataset.l; saveCfg(); render(); };
   const cu=$('#customSit'); if(cu) cu.oninput=e=>{ pick.custom=e.target.value; };
@@ -768,6 +829,17 @@ function topicOf(){
   if(F.topic==='custom') return F.topicCustom.trim();
   const t=TOPICS.find(x=>x.id===F.topic);
   return t&&t.p? t.p : '';
+}
+
+function ring(done,goal){
+  const r=30, c=2*Math.PI*r, pct=Math.min(1,goal? done/goal:0);
+  return `<svg width="78" height="78" viewBox="0 0 78 78" style="flex:none">
+    <circle cx="39" cy="39" r="${r}" fill="none" stroke="var(--line)" stroke-width="8"/>
+    <circle cx="39" cy="39" r="${r}" fill="none" stroke="${pct>=1?'var(--ok)':'var(--accent)'}" stroke-width="8"
+      stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-pct)}" transform="rotate(-90 39 39)"/>
+    <text x="39" y="37" text-anchor="middle" font-size="19" font-weight="800" fill="currentColor">${done}</text>
+    <text x="39" y="52" text-anchor="middle" font-size="10" fill="var(--sub)">/ ${goal}</text>
+  </svg>`;
 }
 
 function streak(){
@@ -1097,7 +1169,7 @@ async function finishChat(){
 - "score": 0-100 for how well the learner communicated in this scene. Be generous but honest.
 - "summary_ja": 1-2 sentences in Japanese about how the conversation went. Praise something specific they actually said.
 - "good_points": 1-3 short Japanese strings, each quoting the learner's own English that worked well.
-- "fixes": up to 3 items. "you" = what the learner actually wrote, "better" = a natural rewrite, "why_ja" = short Japanese reason (max 40 chars). Only real problems, not nitpicks. Empty array if nothing to fix.
+- "fixes": up to 3 items. "you" = what the learner actually wrote, "better" = a natural rewrite, "why_ja" = short Japanese reason (max 40 chars). "cat" = which kind of mistake it is: tense(時制) / article(冠詞) / preposition(前置詞) / word-order(語順) / plural(単複) / vocab(単語選び) / expression(言い回しが不自然) / question(疑問文の作り方) / other. Only real problems, not nitpicks. Empty array if nothing to fix.
 - "phrases": 3-5 useful English expressions FROM OR FOR this scene worth memorizing, with Japanese.
 - "next_goal_ja": one concrete thing to try next time, in Japanese, one sentence.`,
         contents:[{role:'user',parts:[{text:`Scene: ${c.scene.custom?c.custom:c.scene.t}${c.char?' (free talk with '+c.char.name+')':''}${c.topic?'\nTopic: '+c.topic:''}${c.mission?'\nThe learner was trying to use: '+c.mission.t+' ('+(c.missionDone?'they managed it':'they did not manage it')+')':''}\nLevel: ${LEVELS.find(l=>l.id===c.level).t}\n\n`+c.msgs.map(m=>(m.role==='ai'?'Partner: ':'Learner: ')+m.en).join('\n')}]}],
@@ -1115,6 +1187,11 @@ async function finishChat(){
     score:rep.score||null, msgs:c.msgs.map(m=>({r:m.role,en:m.en,ja:m.ja||''})), report:rep
   });
   sessions=sessions.slice(0,120); save(LS.log,sessions);
+  (rep.fixes||[]).forEach(f=>{
+    if(!f.better) return;
+    weak.unshift({id:uid(), cat:f.cat||'other', you:f.you||'', better:f.better, why_ja:f.why_ja||'', ts:Date.now(), scene:c.scene.t});
+  });
+  weak=weak.slice(0,300); save(LS.weak,weak);
   paintMsgs();
 }
 function localReport(c){
@@ -1236,70 +1313,228 @@ $('#micJa').onclick=()=>{
 function addPhrase(en,ja,scene,bulk){
   en=String(en||'').trim(); if(!en) return;
   if(phrases.some(p=>p.en.toLowerCase()===en.toLowerCase())){ if(!bulk) toast('すでに入っています'); return; }
-  phrases.unshift({id:uid(),en,ja:ja||'',scene:scene||'',ts:Date.now(),box:0});
+  phrases.unshift(srsInit({id:uid(),en,ja:ja||'',scene:scene||'',ts:Date.now(),box:0}));
   if(!bulk){ save(LS.ph,phrases); toast('📒 フレーズ帳に入れました'); }
 }
-let phMode='list';
+/* --- 発音チェック：認識結果とお手本を単語ごとに突き合わせる --- */
+const normWords = t=>String(t||'').toLowerCase().replace(/[^a-z' ]/g,' ').split(/\s+/).filter(Boolean);
+function pronScore(target, said){
+  const a=normWords(target), b=normWords(said);
+  if(!a.length) return {rate:0, marks:[]};
+  // 最長共通部分列で「言えた単語」を対応づける
+  const dp=Array.from({length:a.length+1},()=>new Array(b.length+1).fill(0));
+  for(let i=a.length-1;i>=0;i--) for(let j=b.length-1;j>=0;j--)
+    dp[i][j]= a[i]===b[j]? dp[i+1][j+1]+1 : Math.max(dp[i+1][j],dp[i][j+1]);
+  const marks=[]; let i=0,j=0;
+  while(i<a.length){
+    if(j<b.length && a[i]===b[j]){ marks.push({w:a[i],ok:true}); i++; j++; }
+    else if(j<b.length && dp[i+1][j]>=dp[i][j+1]){ marks.push({w:a[i],ok:false}); i++; }
+    else if(j<b.length){ j++; }
+    else { marks.push({w:a[i],ok:false}); i++; }
+  }
+  const ok=marks.filter(x=>x.ok).length;
+  return {rate:Math.round(ok/a.length*100), marks, said:b.join(' ')};
+}
+function pronHtml(r){
+  return `<div style="font-size:15px;line-height:2">
+    ${r.marks.map(m=>`<span style="padding:2px 6px;border-radius:7px;margin-right:3px;background:${m.ok?'color-mix(in srgb,var(--ok) 18%,transparent)':'color-mix(in srgb,var(--danger) 18%,transparent)'};color:${m.ok?'var(--ok)':'var(--danger)'};font-weight:${m.ok?600:700}">${esc(m.w)}</span>`).join('')}
+  </div>
+  <div class="muted" style="font-size:12px;margin-top:6px">聞き取られた音：「${esc(r.said||'（無音）')}」</div>`;
+}
+
+/* ---------- 11. フレーズ帳（間隔反復＋発音チェック） ---------- */
+let phMode='list', phQuery='';
+const QMODES=[
+ {id:'mix', t:'おまかせ', d:'3種類を混ぜて出す'},
+ {id:'ja2en', t:'日本語→英語', d:'意味を見て英語で言う'},
+ {id:'listen', t:'🎧 聞き取り', d:'音だけ聞いて意味を答える'},
+ {id:'speak', t:'🎤 発音', d:'お手本と同じに言えるか'}
+];
 function renderPhrases(m){
   $('#hTitle').textContent='📒 フレーズ帳';
-  $('#hSub').textContent=`${phrases.length}個 ／ 覚えた ${phrases.filter(p=>p.box>=2).length}個`;
-  if(!phrases.length){ m.innerHTML=`<div class="empty">まだフレーズがありません。<br>会話のあとのふりかえりから追加できます。</div>`; return; }
+  const due=dueList();
+  $('#hSub').textContent=phrases.length? `${phrases.length}個 ／ 覚えた ${learned()}個 ／ 今日 ${due.length}個` : '会話のふりかえりから追加できます';
+  if(!phrases.length){ m.innerHTML=`<div class="empty">まだフレーズがありません。<br>会話のあとのふりかえりで「📒 フレーズ帳に入れる」を押すとたまります。</div>`; return; }
   if(phMode==='quiz'){ renderQuiz(m); return; }
+  const q=phQuery.trim().toLowerCase();
+  const list=phrases.filter(p=>!q || p.en.toLowerCase().includes(q) || (p.ja||'').includes(phQuery.trim()));
+  const boxCount=[0,1,2,3,4,5,6].map(b=>phrases.filter(p=>(p.box||0)===b).length);
   m.innerHTML=`
-   <div class="row"><button class="btn grow" id="qz">🎴 テストで復習する</button></div>
+   <div class="card">
+     <h2>今日の復習</h2>
+     ${due.length?`<p class="muted" style="margin:0 0 10px">${due.length}個が「そろそろ忘れそう」な頃合いです。</p>
+       <button class="btn block" id="qzDue">▶︎ 今日のぶんをやる（${due.length}個）</button>`
+      :`<p class="muted" style="margin:0 0 10px">今日ぶんは終わりました。${esc(nextDueLabel())}</p>`}
+     <div class="row" style="margin-top:9px">
+       <button class="btn ghost grow sm" id="qzAll">ぜんぶから10個</button>
+       <button class="btn ghost grow sm" id="qzWeak">苦手なものだけ</button>
+     </div>
+     <label class="f">出しかた</label>
+     <div class="seg" id="qmode">${QMODES.map(x=>`<button data-qm="${x.id}" class="${cfg.quizMode===x.id?'on':''}" style="font-size:12px">${x.t}</button>`).join('')}</div>
+     <p class="muted" style="margin:8px 0 0">${esc(QMODES.find(x=>x.id===cfg.quizMode).d)}</p>
+   </div>
+   <div class="card">
+     <h2>定着ぐあい</h2>
+     <div style="display:flex;align-items:flex-end;gap:5px;height:70px">
+       ${boxCount.map((c2,b)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end">
+         <div style="font-size:10px;color:var(--sub)">${c2||''}</div>
+         <div style="width:100%;height:${c2?Math.max(5,c2/Math.max(1,...boxCount)*44):5}px;border-radius:5px;background:${b>=4?'var(--ok)':b>=2?'var(--accent)':'var(--line)'}"></div>
+         <div style="font-size:9.5px;color:var(--sub)">${b===0?'新':SRS_DAYS[b]+'日'}</div></div>`).join('')}
+     </div>
+     <p class="muted" style="margin:8px 0 0">正解すると次に会うのが「1→3→7→16→35日後」と伸びていきます。忘れた頃に出てくるので記憶に残ります。</p>
+   </div>
+   <input class="f" id="phq" placeholder="🔍 フレーズを探す" value="${esc(phQuery)}">
    <div style="display:flex;flex-direction:column;gap:9px">
-   ${phrases.map(p=>`<div class="pcard ${p.box>=2?'done':''}">
-     <div class="grow"><div class="pe">${esc(p.en)}</div><div class="pj">${esc(p.ja)}${p.scene?' ・ '+esc(p.scene):''}</div></div>
+   ${list.length?list.map(p=>`<div class="pcard ${(p.box||0)>=4?'done':''}">
+     <div class="grow"><div class="pe">${esc(p.en)}</div>
+       <div class="pj">${esc(p.ja)}${p.scene?' ・ '+esc(p.scene):''}</div>
+       <div class="pj" style="margin-top:2px">${(p.box||0)>=4?'✅ 覚えた':'📦 レベル'+(p.box||0)}${p.seen?` ・ ${p.ok||0}/${p.seen}回正解`:''}${(p.due||0)>Date.now()?` ・ ${Math.ceil((p.due-Date.now())/DAY)}日後`:' ・ 今日ぶん'}</div>
+     </div>
      <button class="chip" data-sp="${esc(p.en)}">🔊</button>
      <button class="chip" data-del="${p.id}">🗑</button>
-   </div>`).join('')}</div>`;
-  $('#qz').onclick=()=>{ quiz=null; phMode='quiz'; render(); };
+   </div>`).join(''):`<div class="empty">見つかりませんでした</div>`}</div>`;
+  const startQuiz=(pool,label)=>{ if(!pool.length){ toast('対象がありません'); return; } quiz={list:pool,i:0,open:false,right:0,label,phase:'q',pron:null}; phMode='quiz'; render(); };
+  $('#qzDue') && ($('#qzDue').onclick=()=>startQuiz(shuffle(dueList()).slice(0,20),'今日の復習'));
+  $('#qzAll').onclick=()=>startQuiz(shuffle([...phrases]).slice(0,10),'ぜんぶから');
+  $('#qzWeak').onclick=()=>startQuiz([...phrases].sort((a,b)=>(a.box||0)-(b.box||0)||(b.seen-b.ok)-(a.seen-a.ok)).slice(0,10),'苦手なもの');
+  $('#qmode').onclick=e=>{ const b=e.target.closest('[data-qm]'); if(!b) return; cfg.quizMode=b.dataset.qm; saveCfg(); render(); };
+  const pq=$('#phq'); pq.oninput=e=>{ phQuery=e.target.value; const at=e.target.selectionStart; render(); const el=$('#phq'); if(el){ el.focus(); el.setSelectionRange(at,at); } };
   m.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>speak(b.dataset.sp));
   m.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+    if(!confirm('このフレーズを消しますか？')) return;
     phrases=phrases.filter(p=>p.id!==b.dataset.del); save(LS.ph,phrases); render();
   });
 }
+const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+
 let quiz=null;
+function modeFor(p){
+  if(cfg.quizMode!=='mix') return cfg.quizMode;
+  const r=(p.seen||0)%3;
+  return ['ja2en','listen','speak'][r];
+}
 function renderQuiz(m){
-  if(!quiz){
-    const pool=[...phrases].sort((a,b)=>a.box-b.box || Math.random()-0.5).slice(0,10);
-    quiz={list:pool,i:0,open:false,right:0};
-  }
   if(quiz.i>=quiz.list.length){
+    const rate=Math.round(quiz.right/quiz.list.length*100);
     m.innerHTML=`<div class="card" style="text-align:center">
       <h2>おつかれさま！</h2>
-      <div style="font-size:34px;font-weight:800">${quiz.right} / ${quiz.list.length}</div>
-      <p class="muted">言えたフレーズの数</p>
-      <button class="btn block" id="qagain">もう一度</button>
+      <div style="font-size:36px;font-weight:800">${quiz.right} / ${quiz.list.length}</div>
+      <div class="bar" style="margin:8px 0 4px"><i style="width:${rate}%"></i></div>
+      <p class="muted">${rate>=80?'よく覚えています。この調子！':rate>=50?'半分は入っています。間違えたぶんは近いうちにまた出ます。':'まだ定着していません。明日また出てきます。'}</p>
+      <p class="muted">${esc(nextDueLabel())}</p>
+      <button class="btn block" id="qagain">もう一度やる</button>
       <button class="btn ghost block" id="qback" style="margin-top:8px">一覧にもどる</button></div>`;
-    $('#qagain').onclick=()=>{ quiz=null; render(); };
+    $('#qagain').onclick=()=>{ quiz={...quiz,i:0,right:0,open:false,phase:'q',pron:null,list:shuffle(quiz.list)}; render(); };
     $('#qback').onclick=()=>{ quiz=null; phMode='list'; render(); };
     return;
   }
-  const p=quiz.list[quiz.i];
-  m.innerHTML=`<div class="muted">${quiz.i+1} / ${quiz.list.length}</div>
+  const p=quiz.list[quiz.i], mode=quiz.forced||modeFor(p);
+  const head=`<div class="row"><div class="muted grow">${esc(quiz.label)} ${quiz.i+1} / ${quiz.list.length}　${mode==='speak'?'🎤 発音':mode==='listen'?'🎧 聞き取り':'✍️ 日本語→英語'}</div></div>
+   <div class="bar" style="margin-bottom:4px"><i style="width:${quiz.i/quiz.list.length*100}%"></i></div>`;
+  const next=(correct)=>{ srsAnswer(p,correct); save(LS.ph,phrases); if(correct) quiz.right++; quiz.i++; quiz.open=false; quiz.pron=null; quiz.phase='q'; render(); };
+
+  if(mode==='speak'){
+    const pr=quiz.pron;
+    m.innerHTML=head+`
+     <div class="card" style="text-align:center;padding:22px 16px">
+       <div style="font-size:13px;color:var(--sub)">お手本と同じように言ってみよう</div>
+       <div style="font-size:19px;font-weight:700;margin:10px 0 6px">${esc(p.en)}</div>
+       <div class="muted" style="font-size:12.5px">${esc(p.ja)}</div>
+       <div class="row" style="justify-content:center;margin-top:14px">
+         <button class="btn soft sm" id="say">🔊 お手本</button>
+         <button class="btn soft sm" id="slow">🐢 ゆっくり</button>
+       </div>
+       <button class="mic" id="pmic" style="margin:16px auto 0">🎙</button>
+       <div class="muted" style="font-size:12px;margin-top:8px" id="pmsg">マイクを押して声に出してみましょう</div>
+       ${pr?`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+          <div style="font-size:30px;font-weight:800;color:${pr.rate>=80?'var(--ok)':pr.rate>=50?'var(--warn)':'var(--danger)'}">${pr.rate}%</div>
+          <div class="muted" style="font-size:12px;margin-bottom:8px">${pr.rate>=80?'しっかり伝わる発音です':pr.rate>=50?'惜しい。赤い単語をもう一度':'ゆっくりでいいので区切って言ってみて'}</div>
+          ${pronHtml(pr)}
+        </div>`:''}
+     </div>
+     ${pr?`<div class="row"><button class="btn ghost grow" id="ng">もう一度</button><button class="btn grow" id="ok">次へ</button></div>`:''}
+     <button class="btn ghost block" id="qskip">この問題をとばす</button>
+     <button class="btn ghost block" id="qback">やめる</button>`;
+    $('#say').onclick=()=>speak(p.en);
+    $('#slow').onclick=()=>speak(p.en,Math.max(0.55,cfg.rate-0.25));
+    $('#pmic').onclick=()=>{
+      const b=$('#pmic');
+      if(b.classList.contains('rec')){ stopRec(); return; }
+      b.classList.add('rec'); $('#pmsg').textContent='聞いています…';
+      startRec('en-US',
+        fin=>{ quiz.pron=pronScore(p.en,fin); render(); },
+        itr=>{ const el=$('#pmsg'); if(el) el.textContent='「'+itr+'」'; },
+        ()=>{ const el=$('#pmic'); if(el) el.classList.remove('rec'); });
+    };
+    if(pr){ $('#ok').onclick=()=>next(pr.rate>=70); $('#ng').onclick=()=>{ quiz.pron=null; render(); }; }
+    $('#qskip').onclick=()=>{ quiz.i++; quiz.pron=null; render(); };
+    $('#qback').onclick=()=>{ quiz=null; phMode='list'; render(); };
+    return;
+  }
+
+  const isListen = mode==='listen';
+  m.innerHTML=head+`
    <div class="card" style="text-align:center;padding:26px 16px">
-     <div style="font-size:13px;color:var(--sub)">これを英語で言うと？</div>
-     <div style="font-size:19px;font-weight:700;margin:10px 0 18px">${esc(p.ja||p.scene||'（訳なし）')}</div>
-     ${quiz.open?`<div style="font-size:20px;font-weight:800;color:var(--accent)">${esc(p.en)}</div>
+     <div style="font-size:13px;color:var(--sub)">${isListen?'聞こえた英語の意味は？':'これを英語で言うと？'}</div>
+     ${isListen
+       ? `<button class="btn soft" id="play" style="margin:16px auto 6px">🔊 もう一度聞く</button>
+          <div class="muted" style="font-size:12px">${quiz.open?'':'まず声に出して言ってみてから答えを見よう'}</div>`
+       : `<div style="font-size:19px;font-weight:700;margin:10px 0 18px">${esc(p.ja||p.scene||'（訳なし）')}</div>`}
+     ${quiz.open?`<div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:12px">${esc(p.en)}</div>
+       <div class="muted" style="margin-top:4px">${esc(p.ja)}</div>
        <button class="btn soft sm" id="say" style="margin-top:10px">🔊 聞く</button>`
-      :`<button class="btn block" id="open">答えを見る</button>`}
+      :`<button class="btn block" id="open" style="margin-top:14px">答えを見る</button>`}
    </div>
    ${quiz.open?`<div class="row"><button class="btn ghost grow" id="ng">まだ</button><button class="btn grow" id="ok">言えた</button></div>`:''}
    <button class="btn ghost block" id="qback">やめる</button>`;
+  if(isListen && !quiz.open && quiz.phase==='q'){ quiz.phase='played'; speak(p.en); }
+  const pl=$('#play'); if(pl) pl.onclick=()=>speak(p.en);
   if(quiz.open){
     $('#say').onclick=()=>speak(p.en);
-    $('#ok').onclick=()=>{ p.box=Math.min(3,p.box+1); save(LS.ph,phrases); quiz.right++; quiz.i++; quiz.open=false; render(); };
-    $('#ng').onclick=()=>{ p.box=0; save(LS.ph,phrases); quiz.i++; quiz.open=false; render(); };
-    speak(p.en);
+    $('#ok').onclick=()=>next(true);
+    $('#ng').onclick=()=>next(false);
+    if(!isListen) speak(p.en);
   }else{
     $('#open').onclick=()=>{ quiz.open=true; render(); };
   }
   $('#qback').onclick=()=>{ quiz=null; phMode='list'; render(); };
 }
 
+/* ---------- 11.5 弱点ノート ---------- */
+const CATS={tense:'時制（過去・現在完了など）',article:'冠詞（a / the）',preposition:'前置詞（in / on / at）',
+ 'word-order':'語順',plural:'単数・複数',vocab:'単語の選び方',expression:'言い回しが不自然',
+ question:'疑問文の作り方',other:'その他'};
+const CAT_TIP={tense:'「いつの話か」を先に決めてから動詞を選ぶと安定します。',
+ article:'初めて出す名詞は a、相手も知っているものは the。数えられない名詞は付けない。',
+ preposition:'場所は「点=at / 面=on / 中=in」、時間は「時刻=at / 曜日=on / 月・年=in」。',
+ 'word-order':'英語は「だれが→どうする→何を→どこで→いつ」の順が基本。',
+ plural:'数えられる名詞が2つ以上なら s。a と s は同時に付かない。',
+ vocab:'辞書の1番目の意味に飛びつかず、場面ごと覚えるのが近道。',
+ expression:'単語は合っていても言い方が不自然。まるごと言い回しで覚えましょう。',
+ question:'疑問文は「Do / Did / Are」などを先頭に。語順が入れ替わります。',
+ other:'まずは通じることを優先してOKです。'};
+function weakTop(days){
+  const from=days? Date.now()-days*DAY : 0;
+  const c={};
+  weak.filter(w=>w.ts>=from).forEach(w=>{ c[w.cat]=(c[w.cat]||0)+1; });
+  return Object.entries(c).sort((a,b)=>b[1]-a[1]);
+}
+function avgScore(n){
+  const ss=sessions.filter(s=>s.score!=null).slice(0,n||5);
+  return ss.length? Math.round(ss.reduce((a,s)=>a+s.score,0)/ss.length) : null;
+}
+function levelSuggestion(){
+  if(!cfg.autoLevel) return null;
+  const a=avgScore(5);
+  if(a==null || sessions.filter(s=>s.score!=null).length<3) return null;
+  const i=LEVELS.findIndex(l=>l.id===cfg.level);
+  if(a>=88 && i<LEVELS.length-1) return {to:LEVELS[i+1], why:`直近5回の平均が ${a}点。余裕がありそうです`, up:true};
+  if(a<=58 && i>0) return {to:LEVELS[i-1], why:`直近5回の平均が ${a}点。少し背伸びしすぎかもしれません`, up:false};
+  return null;
+}
+
 /* ---------- 12. 記録 ---------- */
-let openSession=null;
+let openSession=null, openWeak=false;
 function renderStats(m){
   $('#hTitle').textContent='📈 記録';
   $('#hSub').textContent='がんばりの見える化';
@@ -1315,6 +1550,15 @@ function renderStats(m){
     <div><b>${tot.t}</b><span>のべ発話</span></div>
     <div><b>${fmtMin(tot.s)}</b><span>合計時間</span></div>
   </div>
+  ${avgScore(5)!=null?`<div class="card"><h2>いまの実力</h2>
+    <div class="row"><div style="font-size:34px;font-weight:800;line-height:1">${avgScore(5)}</div>
+      <div class="grow"><div class="muted">直近5回の平均点</div>
+        <div class="bar" style="margin-top:5px"><i style="width:${avgScore(5)}%"></i></div></div></div>
+    ${(()=>{const sg=levelSuggestion(); return sg?`<div style="margin-top:12px;padding:11px 13px;background:var(--accent-soft);border-radius:12px">
+      <div style="font-size:13.5px;font-weight:700">${sg.up?'⬆️ そろそろ上げてみませんか？':'⬇️ 少し下げてみませんか？'}</div>
+      <div class="muted" style="font-size:12px;margin:3px 0 8px">${esc(sg.why)}</div>
+      <button class="btn soft sm" id="lvUp">「${esc(sg.to.t)}」にする</button></div>`:''; })()}
+  </div>`:''}
   <div class="card"><h2>この1週間</h2>
     <div style="display:flex;align-items:flex-end;gap:7px;height:110px">
       ${week.map(w=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end">
@@ -1323,6 +1567,30 @@ function renderStats(m){
         <div style="font-size:11px;color:var(--sub)">${w.lb}</div></div>`).join('')}
     </div>
     <p class="muted" style="margin:10px 0 0">総単語数 ${tot.w} 語</p>
+  </div>
+  <div class="card">
+    <h2>🩹 弱点ノート <span class="muted" style="font-weight:400;font-size:12px">（直してもらった回数）</span></h2>
+    ${weak.length? (()=>{ const top=weakTop(0); const max=top[0][1]; return `
+      ${top.slice(0,6).map(([cat,cnt])=>`
+        <div style="margin-bottom:9px">
+          <div class="row" style="font-size:13.5px"><div class="grow"><b>${esc(CATS[cat]||cat)}</b></div><div class="muted">${cnt}回</div></div>
+          <div class="bar" style="margin-top:3px"><i style="width:${cnt/max*100}%;background:${cnt>=max?'var(--danger)':'var(--accent)'}"></i></div>
+        </div>`).join('')}
+      <div style="margin-top:12px;padding:11px 13px;background:var(--accent-soft);border-radius:12px">
+        <div style="font-size:12px;font-weight:700;color:var(--accent)">いちばん多いのは「${esc(CATS[top[0][0]]||top[0][0])}」</div>
+        <div style="font-size:13px;margin-top:4px">${esc(CAT_TIP[top[0][0]]||'')}</div>
+      </div>
+      <button class="btn soft block sm" id="weakOpen" style="margin-top:10px">${openWeak?'閉じる':`直された文をぜんぶ見る（${weak.length}件）`}</button>
+      ${openWeak?`<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto">
+        ${weak.slice(0,60).map(w=>`<div style="border:1px solid var(--line);border-radius:11px;padding:9px 11px">
+          <div class="muted" style="font-size:10.5px">${esc(CATS[w.cat]||w.cat)} ・ ${fmtDate(w.ts)}${w.scene?' ・ '+esc(w.scene):''}</div>
+          <div class="muted" style="text-decoration:line-through">${esc(w.you)}</div>
+          <div style="font-weight:700">${esc(w.better)} <button class="chip" data-sayt="${esc(w.better)}">🔊</button>
+            <button class="chip" data-wkeep="${w.id}">📒</button></div>
+          <div class="muted" style="font-size:12px">${esc(w.why_ja)}</div>
+        </div>`).join('')}
+      </div>`:''}`; })()
+     : `<div class="empty">まだありません。会話のふりかえりで直された文が、ここに自動でたまります。</div>`}
   </div>
   <div class="card"><h2>これまでの会話</h2>
    ${sessions.length? sessions.slice(0,30).map(s=>`
@@ -1341,6 +1609,10 @@ function renderStats(m){
         </div>`:''}
      </div>`).join('') : `<div class="empty">まだ記録がありません</div>`}
   </div>`;
+  const lu=$('#lvUp'); if(lu) lu.onclick=()=>{ const sg=levelSuggestion(); if(sg){ cfg.level=sg.to.id; saveCfg(); toast('むずかしさを「'+sg.to.t+'」にしました'); render(); } };
+  const wo=$('#weakOpen'); if(wo) wo.onclick=()=>{ openWeak=!openWeak; render(); };
+  m.querySelectorAll('[data-sayt]').forEach(b=>b.onclick=()=>speak(b.dataset.sayt));
+  m.querySelectorAll('[data-wkeep]').forEach(b=>b.onclick=()=>{ const w=weak.find(x=>x.id===b.dataset.wkeep); if(w) addPhrase(w.better,w.why_ja||'','弱点ノート'); });
   m.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{ openSession = openSession===b.dataset.op? null : b.dataset.op; render(); });
   m.querySelectorAll('[data-del2]').forEach(b=>b.onclick=()=>{ sessions=sessions.filter(s=>s.id!==b.dataset.del2); save(LS.log,sessions); openSession=null; render(); });
 }
@@ -1401,6 +1673,10 @@ function renderSettings(m){
       <button class="toggle ${cfg.showJa?'on':''}" data-t="showJa"></button></div>
     <label class="f">1回の会話の長さ（自分が話す回数の目安）</label>
     <input class="f" id="turns" type="number" min="3" max="30" value="${cfg.turns}">
+    <label class="f">1日の目標（自分が話す回数）</label>
+    <input class="f" id="goal" type="number" min="1" max="200" value="${cfg.goal}">
+    <div class="sw" style="margin-top:6px"><div class="l">レベルの上げ下げを提案する<small>直近5回の平均点から判断します</small></div>
+      <button class="toggle ${cfg.autoLevel?'on':''}" data-t="autoLevel"></button></div>
     <label class="f">呼んでほしい名前（任意）</label>
     <input class="f" id="name" placeholder="Shu" value="${esc(cfg.name)}">
   </div>
@@ -1455,9 +1731,10 @@ function renderSettings(m){
   m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{ cfg[b.dataset.t]=!cfg[b.dataset.t]; saveCfg(); render(); });
   $('#silence').oninput=e=>{ cfg.silence=parseFloat(e.target.value); $('#silV').textContent=cfg.silence.toFixed(1)+'秒'; saveCfg(); };
   $('#turns').onchange=e=>{ cfg.turns=Math.max(3,Math.min(30,+e.target.value||8)); saveCfg(); };
+  $('#goal').onchange=e=>{ cfg.goal=Math.max(1,Math.min(200,+e.target.value||12)); saveCfg(); };
   $('#name').onchange=e=>{ cfg.name=e.target.value.trim(); saveCfg(); };
   $('#exp').onclick=()=>{
-    const blob=new Blob([JSON.stringify({cfg:{...cfg,apiKey:''},sessions,phrases},null,1)],{type:'application/json'});
+    const blob=new Blob([JSON.stringify({cfg:{...cfg,apiKey:''},sessions,phrases,weak},null,1)],{type:'application/json'});
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
     a.download='talkie-backup-'+todayKey()+'.json'; a.click(); URL.revokeObjectURL(a.href);
   };
@@ -1468,7 +1745,8 @@ function renderSettings(m){
     r.onload=()=>{ try{
       const d=JSON.parse(r.result);
       if(d.sessions){ sessions=d.sessions; save(LS.log,sessions); }
-      if(d.phrases){ phrases=d.phrases; save(LS.ph,phrases); }
+      if(d.phrases){ phrases=d.phrases.map(srsInit); save(LS.ph,phrases); }
+      if(d.weak){ weak=d.weak; save(LS.weak,weak); }
       if(d.cfg){ Object.assign(cfg,d.cfg,{apiKey:cfg.apiKey}); saveCfg(); }
       toast('復元しました'); render();
     }catch(err){ toast('ファイルを読めませんでした'); } };
@@ -1476,12 +1754,16 @@ function renderSettings(m){
   };
   $('#wipe').onclick=()=>{ if(confirm('会話の記録・フレーズ帳・キーをすべて消します。よろしいですか？')){
     localStorage.removeItem(LS.log); localStorage.removeItem(LS.ph); localStorage.removeItem(LS.cfg);
+    localStorage.removeItem(LS.weak); localStorage.removeItem(LS.use);
     location.reload(); } };
 }
 
 /* ---------- 14. 起動 ---------- */
 window.addEventListener('beforeunload',e=>{ if(app.chat && !app.chat.ended){ e.preventDefault(); e.returnValue=''; } });
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) stopSpeak(); });
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
 render();
 </script>
 </body>
