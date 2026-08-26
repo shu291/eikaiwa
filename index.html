@@ -325,12 +325,87 @@ const SCENES = [
   {en:"Great question. We'll be in touch by email next week. Thanks for your time!",ja:"良い質問です。来週メールでご連絡します。お時間ありがとうございました！",
    hints:[{en:"Thank you very much for your time.",ja:"お時間ありがとうございました"},{en:"Thanks. I look forward to hearing from you.",ja:"ありがとう。ご連絡お待ちしています"},{en:"Thank you. It was nice meeting you.",ja:"ありがとう。お会いできてよかったです"}]}
  ]},
-{id:'free', em:'💬', t:'フリートーク', d:'話題は自由。AIキーが必要', apiOnly:true,
+{id:'free', em:'💬', t:'フリートーク', d:'相手・話題・ミッションを選ぶ', apiOnly:true,
  role:'Sam, a warm and curious native English speaker who loves talking with learners',
  sit:'Free conversation. Ask about the user’s day, interests, and opinions. Keep the conversation going with follow-up questions.'},
 {id:'custom', em:'✏️', t:'自分で決める', d:'場面を書いて練習。AIキーが必要', apiOnly:true, custom:true,
  role:'', sit:''}
 ];
+
+/* ---------- 1.5 フリートーク専用のデータ ---------- */
+const CHARS=[
+ {id:'sam', em:'🧢', name:'Sam', t:'同い年の友達', d:'アメリカ。フランクで話しやすい', acc:'en-US',
+  p:'Sam, an American teenager the same age as the learner. Casual, warm, uses contractions and light slang ("kinda", "for real?", "no way"). Reacts with real emotion, teases gently, shares your own stories too.'},
+ {id:'emma', em:'👩‍🏫', name:'Emma', t:'やさしい先生', d:'イギリス。ゆっくり丁寧', acc:'en-GB',
+  p:'Emma, a patient British English teacher. Speak clearly and politely, a little slower. Encourage the learner often ("That is a great way to put it"). Gently rephrase what they said correctly inside your own reply so they hear the natural version.'},
+ {id:'mike', em:'🎤', name:'Mike', t:'おしゃべりな人', d:'話題をどんどん広げる', acc:'en-US',
+  p:'Mike, a loud, funny, high-energy American who loves talking. Jump between topics, exaggerate, make jokes, ask surprising questions. Keep the energy up so the conversation never dies.'},
+ {id:'rina', em:'🌙', name:'Rina', t:'聞き上手', d:'落ち着いて深く聞いてくれる', acc:'en-US',
+  p:'Rina, a calm and thoughtful listener. Ask gentle follow-up questions that go one level deeper ("What made you feel that way?"). Never rush. Give the learner space to explain themselves.'}
+];
+const TOPICS=[
+ {id:'auto', em:'🎲', t:'おまかせ', p:''},
+ {id:'today', em:'📅', t:'今日の出来事', p:'what the learner did today and how their day went'},
+ {id:'hobby', em:'🎮', t:'趣味・好きなもの', p:'the learner hobbies, what they are into lately, and why they like it'},
+ {id:'school', em:'🎒', t:'学校・勉強', p:'school life, subjects, tests, teachers and studying'},
+ {id:'future', em:'🚀', t:'将来の夢', p:'the future, dream jobs, university, and what the learner wants to be'},
+ {id:'food', em:'🍜', t:'食べ物', p:'food, favourite meals, cooking, and eating out'},
+ {id:'travel', em:'🗾', t:'旅行・行きたい場所', p:'travel, places the learner has been and places they want to go'},
+ {id:'music', em:'🎬', t:'音楽・映画', p:'music, movies, shows and what the learner watched or listened to recently'},
+ {id:'sports', em:'🏃', t:'スポーツ・運動', p:'sports, exercise, training and competition'},
+ {id:'tech', em:'💻', t:'テクノロジー・AI', p:'technology, smartphones, apps, programming and AI'},
+ {id:'deep', em:'🤔', t:'ちょっと深い話', p:'opinions and values: happiness, friendship, money, what matters in life. Ask for the learner opinion and gently push back to keep it interesting'},
+ {id:'custom', em:'✏️', t:'自分で書く', p:''}
+];
+const MISSIONS={
+ a:[{id:'like',t:'I like / I don\u2019t like ~',d:'好き嫌いを言う'},
+    {id:'because',t:'because ~',d:'理由をつけて話す'},
+    {id:'howabout',t:'How about you?',d:'相手に聞き返す'},
+    {id:'canI',t:'Can I ~? / Could you ~?',d:'お願いしてみる'}],
+ b:[{id:'perf',t:"I've been ~ing",d:'ずっと続けていることを言う'},
+    {id:'usedto',t:'I used to ~',d:'昔はこうだった、と話す'},
+    {id:'actually',t:'Actually, ...',d:'「実はね」と切り出す'},
+    {id:'reminds',t:'That reminds me of ~',d:'話をつなげる'},
+    {id:'ifI',t:'If I could ~, I would ~',d:'もしも話をする'}],
+ c:[{id:'thething',t:'The thing is, ...',d:'本題・言いにくいことを切り出す'},
+    {id:'guess',t:'I guess / I suppose',d:'断定せずにぼかす'},
+    {id:'notonly',t:'Not only ~ but also ~',d:'情報を重ねる'},
+    {id:'honest',t:'To be honest, ...',d:'正直な気持ちを言う'},
+    {id:'ifiwere',t:"If I were you, I'd ~",d:'相手に助言する'}]
+};
+const DAILY=[
+ {en:"What is one small thing that made you happy this week?",ja:"今週、小さくても嬉しかったことは？"},
+ {en:"If you could have dinner with anyone, who would it be?",ja:"誰とでも夕食を食べられるなら誰と？"},
+ {en:"What is something you are secretly good at?",ja:"実はちょっと得意なことは？"},
+ {en:"Would you rather be famous or rich? Why?",ja:"有名になるのとお金持ち、どっち？"},
+ {en:"What did you want to be when you were a little kid?",ja:"小さい頃、何になりたかった？"},
+ {en:"What is the best thing you ate this month?",ja:"今月いちばん美味しかったものは？"},
+ {en:"If school had no tests, what would change for you?",ja:"テストがない学校だったら何が変わる？"},
+ {en:"What app do you use the most, and why?",ja:"いちばん使うアプリは？なぜ？"},
+ {en:"What is a skill you want to learn this year?",ja:"今年身につけたいことは？"},
+ {en:"Do you prefer mornings or nights? Why?",ja:"朝型？夜型？その理由は？"},
+ {en:"What is something people get wrong about you?",ja:"よく誤解されることは？"},
+ {en:"If you had one free day and no money, what would you do?",ja:"お金なしで自由な1日、何する？"},
+ {en:"What song could you listen to a hundred times?",ja:"100回聴ける曲は？"},
+ {en:"What is the hardest thing about learning English?",ja:"英語学習でいちばん大変なことは？"},
+ {en:"Which country do you want to visit first? Why?",ja:"最初に行きたい国は？なぜ？"},
+ {en:"What is your favourite way to relax after school?",ja:"放課後のリラックス方法は？"},
+ {en:"Do you think AI will change your future job?",ja:"AIは将来の仕事を変えると思う？"},
+ {en:"What advice would you give your younger self?",ja:"昔の自分にアドバイスするなら？"},
+ {en:"What is one rule you would change at your school?",ja:"学校で変えたいルールは？"},
+ {en:"Are you more of a planner or a go-with-the-flow person?",ja:"計画する派？流れに任せる派？"},
+ {en:"What is something you own that you would never sell?",ja:"絶対に売らないものは？"},
+ {en:"What makes a good friend, in your opinion?",ja:"良い友達の条件は？"},
+ {en:"What is the last thing that made you laugh out loud?",ja:"最後に声を出して笑ったことは？"},
+ {en:"If you could master one sport instantly, which one?",ja:"一瞬で上達できるスポーツは？"},
+ {en:"How do you feel about doing homework? Be honest.",ja:"宿題についてどう思う？正直に"},
+ {en:"What is one thing you want to do before you turn twenty?",ja:"20歳までにやりたいことは？"},
+ {en:"Do you like taking photos? What do you take pictures of?",ja:"写真は撮る？何を撮る？"},
+ {en:"What food would you never eat again?",ja:"もう食べたくない食べ物は？"},
+ {en:"If you could live anywhere in Japan, where would it be?",ja:"日本のどこにでも住めるなら？"},
+ {en:"What is something you changed your mind about recently?",ja:"最近、考えが変わったことは？"}
+];
+const dailyQ = ()=>{ const d=new Date(); return DAILY[(Math.floor(d.getTime()/86400000)+d.getTimezoneOffset())%DAILY.length] || DAILY[0]; };
 
 const LEVELS = [
  {id:'a', t:'やさしい', d:'中学英語・短い文', ins:'Use very simple English (CEFR A2). Short sentences under 12 words, common words only, present and past simple. Speak slowly in style.'},
@@ -346,8 +421,10 @@ const save = (k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){
 const cfg = Object.assign({
   apiKey:'', model:'gemini-2.5-flash', voiceURI:'', rate:0.92,
   autoSpeak:true, autoSend:true, showJa:false, level:'b', name:'', turns:8,
-  handsFree:true, silence:4.5
+  handsFree:true, silence:4.5,
+  free:{char:'sam', topic:'auto', topicCustom:'', mission:'auto', len:'normal'}
 }, load(LS.cfg,{}));
+cfg.free=Object.assign({char:'sam',topic:'auto',topicCustom:'',mission:'auto',len:'normal'},cfg.free||{});
 const saveCfg = ()=> save(LS.cfg,cfg);
 
 let sessions = load(LS.log,[]);       // {id,ts,scene,level,turns,words,sec,msgs,report}
@@ -391,6 +468,11 @@ loadVoices();
 if(typeof speechSynthesis!=='undefined') speechSynthesis.onvoiceschanged=loadVoices;
 function pickVoice(){
   if(!voices.length) loadVoices();
+  const acc = app && app.chat && app.chat.accent;
+  if(!cfg.voiceURI && acc){
+    const byAcc=voices.filter(v=>v.lang.replace('_','-').toLowerCase().startsWith(acc.toLowerCase()));
+    if(byAcc.length) return byAcc.find(v=>/Google|Samantha|Daniel|Kate|Serena|Ava/i.test(v.name)) || byAcc[0];
+  }
   return voices.find(v=>v.voiceURI===cfg.voiceURI)
       || voices.find(v=>/en-US/i.test(v.lang) && /Samantha|Google US|Ava|Allison/i.test(v.name))
       || voices.find(v=>/en-US/i.test(v.lang)) || voices[0] || null;
@@ -511,8 +593,13 @@ const TURN_SCHEMA = S({
     status:{type:'string',enum:['good','tip','none']},
     better:{type:'string'}, why_ja:{type:'string'}
   },['status']),
-  done:{type:'boolean'}
+  done:{type:'boolean'},
+  mission_used:{type:'boolean'}
 },['reply','reply_ja','hints','feedback','done']);
+const WORD_SCHEMA = S({
+  en:{type:'string'}, ja:{type:'string'},
+  example_en:{type:'string'}, example_ja:{type:'string'}, note_ja:{type:'string'}
+},['en','ja','example_en','example_ja']);
 const REPORT_SCHEMA = S({
   score:{type:'integer'}, summary_ja:{type:'string'},
   good_points:{type:'array',items:{type:'string'}},
@@ -593,6 +680,7 @@ function renderSetup(m){
      <h2>どんな場面？</h2>
      <textarea class="f" id="customSit" rows="3" placeholder="例：スタバで店員さんと世間話する／医者に頭が痛いと伝える／ホームステイ先の家族と夕食を食べる">${esc(pick.custom)}</textarea>
    </div>`:''}
+  ${sc&&sc.id==='free'? freePanel() : ''}
   <div class="card">
     <h2>むずかしさ</h2>
     <div class="seg" id="lvl">${LEVELS.map(l=>`<button data-l="${l.id}" class="${cfg.level===l.id?'on':''}">${l.t}</button>`).join('')}</div>
@@ -609,8 +697,79 @@ function renderSetup(m){
   $('#scenes').onclick=e=>{ const b=e.target.closest('[data-s]'); if(!b) return; pick.scene=b.dataset.s; render(); };
   $('#lvl').onclick=e=>{ const b=e.target.closest('[data-l]'); if(!b) return; cfg.level=b.dataset.l; saveCfg(); render(); };
   const cu=$('#customSit'); if(cu) cu.oninput=e=>{ pick.custom=e.target.value; };
+  bindFreePanel();
   $('#start').onclick=()=>startChat(pick.scene);
 }
+/* --- フリートークの準備パネル --- */
+function freePanel(){
+  const F=cfg.free, q=dailyQ();
+  const ms=MISSIONS[cfg.level]||MISSIONS.b;
+  return `
+  <div class="card">
+    <h2>だれと話す？</h2>
+    <div class="scenes">
+      ${CHARS.map(ch=>`<button class="scene ${F.char===ch.id?'on':''}" data-ch="${ch.id}">
+        <span class="em">${ch.em}</span><span class="t">${ch.name}・${ch.t}</span><span class="d">${ch.d}</span></button>`).join('')}
+    </div>
+  </div>
+  <div class="card">
+    <h2>何を話す？</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:7px">
+      ${TOPICS.map(t=>`<button class="chip" data-tp="${t.id}" style="${F.topic===t.id?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft)':''};padding:7px 12px;font-size:13px">${t.em} ${t.t}</button>`).join('')}
+    </div>
+    ${F.topic==='custom'?`<input class="f" id="topicCustom" style="margin-top:10px" placeholder="例：昨日みた映画の話／部活のこと" value="${esc(F.topicCustom)}">`:''}
+    <div style="margin-top:12px;padding:11px 13px;background:var(--accent-soft);border-radius:12px">
+      <div style="font-size:11.5px;font-weight:700;color:var(--accent)">🗓 今日のお題</div>
+      <div style="font-weight:600;margin-top:3px">${esc(q.en)}</div>
+      <div class="muted" style="font-size:12px">${esc(q.ja)}</div>
+      <button class="btn soft sm" id="useDaily" style="margin-top:8px">このお題で話す</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>今日のミッション <span class="muted" style="font-weight:400;font-size:12px">（使えたら達成）</span></h2>
+    <div style="display:flex;flex-wrap:wrap;gap:7px">
+      <button class="chip" data-ms="none" style="${F.mission==='none'?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft)':''};padding:7px 12px;font-size:13px">なし</button>
+      <button class="chip" data-ms="auto" style="${F.mission==='auto'?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft)':''};padding:7px 12px;font-size:13px">🎲 おまかせ</button>
+      ${ms.map(x=>`<button class="chip" data-ms="${x.id}" style="${F.mission===x.id?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft)':''};padding:7px 12px;font-size:13px">${esc(x.t)}</button>`).join('')}
+    </div>
+    ${(()=>{ const cur=ms.find(x=>x.id===F.mission); return cur?`<p class="muted" style="margin:9px 0 0">${esc(cur.d)}　会話中にこの言い方が使えたら ⭐️ が付きます。</p>`:''; })()}
+  </div>
+  <div class="card">
+    <h2>会話の長さ</h2>
+    <div class="seg" id="freeLen">
+      ${[['short','短め','5往復'],['normal','ふつう','10往復'],['long','じっくり','20往復'],['endless','エンドレス','自分で終える']]
+        .map(([id,t,d])=>`<button data-fl="${id}" class="${F.len===id?'on':''}">${t}<br><span style="font-size:10px;font-weight:400">${d}</span></button>`).join('')}
+    </div>
+  </div>
+  <button class="btn ghost block" id="randomFree">🎲 全部おまかせにする</button>`;
+}
+function bindFreePanel(){
+  const F=cfg.free;
+  document.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{ F.char=b.dataset.ch; saveCfg(); render(); });
+  document.querySelectorAll('[data-tp]').forEach(b=>b.onclick=()=>{ F.topic=b.dataset.tp; saveCfg(); render(); });
+  document.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{ F.mission=b.dataset.ms; saveCfg(); render(); });
+  const tc=$('#topicCustom'); if(tc) tc.oninput=e=>{ F.topicCustom=e.target.value; cfg.free.topicCustom=e.target.value; saveCfg(); };
+  const fl=$('#freeLen'); if(fl) fl.onclick=e=>{ const b=e.target.closest('[data-fl]'); if(!b) return; F.len=b.dataset.fl; saveCfg(); render(); };
+  const ud=$('#useDaily'); if(ud) ud.onclick=()=>{ F.topic='custom'; F.topicCustom=dailyQ().en; saveCfg(); render(); toast('今日のお題を話題にしました'); };
+  const rf=$('#randomFree'); if(rf) rf.onclick=()=>{
+    const pk=a=>a[Math.floor(Math.random()*a.length)];
+    F.char=pk(CHARS).id; F.topic=pk(TOPICS.filter(t=>t.id!=='custom'&&t.id!=='auto')).id;
+    F.mission=pk(MISSIONS[cfg.level]||MISSIONS.b).id; saveCfg(); render(); toast('おまかせで組み合わせました');
+  };
+}
+function missionOf(){
+  const F=cfg.free, ms=MISSIONS[cfg.level]||MISSIONS.b;
+  if(F.mission==='none') return null;
+  if(F.mission==='auto') return ms[Math.floor(Math.random()*ms.length)];
+  return ms.find(x=>x.id===F.mission)||null;
+}
+function topicOf(){
+  const F=cfg.free;
+  if(F.topic==='custom') return F.topicCustom.trim();
+  const t=TOPICS.find(x=>x.id===F.topic);
+  return t&&t.p? t.p : '';
+}
+
 function streak(){
   const days=[...new Set(sessions.map(s=>todayKey(new Date(s.ts))))].sort().reverse();
   let n=0; let d=new Date();
@@ -624,9 +783,16 @@ function streak(){
 function startChat(sceneId){
   const sc=SCENES.find(s=>s.id===sceneId);
   if(sc.custom && !pick.custom.trim()){ toast('どんな場面か書いてください'); return; }
+  const isFree = sc.id==='free';
+  const ch = isFree? (CHARS.find(x=>x.id===cfg.free.char)||CHARS[0]) : null;
+  const mi = isFree? missionOf() : null;
+  if(isFree && cfg.free.topic==='custom' && !cfg.free.topicCustom.trim()){ toast('話したいことを書くか、別の話題を選んでください'); return; }
   app.chat={
     scene:sc, level:cfg.level, custom:pick.custom.trim(),
-    msgs:[], step:0, t0:Date.now(), hints:null, showHints:false, ended:false, report:null
+    char:ch, topic:isFree? topicOf() : '', mission:mi, missionDone:false,
+    len:isFree? cfg.free.len : 'normal', accent: ch? ch.acc : '',
+    msgs:[], step:0, t0:Date.now(), hints:null, showHints:false, ended:false, report:null,
+    wordPanel:null, tools:false
   };
   render();
   nextAiTurn(true);
@@ -635,8 +801,12 @@ $('#btnEnd').onclick=()=>{ if(app.chat && !app.chat.ended) finishChat(); };
 
 function renderChat(m){
   const c=app.chat;
-  $('#hTitle').textContent=c.scene.em+' '+c.scene.t;
-  $('#hSub').textContent=(hasKey()?'AIモード':'台本モード')+' ・ '+LEVELS.find(l=>l.id===c.level).t;
+  $('#hTitle').textContent=(c.char? c.char.em+' '+c.char.name : c.scene.em+' '+c.scene.t);
+  $('#hSub').textContent=[
+    c.char? c.char.t : (hasKey()?'AIモード':'台本モード'),
+    LEVELS.find(l=>l.id===c.level).t,
+    c.mission? (c.missionDone?'⭐️ ミッション達成':'🎯 '+c.mission.t) : ''
+  ].filter(Boolean).join(' ・ ');
   m.innerHTML=`<div id="chatScroll"></div>`;
   paintMsgs();
 }
@@ -654,7 +824,7 @@ function paintMsgs(){
           ${msg.ja?`<button class="chip" data-ja="${i}">${(cfg.showJa||msg.open)?'訳をかくす':'日本語で見る'}</button>`:''}
         </div></div>`;
     }else{
-      h+=`<div class="msg me"><div class="bub"><div class="en">${esc(msg.en)}</div></div></div>`;
+      h+=`<div class="msg me"><div class="bub"><div class="en">${esc(msg.en)}</div>${msg.mission?`<div class="ja">⭐️ ミッション達成！「${esc(c.mission?c.mission.t:'')}」</div>`:''}</div></div>`;
       if(msg.fb && msg.fb.status && msg.fb.status!=='none'){
         h+=`<div class="fb ${msg.fb.status==='good'?'good':'tip'}">
           ${msg.fb.status==='good'?'✅ 自然な言い方です':'💡 もっと自然に言うなら'}
@@ -666,16 +836,43 @@ function paintMsgs(){
     }
   });
   if(app.busy) h+=`<div class="typing"><i></i><i></i><i></i></div>`;
+  if(c.wordPanel && !c.ended){
+    const w=c.wordPanel;
+    h+=`<div class="hintbox"><div class="hh">🔤 これ英語でなんて言う？</div>
+      <div class="row"><input id="wq" class="grow" style="border:1px solid var(--line);background:var(--card);border-radius:11px;padding:9px 11px" placeholder="例：気まずい／なんとかなるよ" value="${esc(w.q||'')}">
+      <button class="btn sm" id="wgo">調べる</button></div>
+      ${w.result?`<div class="hint" style="cursor:default">
+        <div class="he">${esc(w.result.en)} <button class="chip" data-sayt="${esc(w.result.en)}">🔊</button></div>
+        <div class="hj">${esc(w.result.ja)}</div>
+        <div style="margin-top:7px;padding-top:7px;border-top:1px dashed var(--line)">
+          <div style="font-size:13.5px">${esc(w.result.example_en)} <button class="chip" data-sayt="${esc(w.result.example_en)}">🔊</button></div>
+          <div class="hj">${esc(w.result.example_ja)}</div>
+          ${w.result.note_ja?`<div class="hj" style="margin-top:4px">💡 ${esc(w.result.note_ja)}</div>`:''}
+        </div>
+        <div class="row" style="margin-top:8px"><button class="chip" id="wuse">この文を入力欄に入れる</button>
+        <button class="chip" id="wkeep">📒 フレーズ帳に入れる</button></div>
+      </div>`:''}
+      <button class="chip" id="wclose" style="align-self:flex-start">閉じる</button>
+    </div>`;
+  }
   if(c.hints && c.showHints && !c.ended){
     h+=`<div class="hintbox"><div class="hh">こう言ってみよう（タップで入力）</div>
       ${c.hints.map((x,i)=>`<button class="hint" data-h="${i}"><div class="he">${esc(x.en)}</div><div class="hj">${esc(x.ja)}</div></button>`).join('')}
     </div>`;
   }
   if(!c.ended){
-    h+=`<div class="row" style="margin-top:2px;justify-content:center;flex-wrap:wrap">
+    const free=c.scene.id==='free';
+    h+=`<div class="row" style="margin-top:2px;justify-content:center;flex-wrap:wrap;gap:7px">
       <button class="btn soft sm" id="bHint">${c.showHints?'ヒントを閉じる':'💡 なんて言えばいい？'}</button>
+      ${hasKey()?`<button class="btn ghost sm" id="bSimple">🐢 やさしく言い直して</button>`:''}
+      ${hasKey()?`<button class="btn ghost sm" id="bWord">🔤 英語でなんて言う？</button>`:''}
+      ${hasKey()&&free?`<button class="btn ghost sm" id="bTopic">🔀 話題を変える</button>`:''}
+      ${hasKey()?`<button class="btn ghost sm" id="bLevel">🎚 ${LEVELS.find(l=>l.id===c.level).t}にしている</button>`:''}
       <button class="btn ghost sm" id="bEnd">🏁 会話を終える</button>
     </div>`;
+    if(free && c.mission){
+      h+=`<div class="muted" style="text-align:center;font-size:12px">${c.missionDone?'⭐️ 今日のミッション達成！':'🎯 今日のミッション：<b>'+esc(c.mission.t)+'</b>（'+esc(c.mission.d)+'）'}</div>`;
+    }
   }
   if(c.report) h+=reportHtml(c.report,c);
   box.innerHTML=h;
@@ -687,6 +884,24 @@ function paintMsgs(){
   box.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{ $('#txt').value=c.hints[+b.dataset.h].en; c.showHints=false; paintMsgs(); $('#txt').focus(); });
   const bh=$('#bHint'); if(bh) bh.onclick=onHint;
   const be=$('#bEnd'); if(be) be.onclick=finishChat;
+  const bs=$('#bSimple'); if(bs) bs.onclick=()=>{ if(app.busy) return; stopRec();
+    nextAiTurn(false,'(The learner did not understand your last line. Say the SAME thing again in much simpler English with shorter words. Do not move the conversation forward and do not add new information. Set feedback status to "none".)'); };
+  const bt=$('#bTopic'); if(bt) bt.onclick=()=>{ if(app.busy) return; stopRec();
+    nextAiTurn(false,'(The learner wants a different topic. Close the current topic in one short sentence, then start a completely NEW and interesting topic with a question. Set feedback status to "none".)'); };
+  const bw=$('#bWord'); if(bw) bw.onclick=()=>{ c.wordPanel=c.wordPanel?null:{q:'',result:null}; paintMsgs(); const i=$('#wq'); if(i) i.focus(); };
+  const bl=$('#bLevel'); if(bl) bl.onclick=()=>{
+    const i=LEVELS.findIndex(l=>l.id===c.level); const nx=LEVELS[(i+1)%LEVELS.length];
+    c.level=nx.id; cfg.level=nx.id; saveCfg(); renderChat($('#main'));
+    toast('この会話のむずかしさを「'+nx.t+'」にしました');
+  };
+  const wq=$('#wq'); if(wq){
+    wq.oninput=e=>{ c.wordPanel.q=e.target.value; };
+    wq.onkeydown=e=>{ if(e.key==='Enter'&&!e.isComposing){ e.preventDefault(); askWord(); } };
+  }
+  const wgo=$('#wgo'); if(wgo) wgo.onclick=askWord;
+  const wclose=$('#wclose'); if(wclose) wclose.onclick=()=>{ c.wordPanel=null; paintMsgs(); };
+  const wuse=$('#wuse'); if(wuse) wuse.onclick=()=>{ $('#txt').value=c.wordPanel.result.example_en; autoGrow(); c.wordPanel=null; paintMsgs(); $('#txt').focus(); };
+  const wkeep=$('#wkeep'); if(wkeep) wkeep.onclick=()=>{ const r=c.wordPanel.result; addPhrase(r.en,r.ja,'単語メモ'); };
   scrollDown();
 }
 function scrollDown(){ requestAnimationFrame(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})); }
@@ -694,8 +909,16 @@ function scrollDown(){ requestAnimationFrame(()=>window.scrollTo({top:document.b
 /* --- AIへの指示文 --- */
 function systemPrompt(c){
   const lv=LEVELS.find(l=>l.id===c.level);
-  const sit=c.scene.custom? c.custom : c.scene.sit;
-  const role=c.scene.custom? 'the most natural conversation partner for this situation' : c.scene.role;
+  const isFree=c.scene.id==='free';
+  let sit=c.scene.custom? c.custom : c.scene.sit;
+  let role=c.scene.custom? 'the most natural conversation partner for this situation' : c.scene.role;
+  if(isFree && c.char){
+    role=c.char.p;
+    sit='Free conversation between friends. '+(c.topic
+      ? 'Start from this topic and stay roughly around it, but let it drift naturally: '+c.topic+'.'
+      : 'Pick an interesting everyday topic yourself and start from there.')
+      +' Share your own opinions and small stories too, so it feels like a real two-way conversation, not an interview.';
+  }
   return `You are ${role}. You are having a spoken English conversation with a Japanese learner${cfg.name?' named '+cfg.name:''}.
 
 SITUATION: ${sit}
@@ -713,29 +936,44 @@ RULES
    * status "good" if it was already natural (leave "better" empty).
    * status "tip" if a native would phrase it differently: put the improved English in "better" and a SHORT Japanese explanation (max 40 Japanese characters) in "why_ja". Only mention what matters for being understood — never nitpick.
 - "done" = true only when the scene has reached a natural ending (goodbye, payment finished, etc.).
-- Aim to wrap the conversation up naturally after about ${cfg.turns} learner turns.`;
+${lengthRule(c)}${missionRule(c)}`;
+}
+function lengthRule(c){
+  const map={short:5,normal:10,long:20};
+  if(c.len==='endless') return '\n- NEVER end the conversation yourself. Always keep it going with a new question. Set "done" to false every time.';
+  const t=map[c.len]||cfg.turns;
+  return `\n- Aim to wrap the conversation up naturally after about ${t} learner turns.`;
+}
+function missionRule(c){
+  if(!c.mission) return '';
+  return `\n- MISSION: the learner is trying to use "${c.mission.t}" at least once. Set "mission_used" to true ONLY on the turn where their message actually contains that pattern used correctly. Do not tell them about the mission unless they ask. If they have not used it after several turns, steer the conversation so that using it becomes natural (for example by asking a question that invites it).`;
 }
 function historyContents(c){
   return c.msgs.map(m=>({role: m.role==='ai'?'model':'user', parts:[{text:m.en}]}));
 }
 
 /* --- AIの番 --- */
-async function nextAiTurn(first){
+async function nextAiTurn(first,directive){
   const c=app.chat;
   app.busy=true; paintMsgs();
   try{
     if(hasKey()){
       const contents=historyContents(c);
-      if(first) contents.push({role:'user',parts:[{text:'(The learner has just arrived. Start the conversation with your first line.)'}]});
+      if(first) contents.push({role:'user',parts:[{text:'(The learner has just arrived. Start the conversation with your first line.'+(c.topic?' Open with the topic given in your instructions.':'')+')'}]});
+      else if(directive) contents.push({role:'user',parts:[{text:directive}]});
       const r=await gemini({system:systemPrompt(c), contents, schema:TURN_SCHEMA});
       app.busy=false;
       c.msgs.push({role:'ai', en:r.reply, ja:r.reply_ja});
       const last=[...c.msgs].reverse().find(m=>m.role==='me');
-      if(last && r.feedback) last.fb=r.feedback;
+      if(last && r.feedback && !(directive && r.feedback.status==='none' && last.fb)) last.fb=r.feedback;
       c.hints=(r.hints||[]).slice(0,3); c.showHints=false;
+      if(r.mission_used && c.mission && !c.missionDone){
+        c.missionDone=true; if(last) last.mission=true;
+        toast('⭐️ ミッション達成！「'+c.mission.t+'」が使えました');
+      }
       paintMsgs();
       afterAiSpoke(r.reply);
-      if(r.done) setTimeout(()=>{ if(app.chat && !app.chat.ended) finishChat(); },1400);
+      if(r.done && c.len!=='endless') setTimeout(()=>{ if(app.chat && !app.chat.ended) finishChat(); },1400);
     }else{
       // 台本モード
       const sp=c.scene.script||[];
@@ -802,6 +1040,29 @@ async function onHint(){
   app.busy=false; paintMsgs();
 }
 
+/* --- 「これ英語でなんて言う？」 --- */
+async function askWord(){
+  const c=app.chat; if(!c||!c.wordPanel) return;
+  const q=(c.wordPanel.q||'').trim();
+  if(!q){ toast('知りたい言葉を日本語で書いてください'); return; }
+  if(!hasKey()){ toast('この機能はAIキーが必要です'); return; }
+  app.busy=true; paintMsgs();
+  try{
+    const lv=LEVELS.find(l=>l.id===c.level);
+    const r=await gemini({
+      system:`A Japanese learner wants to know how to say something in English during a conversation. Reply in JSON.
+- "en": the most natural English word or phrase real speakers use for it. NOT a literal dictionary translation.
+- "ja": a short Japanese gloss.
+- "example_en": one sentence the learner could actually say right now in this conversation, using it. ${lv.ins}
+- "example_ja": Japanese translation of that sentence.
+- "note_ja": a short Japanese note on nuance or when to use it (max 50 Japanese characters).`,
+      contents:[{role:'user',parts:[{text:'Conversation so far:\n'+c.msgs.slice(-4).map(m=>(m.role==='ai'?'Partner: ':'Me: ')+m.en).join('\n')+'\n\nJapanese the learner wants to say: '+q}]}],
+      schema:WORD_SCHEMA, temp:0.5});
+    c.wordPanel.result=r;
+  }catch(e){ toast(e.message); }
+  app.busy=false; paintMsgs();
+}
+
 /* --- 日本語で言う → 英語にしてもらう --- */
 async function jaToEn(ja){
   if(!hasKey()){ toast('この機能はAIキーが必要です'); return; }
@@ -839,7 +1100,7 @@ async function finishChat(){
 - "fixes": up to 3 items. "you" = what the learner actually wrote, "better" = a natural rewrite, "why_ja" = short Japanese reason (max 40 chars). Only real problems, not nitpicks. Empty array if nothing to fix.
 - "phrases": 3-5 useful English expressions FROM OR FOR this scene worth memorizing, with Japanese.
 - "next_goal_ja": one concrete thing to try next time, in Japanese, one sentence.`,
-        contents:[{role:'user',parts:[{text:`Scene: ${c.scene.custom?c.custom:c.scene.t}\nLevel: ${LEVELS.find(l=>l.id===c.level).t}\n\n`+c.msgs.map(m=>(m.role==='ai'?'Partner: ':'Learner: ')+m.en).join('\n')}]}],
+        contents:[{role:'user',parts:[{text:`Scene: ${c.scene.custom?c.custom:c.scene.t}${c.char?' (free talk with '+c.char.name+')':''}${c.topic?'\nTopic: '+c.topic:''}${c.mission?'\nThe learner was trying to use: '+c.mission.t+' ('+(c.missionDone?'they managed it':'they did not manage it')+')':''}\nLevel: ${LEVELS.find(l=>l.id===c.level).t}\n\n`+c.msgs.map(m=>(m.role==='ai'?'Partner: ':'Learner: ')+m.en).join('\n')}]}],
         schema:REPORT_SCHEMA, temp:0.6});
     }catch(e){ toast(e.message); }
   }
@@ -850,6 +1111,7 @@ async function finishChat(){
   sessions.unshift({
     id:uid(), ts:Date.now(), scene:c.scene.custom?c.custom.slice(0,24):c.scene.t, sceneId:c.scene.id,
     level:c.level, turns:mine.length, words:mine.reduce((a,m)=>a+wordCount(m.en),0), sec,
+    char:c.char?c.char.name:'', mission:c.mission?c.mission.t:'', missionDone:!!c.missionDone,
     score:rep.score||null, msgs:c.msgs.map(m=>({r:m.role,en:m.en,ja:m.ja||''})), report:rep
   });
   sessions=sessions.slice(0,120); save(LS.log,sessions);
@@ -869,9 +1131,28 @@ function localReport(c){
     next_goal_ja:'AIキーを設定すると、自分の言い方に合わせた本当の会話とアドバイスがもらえます。'
   };
 }
+function talkStats(c){
+  const mine=c.msgs.filter(m=>m.role==='me');
+  const words=mine.flatMap(m=>(m.en.toLowerCase().match(/[a-z']+/g)||[]));
+  const uniq=new Set(words);
+  const longest=mine.reduce((a,m)=>Math.max(a,wordCount(m.en)),0);
+  return {turns:mine.length, words:words.length, uniq:uniq.size,
+          avg: mine.length? (words.length/mine.length) : 0, longest};
+}
 function reportHtml(r,c){
+  const st=talkStats(c);
   return `<div class="card" style="margin-top:8px">
     <h2>🏁 今日の会話のふりかえり</h2>
+    ${c.mission?`<div style="padding:10px 12px;border-radius:12px;margin-bottom:12px;border:1px solid ${c.missionDone?'color-mix(in srgb,var(--ok) 45%,var(--line))':'var(--line)'}">
+      ${c.missionDone?'⭐️ <b>ミッション達成！</b>':'🎯 <b>ミッションは未達成</b>'}　「${esc(c.mission.t)}」<span class="muted">（${esc(c.mission.d)}）</span>
+      ${c.missionDone?'':'<div class="muted" style="font-size:12px;margin-top:4px">次はこの言い方を狙ってみましょう。ヒストリーに残るので、また同じミッションで挑戦できます。</div>'}
+    </div>`:''}
+    <div class="stat" style="margin-bottom:12px">
+      <div><b>${st.turns}</b><span>話した回数</span></div>
+      <div><b>${st.words}</b><span>使った語数</span></div>
+      <div><b>${st.uniq}</b><span>語彙の種類</span></div>
+    </div>
+    <p class="muted" style="margin:-4px 0 12px">1回あたり平均 ${st.avg.toFixed(1)} 語・いちばん長い文は ${st.longest} 語。${st.avg<5?'もう一言そえると、ぐっと会話らしくなります。':st.avg<9?'いい長さです。理由(because〜)を足すとさらに伸びます。':'しっかり文で話せています。'}</p>
     <div class="row" style="margin-bottom:8px"><div style="font-size:32px;font-weight:800;line-height:1">${r.score??'-'}</div><div class="muted grow">点／100<div class="bar" style="margin-top:5px"><i style="width:${Math.max(4,Math.min(100,r.score||0))}%"></i></div></div></div>
     <p style="margin:6px 0 12px">${esc(r.summary_ja||'')}</p>
     ${(r.good_points||[]).length?`<div style="margin-bottom:12px"><b style="font-size:13px;color:var(--ok)">よかったところ</b>
@@ -943,7 +1224,12 @@ $('#micJa').onclick=()=>{
   startRec('ja-JP',
     fin=>{ got=fin; },
     itr=>{ txt.value=itr; autoGrow(); },
-    ()=>{ setMicUI(b,false); txt.placeholder='英語で入力 / マイクで話す'; if(got){ txt.value=''; jaToEn(got); } });
+    ()=>{ setMicUI(b,false); txt.placeholder='英語で入力 / マイクで話す';
+      if(!got) return;
+      txt.value='';
+      if(app.chat && app.chat.wordPanel){ app.chat.wordPanel.q=got; paintMsgs(); askWord(); }
+      else jaToEn(got);
+    });
 };
 
 /* ---------- 11. フレーズ帳 ---------- */
@@ -1042,7 +1328,8 @@ function renderStats(m){
    ${sessions.length? sessions.slice(0,30).map(s=>`
      <div style="border-bottom:1px solid var(--line);padding:10px 0">
        <div class="row"><div class="grow"><b style="font-size:14px">${esc(s.scene)}</b>
-         <div class="muted" style="font-size:11.5px">${fmtDate(s.ts)} ・ ${s.turns}回話した ・ ${s.words}語 ・ ${Math.max(1,Math.round(s.sec/60))}分</div></div>
+         <div class="muted" style="font-size:11.5px">${fmtDate(s.ts)} ・ ${s.turns}回話した ・ ${s.words}語 ・ ${Math.max(1,Math.round(s.sec/60))}分${s.char?' ・ '+esc(s.char):''}</div>
+         ${s.mission?`<div class="muted" style="font-size:11.5px">${s.missionDone?'⭐️':'🎯'} ${esc(s.mission)}</div>`:''}</div>
          ${s.score!=null?`<div style="font-weight:800;color:var(--accent)">${s.score}</div>`:''}
          <button class="chip" data-op="${s.id}">${openSession===s.id?'閉じる':'見る'}</button></div>
        ${openSession===s.id?`<div style="margin-top:8px;font-size:13.5px;display:flex;flex-direction:column;gap:6px">
