@@ -2806,7 +2806,7 @@ const ST = id => STYLES.find(x=>x.id===id) || STYLES[1];
 
 
 /* ---------- 2. 保存まわり ---------- */
-const LS = {cfg:'talkie.cfg', log:'talkie.sessions', ph:'talkie.phrases', use:'talkie.usage', weak:'talkie.weak'};
+const LS = {cfg:'talkie.cfg', log:'talkie.sessions', ph:'talkie.phrases', use:'talkie.usage', weak:'talkie.weak', draft:'talkie.draft'};
 const load = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } };
 const save = (k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){ toast('保存できませんでした'); } };
 
@@ -2815,9 +2815,11 @@ const cfg = Object.assign({
   autoSpeak:true, autoSend:true, showJa:false, level:'b', name:'', turns:8,
   handsFree:true, silence:4.5,
   free:{char:'sam', topic:'auto', topicCustom:'', mission:'auto', len:'normal'},
+  mission:'auto', hideEn:false, seenGuide:false,
   goal:12, quizMode:'mix', autoLevel:true, style:'normal'
 }, load(LS.cfg,{}));
 cfg.free=Object.assign({char:'sam',topic:'auto',topicCustom:'',mission:'auto',len:'normal'},cfg.free||{});
+if(cfg.mission==null) cfg.mission=cfg.free.mission||'auto';
 const saveCfg = ()=> save(LS.cfg,cfg);
 
 let sessions = load(LS.log,[]);       // {id,ts,scene,level,turns,words,sec,msgs,report}
@@ -3062,8 +3064,8 @@ function renderTabs(){
 $('#tabs').addEventListener('click',e=>{
   const b=e.target.closest('button[data-tab]'); if(!b) return;
   if(app.chat && !app.chat.ended && b.dataset.tab!=='talk'){
-    if(!confirm('会話をやめて移動しますか？（記録は残りません）')) return;
-    app.chat=null; stopSpeak(); stopRec();
+    if(!confirm('会話をいったん離れますか？（「つづきから」で戻れます）')) return;
+    saveDraft(); app.chat=null; stopSpeak(); stopRec();
   }
   app.tab=b.dataset.tab; render();
 });
@@ -3090,6 +3092,16 @@ function renderSetup(m){
   const sc=SCENES.find(s=>s.id===pick.scene);
   const needKey = sc && sc.apiOnly && !hasKey();
   m.innerHTML=`
+  ${(!cfg.seenGuide && sessions.length===0)?`<div class="card">
+    <h2>👋 はじめまして。3つだけ覚えれば大丈夫です</h2>
+    <ol style="margin:0 0 10px;padding-left:20px;font-size:13.5px;line-height:1.9">
+      <li><b>下の「場面」を選んで「会話をはじめる」</b>。相手が英語で話しかけてきます</li>
+      <li><b>🎙を押して英語で返す</b>。詰まったら <b>💡なんて言えばいい？</b> が3つ候補をくれます</li>
+      <li><b>🏁で終える</b>と、直すところと覚えるフレーズが出ます。フレーズは「練習」タブで復習できます</li>
+    </ol>
+    <p class="muted" style="margin:0 0 10px;font-size:12px">うまく言えなくて大丈夫です。伝わらなかった経験がそのまま教材になります。</p>
+    <button class="btn block" id="guideOk">わかった</button>
+  </div>`:''}
   ${!hasKey()?`<div class="card" style="border-color:color-mix(in srgb,var(--warn) 40%,var(--line))">
      <h2>🔑 まずは無料のAIキーを入れると本領発揮</h2>
      <p class="muted" style="margin:0 0 10px">キーなしでも「台本モード」で練習できますが、返事が決まっています。<br>
@@ -3108,6 +3120,14 @@ function renderSetup(m){
     </div>
     ${hasKey()?`<p class="muted" style="margin:12px 0 0">AIとの通信 今日 ${useToday()} 回（無料枠の目安 ${limit().rpd} 回／日・<b>超えても課金されません</b>）</p>`:''}
   </div>
+  ${(()=>{ const r=getDraft(); if(!r) return '';
+    const mine=r.d.msgs.filter(x=>x.role==='me').length;
+    return `<div class="card" style="border-color:color-mix(in srgb,var(--warn) 45%,var(--line))">
+      <h2>⏸ 途中の会話があります</h2>
+      <p class="muted" style="margin:0 0 10px">${esc(r.sc.em+' '+r.sc.t)}${r.d.charId?' ・ '+esc((CHARS.find(x=>x.id===r.d.charId)||{}).name||''):''} ・ ${mine}往復まで進んでいます（${fmtDate(r.d.ts)}）</p>
+      <div class="row"><button class="btn grow" id="resume">▶︎ つづきから</button>
+        <button class="btn ghost" id="dropDraft">やめる</button></div>
+    </div>`; })()}
   ${dueList().length?`<div class="card" style="border-color:color-mix(in srgb,var(--accent) 40%,var(--line))">
     <h2>📒 そろそろ忘れそうなフレーズが ${dueList().length}個</h2>
     <p class="muted" style="margin:0 0 10px">前に覚えたフレーズの復習どきです。1〜2分で終わります。</p>
@@ -3151,6 +3171,7 @@ function renderSetup(m){
     </div>
     <p class="muted" style="margin:8px 0 0">${esc(ST(cfg.style).d)}${cfg.style!=='normal'?`　（話す速さも${cfg.style==='tough'?'少し速く':'少しゆっくり'}なります）`:''}</p>
   </div>
+  ${hasKey()? missionCard() : ''}
   <button class="btn block" id="start" style="padding:15px;font-size:17px" ${needKey?'disabled':''}>
     ${needKey?'このシーンはAIキーが必要です':'▶︎ 会話をはじめる'}
   </button>
@@ -3159,11 +3180,16 @@ function renderSetup(m){
     ${srAvailable?'':' ／ ⚠️ このブラウザは音声認識に非対応（文字入力で練習できます）'}
   </p>`;
   const gk=$('#goKey'); if(gk) gk.onclick=()=>{ app.tab='set'; render(); };
+  const gok=$('#guideOk'); if(gok) gok.onclick=()=>{ cfg.seenGuide=true; saveCfg(); render(); };
+  const rs=$('#resume'); if(rs) rs.onclick=resumeDraft;
+  const dd=$('#dropDraft'); if(dd) dd.onclick=()=>{ if(confirm('途中の会話を捨てますか？')){ clearDraft(); render(); } };
   const gr=$('#goReview'); if(gr) gr.onclick=()=>{ app.tab='phrase'; phMode='list'; render(); setTimeout(()=>{ const b=$('#qzDue'); if(b) b.click(); },40); };
   const lg=$('#lvGo'); if(lg) lg.onclick=()=>{ const sg=levelSuggestion(); if(sg){ cfg.level=sg.to.id; saveCfg(); toast('むずかしさを「'+sg.to.t+'」にしました'); render(); } };
   const ln=$('#lvNo'); if(ln) ln.onclick=()=>{ cfg.autoLevel=false; saveCfg(); render(); };
   $('#scenes').onclick=e=>{ const b=e.target.closest('[data-s]'); if(!b) return; pick.scene=b.dataset.s; render(); };
   m.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{ pick.cat=b.dataset.cat; render(); });
+  m.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{ cfg.mission=b.dataset.ms; saveCfg(); render(); });
+  m.querySelectorAll('[data-sayt]').forEach(b=>b.onclick=()=>speak(b.dataset.sayt));
   $('#lvl').onclick=e=>{ const b=e.target.closest('[data-l]'); if(!b) return; cfg.level=b.dataset.l; saveCfg(); render(); };
   $('#sty').onclick=e=>{ const b=e.target.closest('[data-st]'); if(!b) return; cfg.style=b.dataset.st; saveCfg(); render(); };
   const cu=$('#customSit'); if(cu) cu.oninput=e=>{ pick.custom=e.target.value; };
@@ -3196,19 +3222,6 @@ function freePanel(){
     </div>
   </div>
   <div class="card">
-    <h2>今日のミッション <span class="muted" style="font-weight:400;font-size:12px">（使えたら達成）</span></h2>
-    <div style="display:flex;flex-wrap:wrap;gap:7px">
-      <button class="chip" data-ms="none" style="${F.mission==='none'?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft)':''};padding:7px 12px;font-size:13px">なし</button>
-      <button class="chip" data-ms="auto" style="${F.mission==='auto'?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft)':''};padding:7px 12px;font-size:13px">🎲 おまかせ</button>
-      ${ms.map(x=>`<button class="chip" data-ms="${x.id}" style="${F.mission===x.id?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft)':''};padding:7px 12px;font-size:13px">${esc(x.t)}</button>`).join('')}
-    </div>
-    ${(()=>{ const cur=ms.find(x=>x.id===F.mission); return cur?`
-      <p class="muted" style="margin:9px 0 0">${esc(cur.d)}　会話中にこの言い方が使えたら ⭐️ が付きます。</p>
-      ${cur.ex?`<div style="margin-top:8px;padding:9px 11px;border:1px solid var(--line);border-radius:11px">
-        <div style="font-size:13.5px;font-weight:600">${esc(cur.ex)} <button class="chip" data-sayt="${esc(cur.ex)}">🔊</button></div>
-        <div class="muted" style="font-size:12px">${esc(cur.exja||'')}</div></div>`:''}`:''; })()}
-  </div>
-  <div class="card">
     <h2>会話の長さ</h2>
     <div class="seg" id="freeLen">
       ${[['short','短め','5往復'],['normal','ふつう','10往復'],['long','じっくり','20往復'],['endless','エンドレス','自分で終える']]
@@ -3233,16 +3246,55 @@ function bindFreePanel(){
   };
 }
 function missionOf(){
-  const F=cfg.free, ms=MISSIONS[cfg.level]||MISSIONS.b;
-  if(F.mission==='none') return null;
-  if(F.mission==='auto') return ms[Math.floor(Math.random()*ms.length)];
-  return ms.find(x=>x.id===F.mission)||null;
+  const ms=MISSIONS[cfg.level]||MISSIONS.b;
+  if(cfg.mission==='none') return null;
+  if(cfg.mission&&cfg.mission.startsWith('weak:')){
+    const cat=cfg.mission.slice(5);
+    return {id:'weak-'+cat, t:WEAK_MISSION[cat]?WEAK_MISSION[cat].t:CATS[cat], d:'弱点をねらう：'+(CATS[cat]||cat),
+            ex:WEAK_MISSION[cat]?WEAK_MISSION[cat].ex:'', exja:WEAK_MISSION[cat]?WEAK_MISSION[cat].exja:'', weakCat:cat};
+  }
+  if(cfg.mission==='auto') return ms[Math.floor(Math.random()*ms.length)];
+  return ms.find(x=>x.id===cfg.mission)||null;
 }
+/* 弱点カテゴリ → 会話中に狙う課題 */
+const WEAK_MISSION={
+ tense:{t:'過去の出来事を過去形／現在完了で正しく話す',ex:"I went there last summer, and I've wanted to go back ever since.",exja:'去年の夏に行って、それからずっとまた行きたいと思ってる'},
+ article:{t:'a / the を意識して名詞を言う',ex:"I bought a used bike, and the brakes were already broken.",exja:'中古の自転車を買ったら、ブレーキがもう壊れてた'},
+ preposition:{t:'in / on / at を正しく使う',ex:"I'll be at the station on Friday, probably in the afternoon.",exja:'金曜は駅にいるよ、たぶん午後'},
+ 'word-order':{t:'語順を崩さず長めの文を言う',ex:"I usually study at the library after school because it's quiet.",exja:'静かだから放課後はたいてい図書館で勉強してる'},
+ plural:{t:'単数・複数を正しく言い分ける',ex:"I have two older brothers and one of them lives abroad.",exja:'兄が2人いて、1人は海外に住んでる'},
+ vocab:{t:'辞書の直訳ではなく場面に合う語を選ぶ',ex:"It was pretty overwhelming at first, but I got used to it.",exja:'最初はいっぱいいっぱいだったけど、慣れたよ'},
+ expression:{t:'不自然な直訳をやめて決まった言い回しで言う',ex:"I'm not really into horror movies, to be honest.",exja:'正直ホラーはあんまり得意じゃないんだ'},
+ question:{t:'自分から質問文を作って聞き返す',ex:"How long have you been doing that? Did you start on your own?",exja:'それどのくらいやってるの？自分で始めたの？'},
+ other:{t:'言いたいことを最後まで言い切る',ex:"What I mean is, it's not the money, it's the time.",exja:'つまりお金じゃなくて時間の問題なんだ'}
+};
 function topicOf(){
   const F=cfg.free;
   if(F.topic==='custom') return F.topicCustom.trim();
   const t=TOPICS.find(x=>x.id===F.topic);
   return t&&t.p? t.p : '';
+}
+
+function missionCard(){
+  const ms=MISSIONS[cfg.level]||MISSIONS.b;
+  const wt=weakTop(30).slice(0,2);
+  const cur = cfg.mission&&cfg.mission.startsWith('weak:')? null : ms.find(x=>x.id===cfg.mission);
+  const sel = v => cfg.mission===v? 'border-color:var(--accent);color:var(--accent);background:var(--accent-soft);':'';
+  return `<div class="card">
+    <h2>今日のミッション <span class="muted" style="font-weight:400;font-size:12px">（会話中に使えたら ⭐️）</span></h2>
+    <div style="display:flex;flex-wrap:wrap;gap:7px">
+      <button class="chip" data-ms="none" style="${sel('none')}padding:7px 12px;font-size:13px">なし</button>
+      <button class="chip" data-ms="auto" style="${sel('auto')}padding:7px 12px;font-size:13px">🎲 おまかせ</button>
+      ${wt.map(([cat])=>`<button class="chip" data-ms="weak:${cat}" style="${sel('weak:'+cat)}padding:7px 12px;font-size:13px;border-style:dashed">🩹 ${esc(CATS[cat]||cat)}</button>`).join('')}
+      ${ms.map(x=>`<button class="chip" data-ms="${x.id}" style="${sel(x.id)}padding:7px 12px;font-size:13px">${esc(x.t)}</button>`).join('')}
+    </div>
+    ${(()=>{ const mo = cfg.mission==='none'? null : (cfg.mission.startsWith('weak:')? missionOf() : cur);
+      return mo?`<p class="muted" style="margin:9px 0 0">${esc(mo.d||'')}</p>
+      ${mo.ex?`<div style="margin-top:8px;padding:9px 11px;border:1px solid var(--line);border-radius:11px">
+        <div style="font-size:13.5px;font-weight:600">${esc(mo.ex)} <button class="chip" data-sayt="${esc(mo.ex)}">🔊</button></div>
+        <div class="muted" style="font-size:12px">${esc(mo.exja||'')}</div></div>`:''}`:''; })()}
+    ${wt.length?`<p class="muted" style="margin:9px 0 0;font-size:11.5px">🩹 の付いたものは、あなたが実際によく直されている弱点です。</p>`:''}
+  </div>`;
 }
 
 function ring(done,goal){
@@ -3265,13 +3317,45 @@ function streak(){
   return {streak:n, today};
 }
 
+/* --- 途中でやめた会話を保存して、あとから続けられるように --- */
+function saveDraft(){
+  const c=app.chat;
+  if(!c || c.ended || !c.msgs.length){ return; }
+  save(LS.draft,{ts:Date.now(), sceneId:c.scene.id, level:c.level, style:c.style, custom:c.custom,
+    charId:c.char?c.char.id:'', topic:c.topic, mission:c.mission, missionDone:!!c.missionDone,
+    len:c.len, accent:c.accent, msgs:c.msgs, step:c.step, hints:c.hints,
+    sec:Math.round((Date.now()-c.t0)/1000)});
+}
+function clearDraft(){ try{ localStorage.removeItem(LS.draft); }catch(e){} }
+function getDraft(){
+  const d=load(LS.draft,null);
+  if(!d || !d.msgs || !d.msgs.length){ return null; }
+  if(Date.now()-d.ts > 7*DAY){ clearDraft(); return null; }
+  const sc=SCENES.find(x=>x.id===d.sceneId);
+  if(!sc){ clearDraft(); return null; }
+  return {d, sc};
+}
+function resumeDraft(){
+  const r=getDraft(); if(!r){ toast('続きが見つかりませんでした'); return; }
+  const {d,sc}=r;
+  app.chat={ scene:sc, level:d.level||cfg.level, style:d.style||'normal', custom:d.custom||'',
+    char: d.charId? (CHARS.find(x=>x.id===d.charId)||null) : null,
+    topic:d.topic||'', mission:d.mission||null, missionDone:!!d.missionDone,
+    len:d.len||'normal', accent:d.accent||'',
+    msgs:d.msgs, step:d.step||0, hints:d.hints||null, showHints:false,
+    t0: Date.now()-Math.min(3600,(d.sec||0))*1000,
+    ended:false, report:null, wordPanel:null };
+  app.tab='talk'; render();
+  toast('つづきから再開しました');
+}
+
 /* ---------- 9. 会話 ---------- */
 function startChat(sceneId){
   const sc=SCENES.find(s=>s.id===sceneId);
   if(sc.custom && !pick.custom.trim()){ toast('どんな場面か書いてください'); return; }
   const isFree = sc.id==='free';
   const ch = isFree? (CHARS.find(x=>x.id===cfg.free.char)||CHARS[0]) : null;
-  const mi = isFree? missionOf() : null;
+  const mi = missionOf();
   if(isFree && cfg.free.topic==='custom' && !cfg.free.topicCustom.trim()){ toast('話したいことを書くか、別の話題を選んでください'); return; }
   app.chat={
     scene:sc, level:cfg.level, style:cfg.style, custom:pick.custom.trim(),
@@ -3280,6 +3364,7 @@ function startChat(sceneId){
     msgs:[], step:0, t0:Date.now(), hints:null, showHints:false, ended:false, report:null,
     wordPanel:null, tools:false
   };
+  clearDraft();
   render();
   nextAiTurn(true);
 }
@@ -3302,13 +3387,15 @@ function paintMsgs(){
   let h='';
   c.msgs.forEach((msg,i)=>{
     if(msg.role==='ai'){
+      const hid = cfg.hideEn && !msg.seen;
       h+=`<div class="msg ai">
-        <div class="bub"><div class="en">${esc(msg.en)}</div>
-        ${(cfg.showJa||msg.open)&&msg.ja?`<div class="ja">${esc(msg.ja)}</div>`:''}</div>
+        <div class="bub"><div class="en">${hid?`<span style="filter:blur(7px);user-select:none;opacity:.75">${esc(msg.en)}</span>`:esc(msg.en)}</div>
+        ${!hid&&(cfg.showJa||msg.open)&&msg.ja?`<div class="ja">${esc(msg.ja)}</div>`:''}</div>
         <div class="tools">
           <button class="chip" data-say="${i}">🔊 もう一度</button>
           <button class="chip" data-slow="${i}">🐢 ゆっくり</button>
-          ${msg.ja?`<button class="chip" data-ja="${i}">${(cfg.showJa||msg.open)?'訳をかくす':'日本語で見る'}</button>`:''}
+          ${hid?`<button class="chip" data-see="${i}" style="border-color:var(--accent);color:var(--accent)">👀 文字を見る</button>`:''}
+          ${!hid&&msg.ja?`<button class="chip" data-ja="${i}">${(cfg.showJa||msg.open)?'訳をかくす':'日本語で見る'}</button>`:''}
           ${(msg.nw&&msg.nw.length)?`<button class="chip" data-nw="${i}" style="border-color:color-mix(in srgb,var(--accent) 45%,var(--line));color:var(--accent)">📖 いまの表現 ${msg.nw.length}</button>`:''}
         </div>
         ${(msg.nw&&msg.nw.length&&msg.nwOpen)?`<div class="hintbox" style="max-width:none">
@@ -3365,10 +3452,11 @@ function paintMsgs(){
       ${hasKey()?`<button class="btn ghost sm" id="bSimple">🐢 やさしく言い直して</button>`:''}
       ${hasKey()?`<button class="btn ghost sm" id="bWord">🔤 英語でなんて言う？</button>`:''}
       ${hasKey()&&free?`<button class="btn ghost sm" id="bTopic">🔀 話題を変える</button>`:''}
+      <button class="btn ghost sm" id="bHide" style="${cfg.hideEn?'border-color:var(--accent);color:var(--accent)':''}">${cfg.hideEn?'🎧 字幕オフ中':'🎧 字幕を消す'}</button>
       ${hasKey()?`<button class="btn ghost sm" id="bLevel">🎚 ${LV(c.level).t}にしている</button>`:''}
       <button class="btn ghost sm" id="bEnd">🏁 会話を終える</button>
     </div>`;
-    if(free && c.mission){
+    if(c.mission){
       h+=`<div class="muted" style="text-align:center;font-size:12px">${c.missionDone?'⭐️ 今日のミッション達成！':'🎯 今日のミッション：<b>'+esc(c.mission.t)+'</b>（'+esc(c.mission.d)+'）'+(c.mission.ex?'<br>例：'+esc(c.mission.ex):'')}</div>`;
     }
   }
@@ -3378,6 +3466,7 @@ function paintMsgs(){
   box.querySelectorAll('[data-slow]').forEach(b=>b.onclick=()=>speak(c.msgs[+b.dataset.slow].en, Math.max(0.55,cfg.rate-0.25)));
   box.querySelectorAll('[data-sayt]').forEach(b=>b.onclick=()=>speak(b.dataset.sayt));
   box.querySelectorAll('[data-ja]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.ja; c.msgs[i].open=!(cfg.showJa||c.msgs[i].open); paintMsgs(); });
+  box.querySelectorAll('[data-see]').forEach(b=>b.onclick=()=>{ c.msgs[+b.dataset.see].seen=true; paintMsgs(); });
   box.querySelectorAll('[data-nw]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.nw; c.msgs[i].nwOpen=!c.msgs[i].nwOpen; paintMsgs(); });
   box.querySelectorAll('[data-nwkeep]').forEach(b=>b.onclick=()=>{ const [i,k]=b.dataset.nwkeep.split(':').map(Number); const x=c.msgs[i].nw[k]; addPhrase(x.en,x.ja,'会話で出た表現'); });
   box.querySelectorAll('[data-keep]').forEach(b=>b.onclick=()=>{ const f=c.msgs[+b.dataset.keep].fb; addPhrase(f.better, f.why_ja||'', c.scene.t); });
@@ -3389,6 +3478,8 @@ function paintMsgs(){
   const bt=$('#bTopic'); if(bt) bt.onclick=()=>{ if(app.busy) return; stopRec();
     nextAiTurn(false,'(The learner wants a different topic. Close the current topic in one short sentence, then start a completely NEW and interesting topic with a question. Set feedback status to "none".)'); };
   const bw=$('#bWord'); if(bw) bw.onclick=()=>{ c.wordPanel=c.wordPanel?null:{q:'',result:null}; paintMsgs(); const i=$('#wq'); if(i) i.focus(); };
+  const bhd=$('#bHide'); if(bhd) bhd.onclick=()=>{ cfg.hideEn=!cfg.hideEn; saveCfg();
+    toast(cfg.hideEn?'字幕オフ。聞き取れなければ🔊と🐢を使ってください':'字幕を戻しました'); paintMsgs(); };
   const bl=$('#bLevel'); if(bl) bl.onclick=()=>{
     const i=LEVELS.findIndex(l=>l.id===c.level); const nx=LEVELS[(i+1)%LEVELS.length];
     c.level=nx.id; cfg.level=nx.id; saveCfg(); renderChat($('#main'));
@@ -3485,6 +3576,7 @@ async function nextAiTurn(first,directive){
       const last=[...c.msgs].reverse().find(m=>m.role==='me');
       if(last && r.feedback && !(directive && r.feedback.status==='none' && last.fb)) last.fb=r.feedback;
       c.hints=(r.hints||[]).slice(0,3); c.showHints=false;
+      saveDraft();
       if(r.mission_used && c.mission && !c.missionDone){
         c.missionDone=true; if(last) last.mission=true;
         toast('⭐️ ミッション達成！「'+c.mission.t+'」が使えました');
@@ -3501,7 +3593,7 @@ async function nextAiTurn(first,directive){
       if(!line){ paintMsgs(); finishChat(); return; }
       c.msgs.push({role:'ai', en:line.en, ja:line.ja});
       c.hints=line.hints; c.showHints=false;
-      c.step++;
+      c.step++; saveDraft();
       paintMsgs();
       afterAiSpoke(line.en);
     }
@@ -3522,6 +3614,7 @@ async function sendMsg(text){
   c.msgs.push({role:'me', en:t});
   c.showHints=false; c.hints=null;
   $('#txt').value=''; autoGrow();
+  saveDraft();
   paintMsgs();
   if(!hasKey()){
     // 台本モード：簡易フィードバック
@@ -3602,7 +3695,7 @@ async function finishChat(){
   const c=app.chat; if(!c || c.ended) return;
   const mine=c.msgs.filter(m=>m.role==='me');
   if(!mine.length){ app.chat=null; stopSpeak(); render(); return; }
-  c.ended=true; stopSpeak(); stopRec();
+  c.ended=true; clearDraft(); stopSpeak(); stopRec();
   $('#composer').classList.add('hidden');
   $('#btnEnd').classList.add('hidden');
   document.body.style.paddingBottom='';
@@ -3816,22 +3909,120 @@ function pronHtml(r){
 }
 
 /* ---------- 11. 練習タブ（フレーズ帳／パック／発音ドリル） ---------- */
-let prTab='srs', openPack=null, openPron=null, pronQuiz=null;
+let prTab='srs', openPack=null, openPron=null, pronQuiz=null, shadow=null, shadowSrc='scene', shadowScene='cafe';
 function renderPractice(m){
   if(phMode==='quiz'){ renderQuiz(m); return; }
   if(prTab==='packs' && openPack){ renderPackDetail(m); return; }
   if(prTab==='pron' && openPron){ renderPronDrill(m); return; }
+  if(prTab==='shadow' && shadow){ renderShadowRun(m); return; }
   const seg=`<div class="seg" id="prTab" style="margin-bottom:2px">
-    <button data-pr="srs" class="${prTab==='srs'?'on':''}">📒 フレーズ帳</button>
-    <button data-pr="packs" class="${prTab==='packs'?'on':''}">📦 パック</button>
-    <button data-pr="pron" class="${prTab==='pron'?'on':''}">🎤 発音</button></div>`;
+    <button data-pr="srs" class="${prTab==='srs'?'on':''}" style="font-size:12px">📒 フレーズ</button>
+    <button data-pr="packs" class="${prTab==='packs'?'on':''}" style="font-size:12px">📦 パック</button>
+    <button data-pr="pron" class="${prTab==='pron'?'on':''}" style="font-size:12px">🎤 発音</button>
+    <button data-pr="shadow" class="${prTab==='shadow'?'on':''}" style="font-size:12px">🗣 音読</button></div>`;
   m.innerHTML=seg+'<div id="prBody"></div>';
   $('#prTab').onclick=e=>{ const b=e.target.closest('[data-pr]'); if(!b) return; prTab=b.dataset.pr; openPack=null; openPron=null; render(); };
   const body=$('#prBody');
   body.style.display='flex'; body.style.flexDirection='column'; body.style.gap='14px';
   if(prTab==='srs') renderPhrases(body);
   else if(prTab==='packs') renderPacks(body);
+  else if(prTab==='shadow') renderShadow(body);
   else renderPronList(body);
+}
+
+/* --- 音読（シャドーイング）：お手本を追いかけて言う --- */
+function shadowMaterial(){
+  if(shadowSrc==='scene'){
+    const sc=SCENES.find(x=>x.id===shadowScene);
+    if(!sc||!sc.script) return [];
+    return sc.script.map(t=>({en:t.en, ja:t.ja, from:sc.t}));
+  }
+  if(shadowSrc==='phrase') return shuffle(phrases.slice()).slice(0,12).map(p=>({en:p.en, ja:p.ja, from:'フレーズ帳'}));
+  if(shadowSrc==='weak')   return weak.slice(0,12).map(w=>({en:w.better, ja:w.why_ja||'', from:'弱点ノート'}));
+  const pk=PACKS.find(x=>x.id===shadowScene)||PACKS[0];
+  return pk? pk.items.slice(0,12).map(i=>({en:i.en, ja:i.ja, from:pk.t})) : [];
+}
+function renderShadow(m){
+  $('#hTitle').textContent='🗣 音読・シャドーイング';
+  $('#hSub').textContent='お手本を追いかけて声に出す';
+  const scenes=SCENES.filter(x=>x.script);
+  m.innerHTML=`
+  <p class="muted" style="margin:0">読めるのに口が動かない、を直す練習です。お手本を聞いて、すぐ後を追って言います。言えたかどうかは音声認識が判定します。</p>
+  <div class="card">
+    <h2>何を読む？</h2>
+    <div class="seg" id="shSrc">
+      <button data-sh="scene" class="${shadowSrc==='scene'?'on':''}" style="font-size:12px">シーン</button>
+      <button data-sh="pack" class="${shadowSrc==='pack'?'on':''}" style="font-size:12px">パック</button>
+      <button data-sh="phrase" class="${shadowSrc==='phrase'?'on':''}" style="font-size:12px">フレーズ帳</button>
+      <button data-sh="weak" class="${shadowSrc==='weak'?'on':''}" style="font-size:12px">弱点</button>
+    </div>
+    ${shadowSrc==='scene'?`<label class="f">シーン</label>
+      <select class="f" id="shScene">${scenes.map(x=>`<option value="${x.id}" ${shadowScene===x.id?'selected':''}>${x.em} ${esc(x.t)}</option>`).join('')}</select>`:''}
+    ${shadowSrc==='pack'?`<label class="f">パック</label>
+      <select class="f" id="shScene">${PACKS.map(x=>`<option value="${x.id}" ${shadowScene===x.id?'selected':''}>${x.em} ${esc(x.t)}</option>`).join('')}</select>`:''}
+    ${shadowSrc==='phrase'&&!phrases.length?`<p class="muted" style="margin:10px 0 0">フレーズ帳が空です。パックから入れてみてください。</p>`:''}
+    ${shadowSrc==='weak'&&!weak.length?`<p class="muted" style="margin:10px 0 0">弱点ノートがまだ空です。会話を1回終えるとたまります。</p>`:''}
+    <p class="muted" style="margin:10px 0 0">${shadowMaterial().length}文を練習します</p>
+    <button class="btn block" id="shGo" style="margin-top:10px" ${shadowMaterial().length?'':'disabled'}>▶︎ はじめる</button>
+  </div>`;
+  $('#shSrc').onclick=e=>{ const b=e.target.closest('[data-sh]'); if(!b) return; shadowSrc=b.dataset.sh;
+    if(shadowSrc==='pack'&&PACKS[0]) shadowScene=PACKS[0].id;
+    if(shadowSrc==='scene') shadowScene='cafe';
+    render(); };
+  const sel=$('#shScene'); if(sel) sel.onchange=e=>{ shadowScene=e.target.value; render(); };
+  $('#shGo').onclick=()=>{ const list=shadowMaterial(); if(!list.length) return;
+    shadow={list,i:0,pron:null,scores:[],stage:'listen'}; render(); };
+}
+function renderShadowRun(m){
+  const q=shadow;
+  if(q.i>=q.list.length){
+    const avg=q.scores.length? Math.round(q.scores.reduce((a,b)=>a+b,0)/q.scores.length):0;
+    m.innerHTML=`<div class="card" style="text-align:center">
+      <h2>おつかれさま！</h2>
+      <div style="font-size:36px;font-weight:800;color:${avg>=80?'var(--ok)':avg>=55?'var(--warn)':'var(--danger)'}">${avg}%</div>
+      <div class="bar" style="margin:8px 0"><i style="width:${avg}%"></i></div>
+      <p class="muted">${q.list.length}文の平均一致率</p>
+      <p class="muted">${avg>=80?'口がよく回っています。速度を上げて挑戦してみましょう。':avg>=55?'半分以上は伝わっています。苦手な文だけ繰り返すと伸びます。':'まずは🐢ゆっくりで、区切って言うところから。'}</p>
+      <button class="btn block" id="shAgain">もう一度</button>
+      <button class="btn ghost block" id="shBack" style="margin-top:8px">材料をえらび直す</button></div>`;
+    $('#shAgain').onclick=()=>{ shadow={...q,i:0,pron:null,scores:[]}; render(); };
+    $('#shBack').onclick=()=>{ shadow=null; render(); };
+    return;
+  }
+  const it=q.list[q.i];
+  m.innerHTML=`<div class="row"><div class="muted grow">${esc(it.from||'')} ${q.i+1} / ${q.list.length}</div>
+    <button class="btn ghost sm" id="shBack">やめる</button></div>
+   <div class="bar"><i style="width:${q.i/q.list.length*100}%"></i></div>
+   <div class="card" style="text-align:center;padding:22px 16px">
+     <div style="font-size:17.5px;font-weight:700;line-height:1.55">${esc(it.en)}</div>
+     ${it.ja?`<div class="muted" style="font-size:12.5px;margin-top:6px">${esc(it.ja)}</div>`:''}
+     <div class="row" style="justify-content:center;margin-top:12px">
+       <button class="btn soft sm" id="say">🔊 お手本</button>
+       <button class="btn soft sm" id="slow">🐢 ゆっくり</button>
+     </div>
+     <button class="mic" id="pmic" style="margin:16px auto 0">🎙</button>
+     <div class="muted" style="font-size:12px;margin-top:8px" id="pmsg">お手本のすぐ後を追いかけて言おう</div>
+     ${q.pron?`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+       <div style="font-size:30px;font-weight:800;color:${q.pron.rate>=80?'var(--ok)':q.pron.rate>=50?'var(--warn)':'var(--danger)'}">${q.pron.rate}%</div>
+       ${pronHtml(q.pron)}</div>`:''}
+   </div>
+   <div class="row">
+     <button class="btn ghost grow" id="shRetry">もう一度言う</button>
+     <button class="btn grow" id="shNext">次へ</button>
+   </div>`;
+  if(q.stage==='listen'){ q.stage='done'; setTimeout(()=>speak(it.en),250); }
+  $('#say').onclick=()=>speak(it.en);
+  $('#slow').onclick=()=>speak(it.en,Math.max(0.55,cfg.rate-0.25));
+  $('#pmic').onclick=()=>{
+    const b=$('#pmic'); if(b.classList.contains('rec')){ stopRec(); return; }
+    b.classList.add('rec'); $('#pmsg').textContent='聞いています…';
+    startRec('en-US', fin=>{ q.pron=pronScore(it.en,fin); render(); },
+      itr=>{ const el=$('#pmsg'); if(el) el.textContent='「'+itr+'」'; },
+      ()=>{ const el=$('#pmic'); if(el) el.classList.remove('rec'); });
+  };
+  $('#shRetry').onclick=()=>{ q.pron=null; render(); };
+  $('#shNext').onclick=()=>{ q.scores.push(q.pron?q.pron.rate:0); q.i++; q.pron=null; q.stage='listen'; render(); };
+  $('#shBack').onclick=()=>{ shadow=null; render(); };
 }
 
 /* --- フレーズパック --- */
@@ -4002,7 +4193,7 @@ function renderPronDrill(m){
 }
 
 /* ---------- 11.2 フレーズ帳（間隔反復＋発音チェック） ---------- */
-let phMode='list', phQuery='';
+let phMode='list', phQuery='', phAdd=null;
 const QMODES=[
  {id:'mix', t:'おまかせ', d:'3種類を混ぜて出す'},
  {id:'ja2en', t:'日本語→英語', d:'意味を見て英語で言う'},
@@ -4013,7 +4204,11 @@ function renderPhrases(m){
   $('#hTitle').textContent='📒 フレーズ帳';
   const due=dueList();
   $('#hSub').textContent=phrases.length? `${phrases.length}個 ／ 覚えた ${learned()}個 ／ 今日 ${due.length}個` : '会話のふりかえりから追加できます';
-  if(!phrases.length){ m.innerHTML=`<div class="empty">まだフレーズがありません。<br>会話のあとのふりかえりで「📒 フレーズ帳に入れる」を押すとたまります。</div>`; return; }
+  if(!phrases.length && !phAdd){
+    m.innerHTML=`<div class="empty">まだフレーズがありません。<br>会話のあとのふりかえりや「📦 パック」からたまります。</div>
+      <button class="btn ghost block sm" id="paOpen">＋ 覚えたい言い方を自分で追加</button>`;
+    $('#paOpen').onclick=()=>{ phAdd={en:'',ja:''}; render(); }; return;
+  }
   if(phMode==='quiz'){ renderQuiz(m); return; }
   const q=phQuery.trim().toLowerCase();
   const list=phrases.filter(p=>!q || p.en.toLowerCase().includes(q) || (p.ja||'').includes(phQuery.trim()));
@@ -4042,6 +4237,19 @@ function renderPhrases(m){
      </div>
      <p class="muted" style="margin:8px 0 0">正解すると次に会うのが「1→3→7→16→35日後」と伸びていきます。忘れた頃に出てくるので記憶に残ります。</p>
    </div>
+   <div class="card">
+     <h2>自分で足す</h2>
+     ${phAdd?`
+       <input class="f" id="paEn" placeholder="English（空のままでも、下の日本語から作れます）" value="${esc(phAdd.en)}">
+       <input class="f" id="paJa" placeholder="日本語の意味" value="${esc(phAdd.ja)}" style="margin-top:8px">
+       <div class="row" style="margin-top:9px">
+         ${hasKey()?`<button class="btn ghost sm" id="paMake">✨ 日本語から英語にする</button>`:''}
+         <button class="btn sm grow" id="paSave">追加する</button>
+         <button class="btn ghost sm" id="paCancel">やめる</button>
+       </div>
+       <p class="muted" style="margin:8px 0 0;font-size:11.5px">言えなくて悔しかった一言を、その日のうちに入れておくのが一番効きます。</p>
+     `:`<button class="btn ghost block sm" id="paOpen">＋ 覚えたい言い方を自分で追加</button>`}
+   </div>
    <input class="f" id="phq" placeholder="🔍 フレーズを探す" value="${esc(phQuery)}">
    <div style="display:flex;flex-direction:column;gap:9px">
    ${list.length?list.map(p=>`<div class="pcard ${(p.box||0)>=4?'done':''}">
@@ -4057,6 +4265,23 @@ function renderPhrases(m){
   $('#qzAll').onclick=()=>startQuiz(shuffle([...phrases]).slice(0,10),'ぜんぶから');
   $('#qzWeak').onclick=()=>startQuiz([...phrases].sort((a,b)=>(a.box||0)-(b.box||0)||(b.seen-b.ok)-(a.seen-a.ok)).slice(0,10),'苦手なもの');
   $('#qmode').onclick=e=>{ const b=e.target.closest('[data-qm]'); if(!b) return; cfg.quizMode=b.dataset.qm; saveCfg(); render(); };
+  const paOpen=$('#paOpen'); if(paOpen) paOpen.onclick=()=>{ phAdd={en:'',ja:''}; render(); };
+  const paCancel=$('#paCancel'); if(paCancel) paCancel.onclick=()=>{ phAdd=null; render(); };
+  const paEn=$('#paEn'); if(paEn) paEn.oninput=e=>{ phAdd.en=e.target.value; };
+  const paJa=$('#paJa'); if(paJa) paJa.oninput=e=>{ phAdd.ja=e.target.value; };
+  const paSave=$('#paSave'); if(paSave) paSave.onclick=()=>{
+    if(!phAdd.en.trim()){ toast('英語を入れてください'); return; }
+    addPhrase(phAdd.en.trim(), phAdd.ja.trim(), '自分で追加'); phAdd=null; render();
+  };
+  const paMake=$('#paMake'); if(paMake) paMake.onclick=async()=>{
+    const ja=(phAdd.ja||'').trim(); if(!ja){ toast('日本語を入れてください'); return; }
+    const b=$('#paMake'); b.disabled=true; b.textContent='作成中…';
+    try{
+      const r=await gemini({ system:`Turn the learner's Japanese into ONE natural English phrase they could actually say in conversation. ${LV(cfg.level).ins} Reply as JSON.`,
+        contents:[{role:'user',parts:[{text:ja}]}], schema:S({en:{type:'string'}},['en']), temp:0.4});
+      phAdd.en=r.en; render(); speak(r.en);
+    }catch(e){ toast(e.message); const bb=$('#paMake'); if(bb){ bb.disabled=false; bb.textContent='✨ 日本語から英語にする'; } }
+  };
   const pq=$('#phq'); pq.oninput=e=>{ phQuery=e.target.value; const at=e.target.selectionStart; render(); const el=$('#phq'); if(el){ el.focus(); el.setSelectionRange(at,at); } };
   m.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>speak(b.dataset.sp));
   m.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
@@ -4193,7 +4418,7 @@ function levelSuggestion(){
 }
 
 /* ---------- 12. 記録 ---------- */
-let openSession=null, openWeak=false;
+let openSession=null, openWeak=false, logQuery='';
 function renderStats(m){
   $('#hTitle').textContent='📈 記録';
   $('#hSub').textContent='がんばりの見える化';
@@ -4252,6 +4477,10 @@ function renderStats(m){
       <div style="margin-top:12px;padding:11px 13px;background:var(--accent-soft);border-radius:12px">
         <div style="font-size:12px;font-weight:700;color:var(--accent)">いちばん多いのは「${esc(CATS[top[0][0]]||top[0][0])}」</div>
         <div style="font-size:13px;margin-top:4px">${esc(CAT_TIP[top[0][0]]||'')}</div>
+        <div class="row" style="margin-top:10px;flex-wrap:wrap">
+          <button class="btn sm" data-wtalk="${top[0][0]}">🎯 この弱点をねらって会話する</button>
+          <button class="btn ghost sm" id="wShadow">🗣 直された文を音読する</button>
+        </div>
       </div>
       <button class="btn soft block sm" id="weakOpen" style="margin-top:10px">${openWeak?'閉じる':`直された文をぜんぶ見る（${weak.length}件）`}</button>
       ${openWeak?`<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto">
@@ -4265,8 +4494,23 @@ function renderStats(m){
       </div>`:''}`; })()
      : `<div class="empty">まだありません。会話のふりかえりで直された文が、ここに自動でたまります。</div>`}
   </div>
+  ${(()=>{ const bySc={};
+     sessions.filter(x=>x.score!=null).forEach(x=>{ (bySc[x.scene]=bySc[x.scene]||[]).push(x.score); });
+     const rows=Object.entries(bySc).map(([k,v])=>[k, Math.round(v.reduce((a,b)=>a+b,0)/v.length), v.length])
+       .filter(r=>r[2]>=1).sort((a,b)=>b[1]-a[1]);
+     if(rows.length<2) return '';
+     return `<div class="card"><h2>場面ごとの得意・苦手</h2>
+       ${rows.map(r=>`<div style="margin-bottom:8px">
+         <div class="row" style="font-size:13px"><div class="grow">${esc(r[0])} <span class="muted">(${r[2]}回)</span></div><div class="muted">${r[1]}点</div></div>
+         <div class="bar" style="margin-top:3px"><i style="width:${r[1]}%;background:${r[1]>=80?'var(--ok)':r[1]>=60?'var(--accent)':'var(--warn)'}"></i></div></div>`).join('')}
+       <p class="muted" style="margin:8px 0 0">いちばん低い「${esc(rows[rows.length-1][0])}」をもう一度やると伸びしろが大きいです。</p>
+     </div>`; })()}
   <div class="card"><h2>これまでの会話</h2>
-   ${sessions.length? sessions.slice(0,30).map(s=>`
+   <input class="f" id="sq" placeholder="🔍 話した内容から探す" value="${esc(logQuery)}" style="margin-bottom:6px">
+   ${(()=>{ const q=logQuery.trim().toLowerCase();
+      const list=sessions.filter(s=>!q || (s.scene||'').toLowerCase().includes(q) ||
+        (s.msgs||[]).some(x=>(x.en||'').toLowerCase().includes(q)||(x.ja||'').includes(logQuery.trim())));
+      return list.length? list.slice(0,30).map(s=>`
      <div style="border-bottom:1px solid var(--line);padding:10px 0">
        <div class="row"><div class="grow"><b style="font-size:14px">${esc(s.scene)}</b>
          <div class="muted" style="font-size:11.5px">${fmtDate(s.ts)} ・ ${s.turns}回話した ・ ${s.words}語 ・ ${Math.max(1,Math.round(s.sec/60))}分${s.char?' ・ '+esc(s.char):''}</div>
@@ -4278,11 +4522,28 @@ function renderStats(m){
              <b style="font-size:10.5px;color:var(--sub)">${x.r==='ai'?'相手':'自分'}</b><div>${esc(x.en)}</div>
              ${x.ja?`<div class="muted" style="font-size:11.5px">${esc(x.ja)}</div>`:''}</div>`).join('')}
           ${s.report?`<div class="muted" style="margin-top:4px">${esc(s.report.summary_ja||'')}</div>`:''}
-          <button class="btn ghost sm" data-del2="${s.id}">この記録を消す</button>
+          <div class="row"><button class="btn ghost sm grow" data-copy="${s.id}">📋 テキストでコピー</button>
+            <button class="btn ghost sm" data-del2="${s.id}">🗑 消す</button></div>
         </div>`:''}
-     </div>`).join('') : `<div class="empty">まだ記録がありません</div>`}
+     </div>`).join('') : `<div class="empty">${q?'見つかりませんでした':'まだ記録がありません'}</div>`; })()}
   </div>`;
+  const sq=$('#sq'); if(sq) sq.oninput=e=>{ logQuery=e.target.value; const at=e.target.selectionStart; render(); const el=$('#sq'); if(el){ el.focus(); el.setSelectionRange(at,at); } };
+  m.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{
+    const ss=sessions.find(x=>x.id===b.dataset.copy); if(!ss) return;
+    const txt=`【${ss.scene}】${fmtDate(ss.ts)}  ${ss.turns}往復 / ${ss.words}語${ss.cefr?' / '+ss.cefr:''}\n\n`
+      + (ss.msgs||[]).map(x=>(x.r==='ai'?'相手: ':'自分: ')+x.en+(x.ja?'\n      '+x.ja:'')).join('\n')
+      + (ss.report?`\n\n--- ふりかえり ---\n${ss.report.summary_ja||''}\n`
+        + (ss.report.fixes||[]).map(f=>`× ${f.you}\n○ ${f.better}（${f.why_ja}）`).join('\n'):'');
+    try{ await navigator.clipboard.writeText(txt); toast('コピーしました'); }
+    catch(e){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); toast('コピーしました'); }catch(_){ toast('コピーできませんでした'); } ta.remove(); }
+  });
   const lu=$('#lvUp'); if(lu) lu.onclick=()=>{ const sg=levelSuggestion(); if(sg){ cfg.level=sg.to.id; saveCfg(); toast('むずかしさを「'+sg.to.t+'」にしました'); render(); } };
+  m.querySelectorAll('[data-wtalk]').forEach(b=>b.onclick=()=>{
+    cfg.mission='weak:'+b.dataset.wtalk; saveCfg(); app.tab='talk'; render();
+    toast('ミッションを「'+(CATS[b.dataset.wtalk]||'')+'」にしました。場面を選んで始めてください');
+  });
+  const wsh=$('#wShadow'); if(wsh) wsh.onclick=()=>{ shadowSrc='weak'; prTab='shadow'; shadow=null; app.tab='phrase'; render(); };
   const wo=$('#weakOpen'); if(wo) wo.onclick=()=>{ openWeak=!openWeak; render(); };
   m.querySelectorAll('[data-sayt]').forEach(b=>b.onclick=()=>speak(b.dataset.sayt));
   m.querySelectorAll('[data-wkeep]').forEach(b=>b.onclick=()=>{ const w=weak.find(x=>x.id===b.dataset.wkeep); if(w) addPhrase(w.better,w.why_ja||'','弱点ノート'); });
@@ -4342,6 +4603,8 @@ function renderSettings(m){
     <label class="f">何秒だまったら「話し終わり」とみなすか　<span id="silV">${cfg.silence.toFixed(1)}秒</span></label>
     <input class="f" id="silence" type="range" min="2" max="10" step="0.5" value="${cfg.silence}">
     <p class="muted" style="margin:4px 0 0;font-size:11.5px">長くすると、言葉に詰まっても勝手に送信されません。まだ一度も声を出していないときは、これ＋2.5秒（最低7秒）待ちます。</p>
+    <div class="sw"><div class="l">🎧 字幕オフ（リスニング特化）<small>相手のセリフを文字で出さない。耳だけで勝負する練習</small></div>
+      <button class="toggle ${cfg.hideEn?'on':''}" data-t="hideEn"></button></div>
     <div class="sw"><div class="l">日本語訳を最初から表示<small>オフだと「日本語で見る」を押したときだけ</small></div>
       <button class="toggle ${cfg.showJa?'on':''}" data-t="showJa"></button></div>
     <label class="f">1回の会話の長さ（自分が話す回数の目安）</label>
