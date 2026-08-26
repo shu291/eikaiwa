@@ -2645,6 +2645,22 @@ const MISSIONS={
     {id:"wasgoingto",t:"I was going to ~, but ...",d:"〜する予定が変わった話",ex:"I was going to study last night, but I fell asleep at eight.",exja:"昨日勉強するつもりだったのに、8時に寝落ちした。"},
     {id:"eventhough",t:"even though ~",d:"〜なのに、と付け足す",ex:"He showed up even though he had a fever.",exja:"熱があったのに、あいつ来たんだよ。"},
     {id:"endedup",t:"I ended up ~ing",d:"結局〜することになった",ex:"We ended up talking for like three hours.",exja:"結局3時間くらい話しちゃった。"}],
+ d:[{id:'idsay',t:'I’d say ~ / I’d argue that ~',d:'断定せずに主張する',ex:"I'd say the second option makes more sense, at least for now.",exja:'今のところ2つ目の方が理にかなってると思う'},
+    {id:'strikes',t:'What strikes me is ~',d:'印象に残った点を言う',ex:"What strikes me is how quickly everyone adapted to it.",exja:'驚いたのは、みんなの適応の早さなんだ'},
+    {id:'fairpoint',t:"That's a fair point, but ~",d:'認めてから反論する',ex:"That's a fair point, but it only works if you have the time.",exja:'それは一理あるけど、時間がある人限定だよね'},
+    {id:'worthnoting',t:'It’s worth noting that ~',d:'見落とされがちな点を足す',ex:"It's worth noting that most of them had never studied abroad.",exja:'ほとんどが留学経験なしだった点は押さえておきたい'},
+    {id:'torn',t:'I’m torn between ~ and ~',d:'2つで迷っていると言う',ex:"I'm torn between studying abroad and staying here with my team.",exja:'留学するかチームに残るかで迷ってる'},
+    {id:'inthesense',t:'in the sense that ~',d:'どういう意味かを補う',ex:"It's risky, in the sense that you can't undo it later.",exja:'あとで取り消せないという意味でリスキーなんだ'},
+    {id:'cometothink',t:'Come to think of it, ~',d:'言われてみれば、と切り出す',ex:"Come to think of it, I've never actually asked her about it.",exja:'言われてみれば、本人に聞いたことなかったな'},
+    {id:'gothatfar',t:"I wouldn't go that far",d:'さすがに言い過ぎだと返す',ex:"I wouldn't go that far, but I see where you're coming from.",exja:'さすがにそこまでは言わないけど、言いたいことは分かる'}],
+ e:[{id:'ifanything',t:'If anything, ~',d:'むしろ逆だと言う',ex:"If anything, the second half was even harder than the first.",exja:'むしろ後半の方がきつかったくらい'},
+    {id:'notthat',t:"Not that I'm complaining",d:'文句じゃないけど、と添える',ex:"We ended up walking the whole way. Not that I'm complaining.",exja:'結局ずっと歩きだった。別に文句はないけどね'},
+    {id:'thatsaid',t:'That said, ~',d:'とはいえ、と流れを変える',ex:"That said, I'd probably do the exact same thing again.",exja:'とはいえ、たぶんまた同じことをやると思う'},
+    {id:'fingeronit',t:"I can't quite put my finger on it",d:'うまく言えないけど、と前置き',ex:"Something felt off. I can't quite put my finger on it.",exja:'何か引っかかったんだ。うまく言えないんだけど'},
+    {id:'stretch',t:'It’s a bit of a stretch to say ~',d:'それは言い過ぎだと指摘',ex:"It's a bit of a stretch to say the whole system is broken.",exja:'制度そのものが壊れてるっていうのは言い過ぎかな'},
+    {id:'forwhat',t:'For what it’s worth, ~',d:'参考までに、と意見を添える',ex:"For what it's worth, I thought your version was better.",exja:'参考までに言うと、君の案の方がよかったと思う'},
+    {id:'giveyouthat',t:"I'll give you that",d:'その点は認める',ex:"Okay, it's cheaper. I'll give you that.",exja:'まあ確かに安い。そこは認めるよ'},
+    {id:'youdthink',t:'You’d think ~, but ~',d:'〜と思うでしょ、でも',ex:"You'd think it gets easier, but honestly it doesn't.",exja:'楽になると思うでしょ？でも正直ならないんだよ'}],
  c:[{id:'thething',t:'The thing is, ...',d:'本題・言いにくいことを切り出す'},
     {id:'guess',t:'I guess / I suppose',d:'断定せずにぼかす'},
     {id:'notonly',t:'Not only ~ but also ~',d:'情報を重ねる'},
@@ -2764,10 +2780,30 @@ const DAILY=[
 const dailyQ = ()=>{ const d=new Date(); return DAILY[(Math.floor(d.getTime()/86400000)+d.getTimezoneOffset())%DAILY.length] || DAILY[0]; };
 
 const LEVELS = [
- {id:'a', t:'やさしい', d:'中学英語・短い文', ins:'Use very simple English (CEFR A2). Short sentences under 12 words, common words only, present and past simple. Speak slowly in style.'},
- {id:'b', t:'ふつう', d:'高校英語・自然な速さ', ins:'Use natural everyday English (CEFR B1). Sentences of 10-18 words, common phrasal verbs, contractions.'},
- {id:'c', t:'むずかしい', d:'ネイティブに近い', ins:'Use natural native-level English (CEFR B2-C1) including idioms, contractions and casual reductions. Do not simplify.'}
+ {id:'a', t:'やさしい', cefr:'A2', d:'中学英語・短い文でゆっくり',
+  ins:`Use very simple English (CEFR A2). Sentences under 12 words. Only the most common 1500 words. Present, past and future simple only. Avoid idioms and phrasal verbs except the most basic ones (get up, look for).`},
+ {id:'b', t:'ふつう', cefr:'B1', d:'高校英語・自然な速さ',
+  ins:`Use natural everyday English (CEFR B1). Sentences of 10-18 words. Common phrasal verbs and contractions. Simple relative clauses and present perfect are fine.`},
+ {id:'c', t:'むずかしい', cefr:'B2', d:'ネイティブに近い言い回し',
+  ins:`Use natural native English (CEFR B2). Use contractions, common idioms, phrasal verbs and casual reductions. Longer sentences with subordinate clauses. Do not simplify your vocabulary.`},
+ {id:'d', t:'上級', cefr:'C1', d:'議論・抽象的な話も遠慮なく',
+  ins:`Use rich, precise C1 English. Discuss abstract ideas, cause and effect, hypotheticals. Use hedging (I'd say, arguably, to some extent), discourse markers (that said, mind you, granted), and less common collocations. Do NOT slow down or explain your vocabulary. Challenge the learner's reasoning, not just their grammar.`},
+ {id:'e', t:'ネイティブ級', cefr:'C2', d:'手加減なし。速い口語と省略',
+  ins:`Speak exactly as you would to another native adult (C2). Full speed spoken English: ellipsis ("Been there.", "You would say that."), false starts, sarcasm, cultural references, regional idioms, and words a dictionary would call rare. Never simplify, never rephrase for the learner, and never acknowledge that they are a learner unless they ask.`}
 ];
+const LV = id => LEVELS.find(l=>l.id===id) || LEVELS[1];
+
+/* 相手の「手加減」の度合い */
+const STYLES=[
+ {id:'gentle', em:'🫧', t:'やさしく', d:'待ってくれる・言い直してくれる', rate:-0.1,
+  ins:`Be patient and supportive. If the learner struggles or goes silent, offer an easier way to answer. Rephrase your own question in simpler words when they seem stuck. Praise effort briefly.`},
+ {id:'normal', em:'🙂', t:'ふつう', d:'ふつうの会話相手', rate:0,
+  ins:`Behave like an ordinary conversation partner. Neither especially patient nor especially demanding.`},
+ {id:'tough', em:'🔥', t:'容赦なし', d:'反論してくる・どんどん進む', rate:0.12,
+  ins:`Be a demanding conversation partner. Push back on what the learner says and give the opposite opinion when it is reasonable to do so. Ask follow-up questions that require them to justify themselves ("Why do you think that?", "But doesn't that contradict what you just said?"). Move the conversation forward quickly. Do not offer easier phrasings. Interrupt with a reaction sometimes.`}
+];
+const ST = id => STYLES.find(x=>x.id===id) || STYLES[1];
+
 
 /* ---------- 2. 保存まわり ---------- */
 const LS = {cfg:'talkie.cfg', log:'talkie.sessions', ph:'talkie.phrases', use:'talkie.usage', weak:'talkie.weak'};
@@ -2779,7 +2815,7 @@ const cfg = Object.assign({
   autoSpeak:true, autoSend:true, showJa:false, level:'b', name:'', turns:8,
   handsFree:true, silence:4.5,
   free:{char:'sam', topic:'auto', topicCustom:'', mission:'auto', len:'normal'},
-  goal:12, quizMode:'mix', autoLevel:true
+  goal:12, quizMode:'mix', autoLevel:true, style:'normal'
 }, load(LS.cfg,{}));
 cfg.free=Object.assign({char:'sam',topic:'auto',topicCustom:'',mission:'auto',len:'normal'},cfg.free||{});
 const saveCfg = ()=> save(LS.cfg,cfg);
@@ -2878,7 +2914,8 @@ function speak(text,rate,onDone){
     const my=++speakSeq, t0=Date.now();
     const u=new SpeechSynthesisUtterance(String(text).replace(/[*_`#]/g,''));
     const v=pickVoice(); if(v){ u.voice=v; u.lang=v.lang; } else u.lang='en-US';
-    u.rate=rate||cfg.rate; u.pitch=1;
+    const styleDelta = (app && app.chat && app.chat.style)? ST(app.chat.style).rate : 0;
+    u.rate=Math.min(1.4,Math.max(0.5, rate!=null? rate : cfg.rate+styleDelta)); u.pitch=1;
     let fired=false, watch=null;
     const fin=()=>{ if(fired) return; fired=true; clearInterval(watch); if(my===speakSeq) done(); };
     u.onend=fin; u.onerror=fin;
@@ -2983,8 +3020,10 @@ const TURN_SCHEMA = S({
   hints:{type:'array',items:S({en:{type:'string'},ja:{type:'string'}},['en','ja'])},
   feedback:S({
     status:{type:'string',enum:['good','tip','none']},
-    better:{type:'string'}, why_ja:{type:'string'}
+    better:{type:'string'}, why_ja:{type:'string'},
+    cat:{type:'string',enum:['tense','article','preposition','word-order','plural','vocab','expression','question','other']}
   },['status']),
+  new_words:{type:'array',items:S({en:{type:'string'},ja:{type:'string'},why_ja:{type:'string'}},['en','ja'])},
   done:{type:'boolean'},
   mission_used:{type:'boolean'}
 },['reply','reply_ja','hints','feedback','done']);
@@ -2994,6 +3033,10 @@ const WORD_SCHEMA = S({
 },['en','ja','example_en','example_ja']);
 const REPORT_SCHEMA = S({
   score:{type:'integer'}, summary_ja:{type:'string'},
+  cefr:{type:'string',enum:['A1','A2','B1','B2','C1','C2']},
+  cefr_why_ja:{type:'string'},
+  advanced_used:{type:'array',items:{type:'string'}},
+  next_expressions:{type:'array',items:S({en:{type:'string'},ja:{type:'string'},when_ja:{type:'string'}},['en','ja'])},
   good_points:{type:'array',items:{type:'string'}},
   fixes:{type:'array',items:S({you:{type:'string'},better:{type:'string'},why_ja:{type:'string'},
     cat:{type:'string',enum:['tense','article','preposition','word-order','plural','vocab','expression','question','other']}},['you','better','why_ja'])},
@@ -3095,8 +3138,18 @@ function renderSetup(m){
   ${sc&&sc.id==='free'? freePanel() : ''}
   <div class="card">
     <h2>むずかしさ</h2>
-    <div class="seg" id="lvl">${LEVELS.map(l=>`<button data-l="${l.id}" class="${cfg.level===l.id?'on':''}">${l.t}</button>`).join('')}</div>
-    <p class="muted" style="margin:8px 0 0">${esc(LEVELS.find(l=>l.id===cfg.level).d)}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:7px" id="lvl">
+      ${LEVELS.map(l=>`<button class="chip" data-l="${l.id}"
+        style="${cfg.level===l.id?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft);':''}padding:8px 13px;font-size:13px;font-weight:700">${l.t}<span style="opacity:.6;font-weight:400"> ${l.cefr}</span></button>`).join('')}
+    </div>
+    <p class="muted" style="margin:9px 0 0">${esc(LV(cfg.level).d)}</p>
+    ${cfg.level==='e'?`<p class="muted" style="margin:6px 0 0;color:var(--warn)">⚠️ 手加減なしです。聞き取れなくて当たり前なので、🐢ボタンをどんどん使ってください。</p>`:''}
+    <label class="f">相手の手加減</label>
+    <div style="display:flex;gap:7px" id="sty">
+      ${STYLES.map(x=>`<button class="chip grow" data-st="${x.id}"
+        style="${cfg.style===x.id?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft);':''}padding:9px 6px;font-size:13px;font-weight:700;text-align:center">${x.em} ${x.t}</button>`).join('')}
+    </div>
+    <p class="muted" style="margin:8px 0 0">${esc(ST(cfg.style).d)}${cfg.style!=='normal'?`　（話す速さも${cfg.style==='tough'?'少し速く':'少しゆっくり'}なります）`:''}</p>
   </div>
   <button class="btn block" id="start" style="padding:15px;font-size:17px" ${needKey?'disabled':''}>
     ${needKey?'このシーンはAIキーが必要です':'▶︎ 会話をはじめる'}
@@ -3112,6 +3165,7 @@ function renderSetup(m){
   $('#scenes').onclick=e=>{ const b=e.target.closest('[data-s]'); if(!b) return; pick.scene=b.dataset.s; render(); };
   m.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{ pick.cat=b.dataset.cat; render(); });
   $('#lvl').onclick=e=>{ const b=e.target.closest('[data-l]'); if(!b) return; cfg.level=b.dataset.l; saveCfg(); render(); };
+  $('#sty').onclick=e=>{ const b=e.target.closest('[data-st]'); if(!b) return; cfg.style=b.dataset.st; saveCfg(); render(); };
   const cu=$('#customSit'); if(cu) cu.oninput=e=>{ pick.custom=e.target.value; };
   bindFreePanel();
   $('#start').onclick=()=>startChat(pick.scene);
@@ -3220,7 +3274,7 @@ function startChat(sceneId){
   const mi = isFree? missionOf() : null;
   if(isFree && cfg.free.topic==='custom' && !cfg.free.topicCustom.trim()){ toast('話したいことを書くか、別の話題を選んでください'); return; }
   app.chat={
-    scene:sc, level:cfg.level, custom:pick.custom.trim(),
+    scene:sc, level:cfg.level, style:cfg.style, custom:pick.custom.trim(),
     char:ch, topic:isFree? topicOf() : '', mission:mi, missionDone:false,
     len:isFree? cfg.free.len : 'normal', accent: ch? ch.acc : '',
     msgs:[], step:0, t0:Date.now(), hints:null, showHints:false, ended:false, report:null,
@@ -3236,7 +3290,8 @@ function renderChat(m){
   $('#hTitle').textContent=(c.char? c.char.em+' '+c.char.name : c.scene.em+' '+c.scene.t);
   $('#hSub').textContent=[
     c.char? c.char.t : (hasKey()?'AIモード':'台本モード'),
-    LEVELS.find(l=>l.id===c.level).t,
+    LV(c.level).t+'('+LV(c.level).cefr+')',
+    c.style!=='normal'? ST(c.style).em+ST(c.style).t : '',
     c.mission? (c.missionDone?'⭐️ ミッション達成':'🎯 '+c.mission.t) : ''
   ].filter(Boolean).join(' ・ ');
   m.innerHTML=`<div id="chatScroll"></div>`;
@@ -3254,7 +3309,18 @@ function paintMsgs(){
           <button class="chip" data-say="${i}">🔊 もう一度</button>
           <button class="chip" data-slow="${i}">🐢 ゆっくり</button>
           ${msg.ja?`<button class="chip" data-ja="${i}">${(cfg.showJa||msg.open)?'訳をかくす':'日本語で見る'}</button>`:''}
-        </div></div>`;
+          ${(msg.nw&&msg.nw.length)?`<button class="chip" data-nw="${i}" style="border-color:color-mix(in srgb,var(--accent) 45%,var(--line));color:var(--accent)">📖 いまの表現 ${msg.nw.length}</button>`:''}
+        </div>
+        ${(msg.nw&&msg.nw.length&&msg.nwOpen)?`<div class="hintbox" style="max-width:none">
+          <div class="hh">📖 いまの言い方（少し上のレベル）</div>
+          ${msg.nw.map((x,k)=>`<div class="hint" style="cursor:default">
+            <div class="he">${esc(x.en)} <button class="chip" data-sayt="${esc(x.en)}">🔊</button></div>
+            <div class="hj">${esc(x.ja)}</div>
+            ${x.why_ja?`<div class="hj" style="margin-top:3px">💡 ${esc(x.why_ja)}</div>`:''}
+            <button class="chip" data-nwkeep="${i}:${k}" style="margin-top:6px">📒 フレーズ帳に入れる</button>
+          </div>`).join('')}
+        </div>`:''}
+        </div>`;
     }else{
       h+=`<div class="msg me"><div class="bub"><div class="en">${esc(msg.en)}</div>${msg.mission?`<div class="ja">⭐️ ミッション達成！「${esc(c.mission?c.mission.t:'')}」</div>`:''}</div></div>`;
       if(msg.fb && msg.fb.status && msg.fb.status!=='none'){
@@ -3299,7 +3365,7 @@ function paintMsgs(){
       ${hasKey()?`<button class="btn ghost sm" id="bSimple">🐢 やさしく言い直して</button>`:''}
       ${hasKey()?`<button class="btn ghost sm" id="bWord">🔤 英語でなんて言う？</button>`:''}
       ${hasKey()&&free?`<button class="btn ghost sm" id="bTopic">🔀 話題を変える</button>`:''}
-      ${hasKey()?`<button class="btn ghost sm" id="bLevel">🎚 ${LEVELS.find(l=>l.id===c.level).t}にしている</button>`:''}
+      ${hasKey()?`<button class="btn ghost sm" id="bLevel">🎚 ${LV(c.level).t}にしている</button>`:''}
       <button class="btn ghost sm" id="bEnd">🏁 会話を終える</button>
     </div>`;
     if(free && c.mission){
@@ -3312,6 +3378,8 @@ function paintMsgs(){
   box.querySelectorAll('[data-slow]').forEach(b=>b.onclick=()=>speak(c.msgs[+b.dataset.slow].en, Math.max(0.55,cfg.rate-0.25)));
   box.querySelectorAll('[data-sayt]').forEach(b=>b.onclick=()=>speak(b.dataset.sayt));
   box.querySelectorAll('[data-ja]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.ja; c.msgs[i].open=!(cfg.showJa||c.msgs[i].open); paintMsgs(); });
+  box.querySelectorAll('[data-nw]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.nw; c.msgs[i].nwOpen=!c.msgs[i].nwOpen; paintMsgs(); });
+  box.querySelectorAll('[data-nwkeep]').forEach(b=>b.onclick=()=>{ const [i,k]=b.dataset.nwkeep.split(':').map(Number); const x=c.msgs[i].nw[k]; addPhrase(x.en,x.ja,'会話で出た表現'); });
   box.querySelectorAll('[data-keep]').forEach(b=>b.onclick=()=>{ const f=c.msgs[+b.dataset.keep].fb; addPhrase(f.better, f.why_ja||'', c.scene.t); });
   box.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{ $('#txt').value=c.hints[+b.dataset.h].en; c.showHints=false; paintMsgs(); $('#txt').focus(); });
   const bh=$('#bHint'); if(bh) bh.onclick=onHint;
@@ -3340,7 +3408,7 @@ function scrollDown(){ requestAnimationFrame(()=>window.scrollTo({top:document.b
 
 /* --- AIへの指示文 --- */
 function systemPrompt(c){
-  const lv=LEVELS.find(l=>l.id===c.level);
+  const lv=LV(c.level);
   const isFree=c.scene.id==='free';
   let sit=c.scene.custom? c.custom : c.scene.sit;
   let role=c.scene.custom? 'the most natural conversation partner for this situation' : c.scene.role;
@@ -3351,23 +3419,41 @@ function systemPrompt(c){
       : 'Pick an interesting everyday topic yourself and start from there.')
       +' Share your own opinions and small stories too, so it feels like a real two-way conversation, not an interview.';
   }
-  return `You are ${role}. You are having a spoken English conversation with a Japanese learner${cfg.name?' named '+cfg.name:''}.
+  const st=ST(c.style||'normal');
+  return `You are ${role}. You are having a REAL spoken conversation with a Japanese learner of English${cfg.name?' named '+cfg.name:''}.
 
 SITUATION: ${sit}
 
-RULES
+## How you speak
 - ${lv.ins}
-- Speak ONLY as the character. One turn at a time: 1-3 sentences, then usually a question so the learner can respond.
-- Never write romaji or Japanese inside "reply". "reply" is spoken aloud by a text-to-speech engine, so no emoji, no asterisks, no stage directions.
-- React naturally to what the learner actually said, even if their English is broken. Never say "as an AI".
-- If the learner writes in Japanese, gently continue in English and include what they probably meant in your hints.
-- "reply_ja" is a natural Japanese translation of your reply.
-- "hints" = exactly 3 different, natural things the LEARNER could say next as a reply to you, at their level, each with a Japanese translation. Make them genuinely different in content, not three ways to say the same thing.
+- ${st.ins}
+- One turn at a time: 1-3 sentences. Usually end with something the learner can respond to — but not always a question. Sometimes just react and let them carry it.
+- Speak ONLY as the character. "reply" is read aloud by a speech engine: no emoji, no asterisks, no stage directions, no romaji, no Japanese.
+- Never say "as an AI". Never break character. Never grade or correct them inside "reply" (corrections go in "feedback" only)${c.style==='gentle'?' — you may naturally re-use the correct form in your own sentence, without pointing it out':''}.
+
+## How you keep the conversation alive (this is the important part)
+- You are a PERSON with your own opinions, habits and small stories. Volunteer them. A conversation where you only ask questions is a failure.
+- Actually respond to the CONTENT of what they said, not just its form. Pick up the most interesting detail and go after it.
+- If their answer is thin ("It was fun."), dig one level deeper: ask what specifically, why, what happened next, how it felt.
+- Never ask a question you have already asked, and never re-ask something they just answered.
+- Let the topic drift the way real conversation does: their answer should suggest your next subject.
+- Vary your turn shapes: sometimes a reaction + your own story, sometimes a short surprised comment, sometimes a follow-up question, sometimes disagreement.
+- Silence and short answers are the learner's problem to solve; give them something concrete to react to rather than an open "What else?".
+
+## Stretching their English (i+1)
+- Deliberately include ONE expression slightly above their current level in most of your turns: a natural collocation, phrasal verb, or idiom they probably do not use yet — but that the surrounding context makes guessable.
+- Put that expression (max 2 per turn) into "new_words" with a natural Japanese meaning and, in "why_ja", when a native would use it (max 40 Japanese characters). If your turn contains nothing above their level, return an empty array.
+
+## The JSON fields
+- "reply_ja": a natural Japanese translation of your reply, in spoken Japanese, not a literal gloss.
+- "hints": exactly 3 things the LEARNER could say next. They must differ in CONTENT and direction — for example (1) answer straight, (2) ask something back, (3) disagree, hesitate or change the subject. Not three ways to say the same thing. Match their level, 3-12 words each.
 - "feedback" is about the learner's LAST message only:
-   * status "none" for their very first turn or if they said nothing meaningful.
-   * status "good" if it was already natural (leave "better" empty).
-   * status "tip" if a native would phrase it differently: put the improved English in "better" and a SHORT Japanese explanation (max 40 Japanese characters) in "why_ja". Only mention what matters for being understood — never nitpick.
-- "done" = true only when the scene has reached a natural ending (goodbye, payment finished, etc.).
+   * "none" for their very first turn, or if they said nothing meaningful.
+   * "good" if it was already natural for their level (leave "better" empty).
+   * "tip" if a native would say it differently. Put the improved English in "better" and a SHORT Japanese explanation (max 40 Japanese characters) in "why_ja".
+   * At levels A2-B1, only flag things that hurt understanding. At B2 and above, also flag unnatural collocations, register mismatches (too formal or too childish for the situation), and sentences that are correct but that no native would actually say.
+   * "cat": which kind of issue it is — tense / article / preposition / word-order / plural / vocab / expression / question / other.
+- "done": true only when the scene has genuinely finished.
 ${lengthRule(c)}${missionRule(c)}`;
 }
 function lengthRule(c){
@@ -3395,7 +3481,7 @@ async function nextAiTurn(first,directive){
       else if(directive) contents.push({role:'user',parts:[{text:directive}]});
       const r=await gemini({system:systemPrompt(c), contents, schema:TURN_SCHEMA});
       app.busy=false;
-      c.msgs.push({role:'ai', en:r.reply, ja:r.reply_ja});
+      c.msgs.push({role:'ai', en:r.reply, ja:r.reply_ja, nw:(r.new_words||[]).slice(0,2)});
       const last=[...c.msgs].reverse().find(m=>m.role==='me');
       if(last && r.feedback && !(directive && r.feedback.status==='none' && last.fb)) last.fb=r.feedback;
       c.hints=(r.hints||[]).slice(0,3); c.showHints=false;
@@ -3480,7 +3566,7 @@ async function askWord(){
   if(!hasKey()){ toast('この機能はAIキーが必要です'); return; }
   app.busy=true; paintMsgs();
   try{
-    const lv=LEVELS.find(l=>l.id===c.level);
+    const lv=LV(c.level);
     const r=await gemini({
       system:`A Japanese learner wants to know how to say something in English during a conversation. Reply in JSON.
 - "en": the most natural English word or phrase real speakers use for it. NOT a literal dictionary translation.
@@ -3500,7 +3586,7 @@ async function jaToEn(ja){
   if(!hasKey()){ toast('この機能はAIキーが必要です'); return; }
   app.busy=true; paintMsgs();
   try{
-    const lv=LEVELS.find(l=>l.id===app.chat.level);
+    const lv=LV(app.chat.level);
     const r=await gemini({
       system:`Translate the learner's Japanese into ONE natural English sentence they could actually say in this conversation. ${lv.ins} Reply with JSON only.`,
       contents:[{role:'user',parts:[{text:'Conversation so far:\n'+app.chat.msgs.slice(-4).map(m=>(m.role==='ai'?'Partner: ':'Me: ')+m.en).join('\n')+'\n\nJapanese to say: '+ja}]}],
@@ -3531,8 +3617,12 @@ async function finishChat(){
 - "good_points": 1-3 short Japanese strings, each quoting the learner's own English that worked well.
 - "fixes": up to 3 items. "you" = what the learner actually wrote, "better" = a natural rewrite, "why_ja" = short Japanese reason (max 40 chars). "cat" = which kind of mistake it is: tense(時制) / article(冠詞) / preposition(前置詞) / word-order(語順) / plural(単複) / vocab(単語選び) / expression(言い回しが不自然) / question(疑問文の作り方) / other. Only real problems, not nitpicks. Empty array if nothing to fix.
 - "phrases": 3-5 useful English expressions FROM OR FOR this scene worth memorizing, with Japanese.
+- "cefr": your honest CEFR estimate of the ENGLISH THE LEARNER PRODUCED in this conversation (A1-C2). Judge only what they actually wrote: sentence length, range of structures, and whether they could handle the unexpected. Do not inflate it to be kind.
+- "cefr_why_ja": one Japanese sentence saying what specifically decided that level, quoting their English.
+- "advanced_used": Japanese strings naming any expression above the basics that they actually pulled off, quoting it. Empty array if none.
+- "next_expressions": 2-4 expressions ONE STEP ABOVE what they used, that would have fit this exact conversation. {"en","ja","when_ja" = when to use it, max 25 Japanese chars}. These should feel like the natural next thing to learn, not random vocabulary.
 - "next_goal_ja": one concrete thing to try next time, in Japanese, one sentence.`,
-        contents:[{role:'user',parts:[{text:`Scene: ${c.scene.custom?c.custom:c.scene.t}${c.char?' (free talk with '+c.char.name+')':''}${c.topic?'\nTopic: '+c.topic:''}${c.mission?'\nThe learner was trying to use: '+c.mission.t+' ('+(c.missionDone?'they managed it':'they did not manage it')+')':''}\nLevel: ${LEVELS.find(l=>l.id===c.level).t}\n\n`+c.msgs.map(m=>(m.role==='ai'?'Partner: ':'Learner: ')+m.en).join('\n')}]}],
+        contents:[{role:'user',parts:[{text:`Scene: ${c.scene.custom?c.custom:c.scene.t}${c.char?' (free talk with '+c.char.name+')':''}${c.topic?'\nTopic: '+c.topic:''}${c.mission?'\nThe learner was trying to use: '+c.mission.t+' ('+(c.missionDone?'they managed it':'they did not manage it')+')':''}\nLevel setting: ${LV(c.level).t} (${LV(c.level).cefr}) / partner style: ${ST(c.style||'normal').t}\n\n`+c.msgs.map(m=>(m.role==='ai'?'Partner: ':'Learner: ')+m.en).join('\n')}]}],
         schema:REPORT_SCHEMA, temp:0.6});
     }catch(e){ toast(e.message); }
   }
@@ -3544,7 +3634,7 @@ async function finishChat(){
     id:uid(), ts:Date.now(), scene:c.scene.custom?c.custom.slice(0,24):c.scene.t, sceneId:c.scene.id,
     level:c.level, turns:mine.length, words:mine.reduce((a,m)=>a+wordCount(m.en),0), sec,
     char:c.char?c.char.name:'', mission:c.mission?c.mission.t:'', missionDone:!!c.missionDone,
-    score:rep.score||null, msgs:c.msgs.map(m=>({r:m.role,en:m.en,ja:m.ja||''})), report:rep
+    score:rep.score||null, cefr:rep.cefr||'', style:c.style||'normal', msgs:c.msgs.map(m=>({r:m.role,en:m.en,ja:m.ja||''})), report:rep
   });
   sessions=sessions.slice(0,120); save(LS.log,sessions);
   (rep.fixes||[]).forEach(f=>{
@@ -3559,7 +3649,10 @@ function localReport(c){
   const words=mine.reduce((a,m)=>a+wordCount(m.en),0);
   const sc=c.scene;
   const phr=(sc.script||[]).flatMap(s=>s.hints||[]).slice(0,5);
+  const avgw = mine.length? words/mine.length : 0;
   return {
+    cefr: avgw<4?'A1':avgw<6?'A2':avgw<9?'B1':avgw<13?'B2':'C1',
+    cefr_why_ja:`1回あたり平均${avgw.toFixed(1)}語で話していました（AIキーを入れると中身まで見て判定します）`,
     score: Math.min(100, 45+mine.length*5+Math.min(25,Math.round(words/3))),
     summary_ja:`${mine.length}回、合計${words}語を英語で話しました。まずは最後までやり切ったことが立派です。`,
     good_points:[`「${mine[0]?mine[0].en:''}」から会話を始められました`],
@@ -3590,8 +3683,18 @@ function reportHtml(r,c){
       <div><b>${st.uniq}</b><span>語彙の種類</span></div>
     </div>
     <p class="muted" style="margin:-4px 0 12px">1回あたり平均 ${st.avg.toFixed(1)} 語・いちばん長い文は ${st.longest} 語。${st.avg<5?'もう一言そえると、ぐっと会話らしくなります。':st.avg<9?'いい長さです。理由(because〜)を足すとさらに伸びます。':'しっかり文で話せています。'}</p>
-    <div class="row" style="margin-bottom:8px"><div style="font-size:32px;font-weight:800;line-height:1">${r.score??'-'}</div><div class="muted grow">点／100<div class="bar" style="margin-top:5px"><i style="width:${Math.max(4,Math.min(100,r.score||0))}%"></i></div></div></div>
+    <div class="row" style="margin-bottom:8px">
+      <div style="font-size:32px;font-weight:800;line-height:1">${r.score??'-'}</div>
+      <div class="muted grow">点／100<div class="bar" style="margin-top:5px"><i style="width:${Math.max(4,Math.min(100,r.score||0))}%"></i></div></div>
+      ${r.cefr?`<div style="text-align:center;padding:6px 12px;border:1px solid var(--accent);border-radius:12px">
+        <div style="font-size:19px;font-weight:800;color:var(--accent);line-height:1.1">${esc(r.cefr)}</div>
+        <div style="font-size:9.5px;color:var(--sub)">今日の英語</div></div>`:''}
+    </div>
+    ${r.cefr_why_ja?`<p class="muted" style="margin:0 0 10px;font-size:12.5px">📏 ${esc(r.cefr_why_ja)}　<span style="opacity:.8">（相手のレベル設定は ${esc(LV(c.level).cefr)}）</span></p>`:''}
     <p style="margin:6px 0 12px">${esc(r.summary_ja||'')}</p>
+    ${(r.advanced_used||[]).length?`<div style="margin-bottom:12px;padding:10px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--ok) 45%,var(--line))">
+      <b style="font-size:13px;color:var(--ok)">⬆️ 一段上の言い方が出ました</b>
+      <ul style="margin:5px 0 0;padding-left:18px;font-size:13.5px">${r.advanced_used.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
     ${(r.good_points||[]).length?`<div style="margin-bottom:12px"><b style="font-size:13px;color:var(--ok)">よかったところ</b>
       <ul style="margin:5px 0 0;padding-left:18px;font-size:14px">${r.good_points.map(g=>`<li>${esc(g)}</li>`).join('')}</ul></div>`:''}
     ${(r.fixes||[]).length?`<div style="margin-bottom:12px"><b style="font-size:13px;color:var(--warn)">ここを直すともっと伝わる</b>
@@ -3603,6 +3706,12 @@ function reportHtml(r,c){
       ${r.phrases.map(p=>`<div class="row" style="margin-top:6px"><div class="grow"><div style="font-weight:600">${esc(p.en)}</div><div class="muted" style="font-size:12px">${esc(p.ja)}</div></div>
       <button class="chip" data-sayt="${esc(p.en)}">🔊</button></div>`).join('')}
       <button class="btn soft block sm" id="keepAll" style="margin-top:10px">📒 まとめてフレーズ帳に入れる</button></div>`:''}
+    ${(r.next_expressions||[]).length?`<div style="margin-top:14px"><b style="font-size:13px">次に使えるとレベルが上がる言い方</b>
+      ${r.next_expressions.map(p=>`<div style="border:1px solid var(--line);border-radius:12px;padding:9px 11px;margin-top:6px">
+        <div style="font-weight:700">${esc(p.en)} <button class="chip" data-sayt="${esc(p.en)}">🔊</button></div>
+        <div class="muted" style="font-size:12.5px">${esc(p.ja)}</div>
+        ${p.when_ja?`<div class="muted" style="font-size:11.5px;margin-top:2px">🗣 ${esc(p.when_ja)}</div>`:''}</div>`).join('')}
+      <button class="btn soft block sm" id="keepNext" style="margin-top:9px">📒 この4つをフレーズ帳に入れる</button></div>`:''}
     <p style="margin:14px 0 0;padding:10px 12px;background:var(--accent-soft);border-radius:12px;font-size:14px">🎯 次の目標：${esc(r.next_goal_ja||'')}</p>
     <div class="row" style="margin-top:12px">
       <button class="btn grow" id="again">もう一度おなじ場面で</button>
@@ -3614,6 +3723,10 @@ function reportHtml(r,c){
 /* レポート内ボタン（描き直されるので委譲で受ける） */
 document.addEventListener('click',e=>{
   const c=app.chat;
+  if(e.target.closest('#keepNext') && c&&c.report){
+    (c.report.next_expressions||[]).forEach(p=>addPhrase(p.en,p.ja,'次に狙う表現',true));
+    save(LS.ph,phrases); toast('フレーズ帳に入れました');
+  }
   if(e.target.closest('#keepAll') && c&&c.report){
     (c.report.phrases||[]).forEach(p=>addPhrase(p.en,p.ja,c.scene.t,true));
     save(LS.ph,phrases); toast('フレーズ帳に入れました');
@@ -4099,7 +4212,21 @@ function renderStats(m){
   ${avgScore(5)!=null?`<div class="card"><h2>いまの実力</h2>
     <div class="row"><div style="font-size:34px;font-weight:800;line-height:1">${avgScore(5)}</div>
       <div class="grow"><div class="muted">直近5回の平均点</div>
-        <div class="bar" style="margin-top:5px"><i style="width:${avgScore(5)}%"></i></div></div></div>
+        <div class="bar" style="margin-top:5px"><i style="width:${avgScore(5)}%"></i></div></div>
+      ${(()=>{const cs=sessions.filter(x=>x.cefr).slice(0,5); if(!cs.length) return '';
+        const order=['A1','A2','B1','B2','C1','C2'];
+        const top=order[Math.round(cs.reduce((a,x)=>a+order.indexOf(x.cefr),0)/cs.length)]||cs[0].cefr;
+        return `<div style="text-align:center;padding:6px 12px;border:1px solid var(--accent);border-radius:12px">
+          <div style="font-size:19px;font-weight:800;color:var(--accent);line-height:1.1">${esc(top)}</div>
+          <div style="font-size:9.5px;color:var(--sub)">最近の英語</div></div>`; })()}
+    </div>
+    ${(()=>{const cs=sessions.filter(x=>x.cefr).slice(0,8).reverse(); if(cs.length<2) return '';
+      const order=['A1','A2','B1','B2','C1','C2'];
+      return `<div style="display:flex;align-items:flex-end;gap:5px;height:52px;margin-top:10px">
+        ${cs.map(x=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end">
+          <div style="width:100%;height:${(order.indexOf(x.cefr)+1)/6*36}px;border-radius:5px;background:var(--accent)"></div>
+          <div style="font-size:9px;color:var(--sub)">${esc(x.cefr)}</div></div>`).join('')}
+      </div><div class="muted" style="font-size:11.5px;margin-top:4px">実際に話した英語のレベルの推移（古い→新しい）</div>`; })()}
     ${(()=>{const sg=levelSuggestion(); return sg?`<div style="margin-top:12px;padding:11px 13px;background:var(--accent-soft);border-radius:12px">
       <div style="font-size:13.5px;font-weight:700">${sg.up?'⬆️ そろそろ上げてみませんか？':'⬇️ 少し下げてみませんか？'}</div>
       <div class="muted" style="font-size:12px;margin:3px 0 8px">${esc(sg.why)}</div>
