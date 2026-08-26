@@ -179,7 +179,7 @@ a{color:var(--accent)}
 
 /* ---------- 1. シーン定義 + キーなし用の台本 ---------- */
 const SCENES = [
-{id:'cafe', em:'☕️', t:'カフェで注文', d:'ドリンクを頼んで支払うまで',
+{id:'cafe', cat:'life', em:'☕️', t:'カフェで注文', d:'ドリンクを頼んで支払うまで',
  role:'a friendly barista at a coffee shop in Seattle',
  sit:'The user is a customer ordering at the counter. Take their order, ask about size, food, for-here-or-to-go, and payment.',
  script:[
@@ -196,7 +196,7 @@ const SCENES = [
   {en:"All set. Your name for the cup? I'll call you when it's ready.",ja:"完了です。カップに書くお名前は？できたらお呼びします",
    hints:[{en:"It's Shu. S-H-U.",ja:"シュウです。S-H-Uです"},{en:"Sure, it's Shu. Thank you!",ja:"はい、シュウです。ありがとう！"},{en:"Could you write it as 'Shu'?",ja:"「Shu」と書いてもらえますか？"}]}
  ]},
-{id:'airport', em:'✈️', t:'入国審査', d:'目的・滞在日数・宿泊先を答える',
+{id:'airport', cat:'travel', em:'✈️', t:'入国審査', d:'目的・滞在日数・宿泊先を答える',
  role:'an immigration officer at Los Angeles International Airport',
  sit:'The user is a Japanese traveler going through immigration. Ask standard questions politely but formally.',
  script:[
@@ -213,7 +213,7 @@ const SCENES = [
   {en:"Everything looks good. Enjoy your stay. Welcome to the United States.",ja:"問題ありません。良い滞在を。アメリカへようこそ",
    hints:[{en:"Thank you very much!",ja:"ありがとうございます！"},{en:"Thanks, have a good day.",ja:"ありがとう、良い一日を"},{en:"Thank you, I'm excited to be here.",ja:"ありがとう、来られて嬉しいです"}]}
  ]},
-{id:'intro', em:'👋', t:'自己紹介・雑談', d:'初対面の人と打ち解ける',
+{id:'intro', cat:'basic', em:'👋', t:'自己紹介・雑談', d:'初対面の人と打ち解ける',
  role:'Alex, a friendly American student the same age as the user, meeting them for the first time at a school event',
  sit:'Small talk between two students meeting for the first time. Be curious and casual.',
  script:[
@@ -230,7 +230,7 @@ const SCENES = [
   {en:"Nice! We should hang out sometime. See you around, Shu!",ja:"いいね！また遊ぼうよ。じゃあね、シュウ！",
    hints:[{en:"Sounds good. See you!",ja:"いいね。またね！"},{en:"Definitely. Let's keep in touch.",ja:"ぜひ。連絡取り合おう"},{en:"Yeah, see you later!",ja:"うん、またね！"}]}
  ]},
-{id:'restaurant', em:'🍽', t:'レストラン', d:'席の案内から会計まで',
+{id:'restaurant', cat:'life', em:'🍽', t:'レストラン', d:'席の案内から会計まで',
  role:'a server at a casual American restaurant',
  sit:'The user is a customer. Seat them, take drink and food orders, check on them, bring the check.',
  script:[
@@ -247,7 +247,7 @@ const SCENES = [
   {en:"Glad to hear it. Here's your check whenever you're ready. Have a great night!",ja:"よかったです。お会計はこちらです。良い夜を！",
    hints:[{en:"Thank you. Can I pay by card?",ja:"ありがとう。カードで払えますか？"},{en:"Thanks! Is the tip included?",ja:"ありがとう！チップは含まれていますか？"},{en:"Thank you, everything was great.",ja:"ありがとう、全部よかったです"}]}
  ]},
-{id:'hotel', em:'🏨', t:'ホテル', d:'チェックインと部屋のお願い',
+{id:'hotel', cat:'travel', em:'🏨', t:'ホテル', d:'チェックインと部屋のお願い',
  role:'a hotel front desk receptionist',
  sit:'The user is checking in. Handle reservation, spelling, room details, breakfast, key card, and requests.',
  script:[
@@ -264,7 +264,7 @@ const SCENES = [
   {en:"Happy to help. The elevator is on your left. Enjoy your stay!",ja:"どういたしまして。エレベーターは左手です。良い滞在を！",
    hints:[{en:"Thank you very much.",ja:"どうもありがとう"},{en:"Thanks, have a good night.",ja:"ありがとう、おやすみなさい"},{en:"Great, thanks for your help.",ja:"助かりました、ありがとう"}]}
  ]},
-{id:'shop', em:'🛍', t:'買い物', d:'サイズ・試着・値段を聞く',
+{id:'shop', cat:'life', em:'🛍', t:'買い物', d:'サイズ・試着・値段を聞く',
  role:'a shop assistant in a clothing store',
  sit:'The user is shopping for clothes. Help with sizes, fitting room, price, and checkout.',
  script:[
@@ -281,7 +281,7 @@ const SCENES = [
   {en:"Great, I'll ring you up at the register. Thanks for stopping by!",ja:"では、レジで会計しますね。ご来店ありがとうございます！",
    hints:[{en:"Thank you for your help.",ja:"助けてくれてありがとう"},{en:"Thanks, have a nice day!",ja:"ありがとう、良い一日を！"},{en:"Could I get a bag, please?",ja:"袋をもらえますか？"}]}
  ]},
-{id:'direction', em:'🗺', t:'道を聞く', d:'迷ったときに助けを求める',
+{id:'direction', cat:'travel', em:'🗺', t:'道を聞く', d:'迷ったときに助けを求める',
  role:'a kind local person on the street in London',
  sit:'The user is lost and asking for directions. Give clear, natural directions with landmarks.',
  script:[
@@ -298,7 +298,7 @@ const SCENES = [
   {en:"Happy to help. Enjoy your trip! Take care.",ja:"お役に立ててよかった。良い旅を！気をつけて",
    hints:[{en:"Thank you so much. Have a good day!",ja:"本当にありがとう。良い一日を！"},{en:"Thanks again. Bye!",ja:"改めてありがとう。さようなら！"},{en:"You too. Thanks!",ja:"あなたも。ありがとう！"}]}
  ]},
-{id:'school', em:'🎒', t:'学校でのおしゃべり', d:'週末や部活の話をする',
+{id:'school', cat:'basic', em:'🎒', t:'学校でのおしゃべり', d:'週末や部活の話をする',
  role:"Jamie, the user's classmate and friend at an international school",
  sit:'Casual chat between classmates about weekends, school, tests, and hobbies. Keep it light and use everyday slang lightly.',
  script:[
@@ -315,7 +315,7 @@ const SCENES = [
   {en:"We'll see about that! Anyway, the bell's about to ring. Catch you at lunch.",ja:"それはどうかな！とにかくチャイム鳴りそう。昼にまたね",
    hints:[{en:"See you then!",ja:"じゃあまた！"},{en:"Alright, later!",ja:"わかった、またあとで！"},{en:"Sure, don't be late.",ja:"うん、遅れないでね"}]}
  ]},
-{id:'interview', em:'💼', t:'面接・自己PR', d:'留学や仕事の面接の練習',
+{id:'interview', cat:'work', em:'💼', t:'面接・自己PR', d:'留学や仕事の面接の練習',
  role:'a friendly but professional interviewer for a study-abroad program',
  sit:'A short interview. Ask about the user, their motivation, strengths, a challenge they overcame, and their questions.',
  script:[
@@ -332,11 +332,2266 @@ const SCENES = [
   {en:"Great question. We'll be in touch by email next week. Thanks for your time!",ja:"良い質問です。来週メールでご連絡します。お時間ありがとうございました！",
    hints:[{en:"Thank you very much for your time.",ja:"お時間ありがとうございました"},{en:"Thanks. I look forward to hearing from you.",ja:"ありがとう。ご連絡お待ちしています"},{en:"Thank you. It was nice meeting you.",ja:"ありがとう。お会いできてよかったです"}]}
  ]},
-{id:'free', em:'💬', t:'フリートーク', d:'相手・話題・ミッションを選ぶ', apiOnly:true,
+{
+ "id": "transfer",
+ "em": "🛫",
+ "t": "乗り継ぎ",
+ "d": "乗り継ぎ便を探す",
+ "cat": "travel",
+ "role": "an airline staff member at a transfer desk in a large US international airport",
+ "sit": "You are flying from Tokyo to Chicago with one stop. This airport is your first stop in the US, so you have to go through immigration, pick up your suitcase and check it in again. You cannot find your gate and you are not sure what to do, so you ask a staff member for help.",
+ "script": [
+  {
+   "en": "Hi there, you look a little lost. Need a hand?",
+   "ja": "こんにちは、ちょっと迷ってる感じですね。手伝いましょうか？",
+   "hints": [
+    {
+     "en": "Yes, please. I'm looking for gate 42.",
+     "ja": "はい、お願いします。42番ゲートを探してるんです。"
+    },
+    {
+     "en": "Yes. Is there enough time before my next flight?",
+     "ja": "はい。次の便まで時間は足りますか？"
+    },
+    {
+     "en": "I think I'm in the wrong terminal.",
+     "ja": "ターミナルを間違えた気がするんです。"
+    }
+   ]
+  },
+  {
+   "en": "Sure, let me take a look. Can I see your boarding pass? Which flight are you connecting to?",
+   "ja": "いいですよ、見てみますね。搭乗券を見せてもらえますか？どの便に乗り継ぎですか？",
+   "hints": [
+    {
+     "en": "Here you go. The three o'clock to Chicago.",
+     "ja": "これです。3時のシカゴ行きです。"
+    },
+    {
+     "en": "It's on my phone. Just a second.",
+     "ja": "スマホに入ってます。ちょっと待ってください。"
+    },
+    {
+     "en": "I don't have it yet. They told me to get it here.",
+     "ja": "まだ持ってないんです。ここでもらってと言われました。"
+    }
+   ]
+  },
+  {
+   "en": "You've got plenty of time, don't worry. This is your first stop in the US, so you have to pick up your suitcase and check it in again. Have you been through immigration yet?",
+   "ja": "時間はたっぷりありますよ、大丈夫。ここはアメリカで最初に着く空港なので、スーツケースを一度受け取って、預け直す必要があります。入国審査はもう通りましたか？",
+   "hints": [
+    {
+     "en": "Yes, I just came from there.",
+     "ja": "はい、今そこから来たところです。"
+    },
+    {
+     "en": "Wait, I have to pick up my bag again?",
+     "ja": "え、荷物をもう一度受け取るんですか？"
+    },
+    {
+     "en": "No, not yet. Where do I go?",
+     "ja": "いえ、まだです。どこに行けばいいですか？"
+    }
+   ]
+  },
+  {
+   "en": "Yeah, everybody has to do it here. Get your bag, drop it at the re-check counter, and then go through security again. After that, take the shuttle train to Terminal 2. Does that make sense?",
+   "ja": "ええ、ここではみんなそうするんですよ。荷物を受け取って、再預けのカウンターに出して、それからもう一度保安検査を受けてください。そのあとシャトルトレインで第2ターミナルへ行ってください。わかりましたか？",
+   "hints": [
+    {
+     "en": "Got it. Bag first, then security.",
+     "ja": "わかりました。まず荷物、それから保安検査ですね。"
+    },
+    {
+     "en": "Sorry, could you say that one more time?",
+     "ja": "すみません、もう一度言ってもらえますか？"
+    },
+    {
+     "en": "Where is the re-check counter?",
+     "ja": "その再預けのカウンターはどこですか？"
+    }
+   ]
+  },
+  {
+   "en": "It's right next to baggage claim, and there are purple signs the whole way. The train is downstairs after security. It's one stop, about five minutes. Anything else you're worried about?",
+   "ja": "手荷物受取所のすぐ隣で、そこまで紫の看板が続いています。電車は保安検査を過ぎた下の階です。1駅で5分くらいですよ。ほかに心配なことはありますか？",
+   "hints": [
+    {
+     "en": "Do I have to open my suitcase for customs?",
+     "ja": "税関でスーツケースを開けないといけませんか？"
+    },
+    {
+     "en": "Is there somewhere to eat near the gate?",
+     "ja": "ゲートの近くに食べられる場所はありますか？"
+    },
+    {
+     "en": "No, I think I'm good. Thanks.",
+     "ja": "いえ、大丈夫だと思います。ありがとうございます。"
+    }
+   ]
+  },
+  {
+   "en": "Only if they ask you to. Just answer their questions and you'll be fine. You've still got about ninety minutes, so take your time. Have a safe flight!",
+   "ja": "言われたときだけです。聞かれたことに答えれば大丈夫ですよ。まだ90分くらいあるので、あわてずに。よい空の旅を！",
+   "hints": [
+    {
+     "en": "Thank you so much. You really saved me.",
+     "ja": "本当にありがとうございます。助かりました。"
+    },
+    {
+     "en": "Could you write the gate number down for me?",
+     "ja": "ゲート番号を書いてもらえますか？"
+    },
+    {
+     "en": "Thanks! Have a good day.",
+     "ja": "ありがとう！よい一日を。"
+    }
+   ]
+  }
+ ]
+},
+{
+ "id": "taxi",
+ "em": "🚕",
+ "t": "タクシー",
+ "d": "行き先を伝えて払う",
+ "cat": "travel",
+ "role": "a friendly taxi driver in a US city",
+ "sit": "You get into a taxi at the airport. You tell the driver where you want to go, chat a little on the way, and pay at the end.",
+ "script": [
+  {
+   "en": "Hop in! Where are you headed?",
+   "ja": "どうぞ乗ってください！どちらまで？",
+   "hints": [
+    {
+     "en": "The Hilton downtown, please.",
+     "ja": "ダウンタウンのヒルトンまでお願いします。"
+    },
+    {
+     "en": "Can you take me to this address?",
+     "ja": "この住所まで行ってもらえますか？"
+    },
+    {
+     "en": "How much is it to the city center?",
+     "ja": "市内の中心まではいくらくらいですか？"
+    }
+   ]
+  },
+  {
+   "en": "No problem. Traffic's pretty bad this time of day, though. Are you in a hurry?",
+   "ja": "いいですよ。ただ、この時間は渋滞がひどいんですよね。お急ぎですか？",
+   "hints": [
+    {
+     "en": "Kind of. I'm meeting someone at six.",
+     "ja": "ちょっと急いでます。6時に人と会うので。"
+    },
+    {
+     "en": "No rush at all. Take your time.",
+     "ja": "全然急いでません。ゆっくりで大丈夫です。"
+    },
+    {
+     "en": "Is there a faster way to go?",
+     "ja": "もっと早く着く道はありますか？"
+    }
+   ]
+  },
+  {
+   "en": "I'll take the highway then. Should be about twenty-five minutes. So, is this your first time here?",
+   "ja": "じゃあ高速で行きますね。25分くらいだと思います。ところで、ここは初めてですか？",
+   "hints": [
+    {
+     "en": "Yeah, I just got here this morning.",
+     "ja": "はい、今朝着いたばかりです。"
+    },
+    {
+     "en": "No, I came here last summer too.",
+     "ja": "いえ、去年の夏にも来ました。"
+    },
+    {
+     "en": "It is. Any places I should see?",
+     "ja": "初めてです。行っておくべき場所ってありますか？"
+    }
+   ]
+  },
+  {
+   "en": "You should check out the market by the river. Good food, and it's not expensive. So what brings you here?",
+   "ja": "川沿いのマーケットに行ってみるといいですよ。食べ物がおいしくて、しかも高くないんです。ところで、何で来たんですか？",
+   "hints": [
+    {
+     "en": "I'm here on a school trip.",
+     "ja": "学校の研修旅行で来ました。"
+    },
+    {
+     "en": "I'm going to study here for two weeks.",
+     "ja": "ここで2週間勉強するんです。"
+    },
+    {
+     "en": "Sorry, I didn't catch that.",
+     "ja": "すみません、聞き取れませんでした。"
+    }
+   ]
+  },
+  {
+   "en": "That's great. Your English is really good, by the way. Alright, here we are. That'll be twenty-two fifty. Cash or card?",
+   "ja": "いいですね。ところで、英語すごく上手ですよ。さて、着きました。22ドル50セントです。現金ですか、カードですか？",
+   "hints": [
+    {
+     "en": "Card, please. Can I tap here?",
+     "ja": "カードでお願いします。ここにタッチすればいいですか？"
+    },
+    {
+     "en": "Cash. I only have a fifty, is that okay?",
+     "ja": "現金で。50ドル札しかないんですけど、大丈夫ですか？"
+    },
+    {
+     "en": "Card. And could I get a receipt?",
+     "ja": "カードで。あと、領収書もらえますか？"
+    }
+   ]
+  },
+  {
+   "en": "Sure. Just tap the reader right there, and the screen will ask you about a tip. Okay, here's your receipt. Want me to get your bag out of the trunk?",
+   "ja": "はい。そこの機械にタッチしてください。画面でチップをどうするか聞かれます。はい、領収書です。トランクから荷物を出しましょうか？",
+   "hints": [
+    {
+     "en": "Yes, please. The big black one.",
+     "ja": "お願いします。大きい黒いやつです。"
+    },
+    {
+     "en": "I've got it, thanks. Keep the change.",
+     "ja": "自分で持てます、ありがとう。おつりはいいです。"
+    },
+    {
+     "en": "Thanks for the ride. Have a good one!",
+     "ja": "乗せてくれてありがとう。じゃあ元気で！"
+    }
+   ]
+  }
+ ]
+},
+{
+ "id": "lost_bag",
+ "em": "🧳",
+ "t": "荷物が出ない",
+ "d": "ロストバゲージの手続き",
+ "cat": "travel",
+ "role": "a baggage service agent at the airport lost luggage counter",
+ "sit": "Your checked suitcase never came out at baggage claim. You go to the counter to report it and find out what happens next. You still have your passport and the bag tag sticker on your boarding pass.",
+ "script": [
+  {
+   "en": "Hi, what can I do for you?",
+   "ja": "こんにちは、どうされましたか？",
+   "hints": [
+    {
+     "en": "My suitcase never came out at baggage claim.",
+     "ja": "スーツケースが受取所に出てこないんです。"
+    },
+    {
+     "en": "The belt stopped. Are any more bags coming?",
+     "ja": "ベルトが止まったんですけど、まだ荷物は出てきますか？"
+    },
+    {
+     "en": "I've been waiting almost an hour. What should I do?",
+     "ja": "1時間近く待ってます。どうしたらいいですか？"
+    }
+   ]
+  },
+  {
+   "en": "Oh no, sorry about that. Let's get it sorted out. Can I see your passport and your bag tag? It's the sticker on your boarding pass. What flight were you on?",
+   "ja": "それは大変ですね、すみません。すぐに調べましょう。パスポートと荷物のタグを見せてもらえますか？搭乗券に貼ってあるシールです。何便でしたか？",
+   "hints": [
+    {
+     "en": "Here you go. Flight 7 from Tokyo.",
+     "ja": "はい、どうぞ。東京発の7便です。"
+    },
+    {
+     "en": "I think I lost the sticker, sorry.",
+     "ja": "シールをなくしちゃったみたいです、すみません。"
+    },
+    {
+     "en": "It's all on my phone. Is that alright?",
+     "ja": "全部スマホに入ってます。それでも大丈夫ですか？"
+    }
+   ]
+  },
+  {
+   "en": "That's no problem. Let me look it up in the system. Can you tell me what the bag looks like?",
+   "ja": "それなら大丈夫ですよ。システムで調べてみますね。どんな荷物か教えてもらえますか？",
+   "hints": [
+    {
+     "en": "It's a black suitcase with four wheels.",
+     "ja": "黒いスーツケースで、キャスターが4つついてます。"
+    },
+    {
+     "en": "About this big, and my name is on the tag.",
+     "ja": "このくらいの大きさで、タグに名前が書いてあります。"
+    },
+    {
+     "en": "I have a photo of it right here.",
+     "ja": "ちょうど写真があります。"
+    }
+   ]
+  },
+  {
+   "en": "Perfect, that helps. Here it is. Your bag is still in Tokyo, and it's coming on tomorrow's flight. Where are you staying tonight?",
+   "ja": "助かります。ありました。荷物はまだ東京にあって、明日の便で届きます。今夜はどこにお泊まりですか？",
+   "hints": [
+    {
+     "en": "At the Grand Hotel downtown.",
+     "ja": "ダウンタウンのグランドホテルです。"
+    },
+    {
+     "en": "Can you send it to my hotel?",
+     "ja": "ホテルまで届けてもらえますか？"
+    },
+    {
+     "en": "Tomorrow? I need my things tonight.",
+     "ja": "明日ですか？今夜使うものが入ってるんですけど。"
+    }
+   ]
+  },
+  {
+   "en": "We'll deliver it to your hotel, free of charge. And I can give you an overnight kit, a toothbrush and a few other things for tonight. Would that help?",
+   "ja": "ホテルまで無料でお届けします。それと、歯ブラシなど今夜に必要なものが入ったセットをお渡しできますよ。あると助かりますか？",
+   "hints": [
+    {
+     "en": "Yes, please. That would really help.",
+     "ja": "はい、お願いします。すごく助かります。"
+    },
+    {
+     "en": "How long does the delivery usually take?",
+     "ja": "配達はだいたいどれくらいかかりますか？"
+    },
+    {
+     "en": "Can I buy clothes and get the money back?",
+     "ja": "服を買ったらお金は戻ってきますか？"
+    }
+   ]
+  },
+  {
+   "en": "Yes, just buy what you need and keep the receipts, and we'll pay you back. Here's your kit and your reference number. We'll text you as soon as your bag lands. Is this the best number for you?",
+   "ja": "はい、必要なものを買ってレシートを取っておいてください。あとでお返しします。こちらがセットと受付番号です。荷物が着いたらすぐにメッセージを送りますね。連絡はこの番号で大丈夫ですか？",
+   "hints": [
+    {
+     "en": "Yes, that's my number.",
+     "ja": "はい、それが私の番号です。"
+    },
+    {
+     "en": "No, let me give you a different one.",
+     "ja": "いえ、別の番号をお伝えします。"
+    },
+    {
+     "en": "Thanks. What if it doesn't come tomorrow?",
+     "ja": "ありがとうございます。明日届かなかったらどうすればいいですか？"
+    }
+   ]
+  }
+ ]
+},
+{
+ "id": "clinic",
+ "em": "🏥",
+ "t": "診療所",
+ "d": "体調不良を伝える",
+ "cat": "life",
+ "role": "a friendly nurse at a walk-in clinic in the US",
+ "sit": "The learner is not feeling well and walks into a clinic without an appointment. After signing in at the front desk, a nurse takes them to a room and asks about their symptoms before the doctor comes in.",
+ "script": [
+  {
+   "en": "Hi there, come on back and have a seat. So, what brings you in today?",
+   "ja": "こんにちは、こちらへどうぞ。座ってくださいね。今日はどうされました？",
+   "hints": [
+    {
+     "en": "I've had a sore throat since yesterday.",
+     "ja": "昨日からのどが痛いんです。"
+    },
+    {
+     "en": "I think I have a fever. Can you check?",
+     "ja": "熱がある気がします。測ってもらえますか？"
+    },
+    {
+     "en": "Sorry, my English isn't great. Can I show you?",
+     "ja": "すみません、英語が苦手で。見せてもいいですか？"
+    }
+   ]
+  },
+  {
+   "en": "Okay, got it. Let me take your temperature real quick. Any coughing or headaches with that?",
+   "ja": "なるほど、わかりました。ちょっと熱を測りますね。せきや頭痛もありますか？",
+   "hints": [
+    {
+     "en": "Yeah, I cough a lot at night.",
+     "ja": "はい、夜にすごくせきが出ます。"
+    },
+    {
+     "en": "No cough, but my head hurts.",
+     "ja": "せきは出ませんが、頭が痛いです。"
+    },
+    {
+     "en": "Not really. I'm just really tired.",
+     "ja": "特には。ただ、すごくだるいです。"
+    }
+   ]
+  },
+  {
+   "en": "Your temperature's a bit high, about a hundred. Have you taken anything for it?",
+   "ja": "少し熱がありますね、37度8分くらいです。何か薬は飲みましたか？",
+   "hints": [
+    {
+     "en": "I took some medicine I brought from Japan.",
+     "ja": "日本から持ってきた薬を飲みました。"
+    },
+    {
+     "en": "No, not yet. I didn't know what to take.",
+     "ja": "いえ、まだです。何を飲めばいいか分からなくて。"
+    },
+    {
+     "en": "No. Can I buy something for it here?",
+     "ja": "いいえ。ここで買える薬はありますか？"
+    }
+   ]
+  },
+  {
+   "en": "Okay. And are you allergic to any medicines?",
+   "ja": "わかりました。あと、お薬のアレルギーはありますか？",
+   "hints": [
+    {
+     "en": "No allergies, as far as I know.",
+     "ja": "たぶんアレルギーはないです。"
+    },
+    {
+     "en": "I'm allergic to penicillin.",
+     "ja": "ペニシリンのアレルギーがあります。"
+    },
+    {
+     "en": "I'm not sure. Is that a problem?",
+     "ja": "わかりません。まずいですか？"
+    }
+   ]
+  },
+  {
+   "en": "Got it, I'll write that down. The doctor will be in to see you in about ten minutes. Oh, and the front desk will need your insurance. Do you have travel insurance?",
+   "ja": "了解です、書いておきますね。先生は10分ほどで来ますよ。あと、受付で保険の確認が必要です。海外旅行保険には入っていますか？",
+   "hints": [
+    {
+     "en": "Yes, here's my insurance card.",
+     "ja": "はい、これが保険証です。"
+    },
+    {
+     "en": "I have it, but I left the card at home.",
+     "ja": "入ってますが、カードは家に置いてきました。"
+    },
+    {
+     "en": "How much does it cost without it?",
+     "ja": "保険なしだといくらかかりますか？"
+    }
+   ]
+  },
+  {
+   "en": "That's fine, we can sort that out afterwards. Just sit tight and the doctor will be right with you, okay?",
+   "ja": "大丈夫ですよ、それは後で何とかしましょう。このまま座って待っててくださいね。先生がすぐ来ますから。",
+   "hints": [
+    {
+     "en": "Okay, thanks so much for your help.",
+     "ja": "はい、本当にありがとうございます。"
+    },
+    {
+     "en": "Sure. Where's the restroom?",
+     "ja": "わかりました。お手洗いはどこですか？"
+    },
+    {
+     "en": "Can I get a receipt for my insurance?",
+     "ja": "保険に出すので、領収書をもらえますか？"
+    }
+   ]
+  }
+ ]
+},
+{
+ "id": "haircut",
+ "em": "💇",
+ "t": "美容院",
+ "d": "髪型を注文する",
+ "cat": "life",
+ "role": "a chatty hairstylist at a salon in the US",
+ "sit": "The learner is getting a haircut abroad for the first time. They have to explain how they want their hair cut and react to the finished result.",
+ "script": [
+  {
+   "en": "Hey, come on back. Have a seat right here. So, what are we doing today?",
+   "ja": "こんにちは、奥へどうぞ。ここに座ってください。今日はどんな感じにしましょう？",
+   "hints": [
+    {
+     "en": "Just a trim, please. Nothing too short.",
+     "ja": "軽くそろえるだけでお願いします。短くしすぎないで。"
+    },
+    {
+     "en": "I want to try something totally new.",
+     "ja": "がらっと違う感じにしてみたいです。"
+    },
+    {
+     "en": "I have a photo. Can I show you?",
+     "ja": "写真があります。見てもらえますか？"
+    }
+   ]
+  },
+  {
+   "en": "Sure, we can do that. How much do you want me to take off the back?",
+   "ja": "いいですよ、やりましょう。後ろはどのくらい切りましょうか？",
+   "hints": [
+    {
+     "en": "Just an inch or so.",
+     "ja": "2、3センチくらいでお願いします。"
+    },
+    {
+     "en": "Short enough so it doesn't touch my collar.",
+     "ja": "えりに当たらないくらい短くしてください。"
+    },
+    {
+     "en": "I'm not sure. What would you recommend?",
+     "ja": "うーん、どうしましょう。おすすめはありますか？"
+    }
+   ]
+  },
+  {
+   "en": "Got it. And how about the sides and around the ears? Short, or do you want to keep some length?",
+   "ja": "了解です。横と耳まわりはどうします？短めにしますか、それとも少し残しますか？",
+   "hints": [
+    {
+     "en": "Nice and short on the sides, please.",
+     "ja": "横はすっきり短くしてください。"
+    },
+    {
+     "en": "Please leave enough to cover my ears.",
+     "ja": "耳が隠れるくらいは残してください。"
+    },
+    {
+     "en": "I'll leave that up to you.",
+     "ja": "そこはお任せします。"
+    }
+   ]
+  },
+  {
+   "en": "Okay, one more thing. What about your bangs? They're getting pretty long.",
+   "ja": "わかりました。あと一つだけ。前髪はどうします？けっこう伸びてますよ。",
+   "hints": [
+    {
+     "en": "Yeah, cut them just above my eyebrows.",
+     "ja": "はい、まゆげの少し上まで切ってください。"
+    },
+    {
+     "en": "Actually, I want to grow them out.",
+     "ja": "前髪は伸ばしたいので、そのままで。"
+    },
+    {
+     "en": "Can you make them a little lighter?",
+     "ja": "少し軽くしてもらえますか？"
+    }
+   ]
+  },
+  {
+   "en": "Perfect, give me about twenty minutes... Okay, all done! Take a look in the mirror. What do you think?",
+   "ja": "バッチリです。20分くらいくださいね……はい、できましたよ！鏡を見てみてください。どうですか？",
+   "hints": [
+    {
+     "en": "Wow, I really like it. Thank you!",
+     "ja": "わあ、すごく気に入りました。ありがとうございます！"
+    },
+    {
+     "en": "Could you take a bit more off the top?",
+     "ja": "上をもう少しだけ切ってもらえますか？"
+    },
+    {
+     "en": "It's a little shorter than I expected.",
+     "ja": "思っていたより少し短いかも。"
+    }
+   ]
+  },
+  {
+   "en": "I'm glad you like it. You can pay at the front desk. Want me to book your next one now?",
+   "ja": "気に入ってもらえてよかったです。お会計は受付でどうぞ。次のご予約、今取っておきますか？",
+   "hints": [
+    {
+     "en": "Sure, how about in a month?",
+     "ja": "そうですね、1か月後くらいでお願いします。"
+    },
+    {
+     "en": "I'll just come back when I need it.",
+     "ja": "また必要になったら来ます。"
+    },
+    {
+     "en": "Do you take credit cards?",
+     "ja": "クレジットカードは使えますか？"
+    }
+   ]
+  }
+ ]
+},
+{
+ "id": "homestay",
+ "em": "🍲",
+ "t": "ホームステイ",
+ "d": "夕食で家族と話す",
+ "cat": "life",
+ "role": "a warm host mother in the Australian family the learner is staying with",
+ "sit": "The learner is having dinner with their host family on one of their first nights. They chat about school, food, and life back in Japan.",
+ "script": [
+  {
+   "en": "Dinner's ready! Grab a seat. I made roast chicken tonight. So how was your first day at school?",
+   "ja": "ごはんできたよ！座って座って。今夜はローストチキンにしたの。それで、学校の初日はどうだった？",
+   "hints": [
+    {
+     "en": "It was fun, but everyone talks so fast.",
+     "ja": "楽しかったけど、みんな話すのが速くて。"
+    },
+    {
+     "en": "Pretty good. I made one friend.",
+     "ja": "まあまあかな。友だちが1人できました。"
+    },
+    {
+     "en": "Honestly, I was nervous the whole day.",
+     "ja": "正直、一日じゅう緊張してました。"
+    }
+   ]
+  },
+  {
+   "en": "Aw, that's totally normal. It gets easier, trust me. Help yourself to the potatoes. Is there anything you can't eat?",
+   "ja": "あら、それが普通よ。すぐ慣れるから大丈夫。ポテトも遠慮なく取ってね。食べられないものはある？",
+   "hints": [
+    {
+     "en": "I eat pretty much anything.",
+     "ja": "だいたい何でも食べられます。"
+    },
+    {
+     "en": "I'm not great with spicy food.",
+     "ja": "辛いものはちょっと苦手です。"
+    },
+    {
+     "en": "Not too much for me, thanks.",
+     "ja": "僕は少なめで大丈夫です。"
+    }
+   ]
+  },
+  {
+   "en": "Good to know, I'll remember that. So do you cook at all back home? What do you usually have for dinner in Japan?",
+   "ja": "わかった、覚えとくね。ところで、家では料理する？日本では夕飯に何を食べるの？",
+   "hints": [
+    {
+     "en": "Usually rice, miso soup and some fish.",
+     "ja": "たいてい、ごはんとみそ汁と魚です。"
+    },
+    {
+     "en": "My mom cooks. I just do the dishes.",
+     "ja": "母が作ります。僕は皿洗い係です。"
+    },
+    {
+     "en": "I can make curry. Want me to cook sometime?",
+     "ja": "カレーなら作れます。今度作りましょうか？"
+    }
+   ]
+  },
+  {
+   "en": "Oh, I'd love that! We've never had real Japanese curry. Are you missing home yet?",
+   "ja": "ぜひお願い！本物の日本のカレーって食べたことないの。もうホームシックになってる？",
+   "hints": [
+    {
+     "en": "A little, but I'm okay so far.",
+     "ja": "ちょっとだけ。でも今のところ大丈夫です。"
+    },
+    {
+     "en": "Not yet. I'm too excited to be here.",
+     "ja": "まだです。ここにいるのが楽しくて。"
+    },
+    {
+     "en": "I miss my dog more than my family.",
+     "ja": "家族より犬に会いたいです。"
+    }
+   ]
+  },
+  {
+   "en": "Ha, fair enough. Listen, just make yourself at home here, okay? Do you need anything for tomorrow?",
+   "ja": "あはは、正直ね。ねえ、ここは自分の家だと思ってくつろいでね。明日、何か必要なものある？",
+   "hints": [
+    {
+     "en": "Could you show me where the bus stop is?",
+     "ja": "バス停の場所を教えてもらえますか？"
+    },
+    {
+     "en": "What time should I get up?",
+     "ja": "何時に起きればいいですか？"
+    },
+    {
+     "en": "No, I think I'm all set. Thanks.",
+     "ja": "いえ、たぶん大丈夫です。ありがとうございます。"
+    }
+   ]
+  },
+  {
+   "en": "No worries, I'll walk you there in the morning. Now, who wants dessert? There's ice cream in the freezer.",
+   "ja": "オッケー、朝いっしょに行ってあげる。さてと、デザート食べる人？冷凍庫にアイスがあるよ。",
+   "hints": [
+    {
+     "en": "Yes please! That sounds amazing.",
+     "ja": "食べます！最高です。"
+    },
+    {
+     "en": "I'm too full. Maybe a bit later?",
+     "ja": "おなかいっぱいで。少しあとでもいいですか？"
+    },
+    {
+     "en": "Let me help clear the table first.",
+     "ja": "先にテーブルを片づけるの手伝います。"
+    }
+   ]
+  }
+ ]
+},
+{
+ "id": "partjob",
+ "em": "📋",
+ "t": "バイトの面接",
+ "d": "カフェの採用面接を受ける",
+ "cat": "work",
+ "role": "a friendly but professional cafe manager in Vancouver, interviewing a high school student for a part-time barista job",
+ "sit": "The user is a high school student applying for a part-time job at your cafe. Ask about their reason for applying, their experience, their schedule, and how they would handle a difficult customer, then explain the next step.",
+ "script": [
+  {
+   "en": "Hey, thanks for coming in. Have a seat. So, tell me a little about yourself.",
+   "ja": "来てくれてありがとう。座ってね。じゃあ、まず自己紹介をお願いできる？",
+   "hints": [
+    {
+     "en": "I'm Shu. I'm in my second year of high school.",
+     "ja": "シュウです。高校2年生です"
+    },
+    {
+     "en": "Sorry, I'm a little nervous. Where should I start?",
+     "ja": "すみません、少し緊張してて。何から話せばいいですか？"
+    },
+    {
+     "en": "Sure. Should I talk about school or my hobbies?",
+     "ja": "はい。学校のことと趣味、どちらを話しましょう？"
+    }
+   ]
+  },
+  {
+   "en": "Nice to meet you, Shu. There are a lot of cafes around here. Why did you pick this one?",
+   "ja": "よろしく、シュウ。この辺りカフェはたくさんあるけど、どうしてうちを選んだの？",
+   "hints": [
+    {
+     "en": "I come here a lot and the staff always look happy.",
+     "ja": "よく来るんですが、店員さんがいつも楽しそうなので"
+    },
+    {
+     "en": "It's close to my school, so I can come after class.",
+     "ja": "学校から近いので、授業のあとに来られます"
+    },
+    {
+     "en": "Honestly, I want to get better at talking with people.",
+     "ja": "正直、人と話すのが上手くなりたいんです"
+    }
+   ]
+  },
+  {
+   "en": "That's a good answer. Have you ever worked anywhere before? It's okay if you haven't.",
+   "ja": "いい答えだね。今までどこかで働いたことはある？なくても大丈夫だよ",
+   "hints": [
+    {
+     "en": "No, this would be my first job.",
+     "ja": "いいえ、これが初めての仕事になります"
+    },
+    {
+     "en": "I helped at my uncle's restaurant last summer.",
+     "ja": "去年の夏、おじの店を手伝いました"
+    },
+    {
+     "en": "Not really. Do you train new people?",
+     "ja": "ないです。研修はありますか？"
+    }
+   ]
+  },
+  {
+   "en": "No problem, we train everyone. Now, what days can you work? We're busiest on weekends.",
+   "ja": "大丈夫、みんな最初から教えるよ。それで、何曜日に入れる？週末が一番忙しいんだ",
+   "hints": [
+    {
+     "en": "I can work Saturdays and Sundays all day.",
+     "ja": "土日なら一日中入れます"
+    },
+    {
+     "en": "Weekdays after five, but not during exam week.",
+     "ja": "平日は5時以降です。ただ、テスト期間は難しいです"
+    },
+    {
+     "en": "How many hours a week do you need?",
+     "ja": "週に何時間くらい必要ですか？"
+    }
+   ]
+  },
+  {
+   "en": "That could work. One more thing. If a customer got upset because we made their drink wrong, what would you do?",
+   "ja": "それならいけそうだね。もう一つ。飲み物を間違えてお客さんが怒ったら、どうする？",
+   "hints": [
+    {
+     "en": "I'd say sorry and make a new one right away.",
+     "ja": "謝って、すぐ作り直します"
+    },
+    {
+     "en": "I'd apologize and ask my manager for help.",
+     "ja": "謝ってから、店長に助けを求めます"
+    },
+    {
+     "en": "I'm not sure yet. What do you usually do?",
+     "ja": "まだ分かりません。普段はどうしていますか？"
+    }
+   ]
+  },
+  {
+   "en": "Good thinking. I like that attitude. I'll call you by Friday either way. Do you have any questions for me?",
+   "ja": "いい考え方だね。そういう姿勢、いいと思う。結果は金曜までに電話するね。何か聞きたいことはある？",
+   "hints": [
+    {
+     "en": "Yes, when would I start if I get the job?",
+     "ja": "はい、採用ならいつから始まりますか？"
+    },
+    {
+     "en": "Do you give us a uniform, or do I wear my own clothes?",
+     "ja": "制服はもらえますか？それとも自分の服ですか？"
+    },
+    {
+     "en": "No, that's everything. Thanks for your time.",
+     "ja": "いえ、大丈夫です。お時間ありがとうございました"
+    }
+   ]
+  }
+ ]
+},
+{
+ "id": "presentation",
+ "em": "🎤",
+ "t": "授業で発表",
+ "d": "意見を話して質問に答える",
+ "cat": "work",
+ "role": "an English teacher running a class discussion at a high school in Canada",
+ "sit": "The user is a student giving a short opinion speech in your English class. Guide them through their speech and ask follow-up questions in front of the class.",
+ "script": [
+  {
+   "en": "Okay everyone, settle down. Shu, you're up. Just tell us your topic and what you think about it.",
+   "ja": "はい、みんな静かに。シュウ、次はあなたの番。テーマと自分の考えを話してね",
+   "hints": [
+    {
+     "en": "My topic is school uniforms. I think we need them.",
+     "ja": "テーマは制服です。制服は必要だと思います"
+    },
+    {
+     "en": "My topic is school uniforms, and I'm against them.",
+     "ja": "テーマは制服です。私は反対の立場です"
+    },
+    {
+     "en": "Can I take a minute to set up my slides?",
+     "ja": "スライドの準備に少し時間をもらえますか？"
+    }
+   ]
+  },
+  {
+   "en": "Okay, people have strong opinions about that one. Give us one clear reason why you think so.",
+   "ja": "なるほど、意見が分かれるテーマだね。そう思う理由を一つ、はっきり教えて",
+   "hints": [
+    {
+     "en": "Because it saves time in the morning.",
+     "ja": "朝の時間を節約できるからです"
+    },
+    {
+     "en": "Mainly because it's cheaper for families.",
+     "ja": "主に、家庭の負担が軽くなるからです"
+    },
+    {
+     "en": "I have two reasons. Is that okay?",
+     "ja": "理由が2つあります。大丈夫ですか？"
+    }
+   ]
+  },
+  {
+   "en": "Good. Now make it real for us. Do you have an example from your own life?",
+   "ja": "いいね。じゃあ具体的に。自分の経験で例はある？",
+   "hints": [
+    {
+     "en": "Yeah, my sister takes an hour to pick out her clothes.",
+     "ja": "はい、姉は毎朝1時間も服を選んでいます"
+    },
+    {
+     "en": "Last year I moved schools, and it really helped.",
+     "ja": "去年転校したとき、本当に助かりました"
+    },
+    {
+     "en": "Not from my life, but I read about it.",
+     "ja": "自分の経験ではないですが、記事で読みました"
+    }
+   ]
+  },
+  {
+   "en": "Kenji just said he completely disagrees with you. What would you say to him?",
+   "ja": "ケンジが、全然賛成できないって言ってるよ。彼に何て返す？",
+   "hints": [
+    {
+     "en": "I see his point, but I still think I'm right.",
+     "ja": "言いたいことは分かりますが、やっぱり私はそう思います"
+    },
+    {
+     "en": "That's fair. Can I hear his reason first?",
+     "ja": "もっともです。先に理由を聞いてもいいですか？"
+    },
+    {
+     "en": "Honestly, he might have a point there.",
+     "ja": "正直、彼の言うことも一理あります"
+    }
+   ]
+  },
+  {
+   "en": "Nice, you handled that well. We're almost out of time. Can you wrap it up in one sentence?",
+   "ja": "うまく答えられたね。時間があまりないから、一文でまとめられる？",
+   "hints": [
+    {
+     "en": "So, uniforms make school life easier for everyone.",
+     "ja": "つまり、制服はみんなの学校生活を楽にします"
+    },
+    {
+     "en": "In short, there are more good points than bad ones.",
+     "ja": "要するに、悪い点より良い点の方が多いと思います"
+    },
+    {
+     "en": "Sorry, can I say two sentences instead?",
+     "ja": "すみません、2文でもいいですか？"
+    }
+   ]
+  },
+  {
+   "en": "Great job, Shu. Your English was much clearer than last time. How did it feel up there?",
+   "ja": "よくできたよ、シュウ。前回より英語がずっと聞き取りやすかった。前に立ってみてどうだった？",
+   "hints": [
+    {
+     "en": "Thanks. I was nervous, but it was fun.",
+     "ja": "ありがとうございます。緊張したけど楽しかったです"
+    },
+    {
+     "en": "My hands were shaking the whole time.",
+     "ja": "ずっと手が震えていました"
+    },
+    {
+     "en": "What should I work on for next time?",
+     "ja": "次はどこを直せばいいですか？"
+    }
+   ]
+  }
+ ]
+},
+{
+ "id": "groupwork",
+ "em": "👥",
+ "t": "グループ課題",
+ "d": "役割分担を話し合う",
+ "cat": "work",
+ "role": "a friendly classmate working with the user on a group presentation for science class",
+ "sit": "You and the user are in a group of three with a classmate named Mei. Your presentation is due next Monday. Talk about the topic, decide who does what, and set a time to meet.",
+ "script": [
+  {
+   "en": "Hey, looks like we got put in the same group again. Do you have any ideas for the topic?",
+   "ja": "ねえ、また同じグループになったね。テーマ、何かアイデアある？",
+   "hints": [
+    {
+     "en": "How about plastic in the ocean?",
+     "ja": "海のプラスチックごみはどう？"
+    },
+    {
+     "en": "Not yet. What are you thinking?",
+     "ja": "まだかな。そっちは何か考えてる？"
+    },
+    {
+     "en": "Anything but volcanoes. We did that already.",
+     "ja": "火山以外なら何でも。前にやったから"
+    }
+   ]
+  },
+  {
+   "en": "Oh, I like that. So how should we split the work? There's the research, the slides, and the presenting.",
+   "ja": "いいね。じゃあ分担はどうする？調べる係とスライド係と発表する係があるよね",
+   "hints": [
+    {
+     "en": "I can do the research. I like looking stuff up.",
+     "ja": "調べるのは私がやるよ。調べ物は好きだから"
+    },
+    {
+     "en": "Let's each take one part. That's fair.",
+     "ja": "一人ひとつずつにしよう。それが公平だと思う"
+    },
+    {
+     "en": "Can we do the slides together instead?",
+     "ja": "スライドは一緒に作るのはどう？"
+    }
+   ]
+  },
+  {
+   "en": "Sounds fair. Honestly, I get really nervous in front of people. Could you do the speaking part?",
+   "ja": "いいと思う。正直、人前だとすごく緊張しちゃうんだよね。発表の担当をお願いできる？",
+   "hints": [
+    {
+     "en": "Sure, I don't mind speaking.",
+     "ja": "いいよ、話すのは平気だから"
+    },
+    {
+     "en": "Only if we split it and you do the ending.",
+     "ja": "半分ずつで、最後だけやってくれるなら"
+    },
+    {
+     "en": "Sorry, I'm bad at that too. Let's ask Mei.",
+     "ja": "ごめん、私も苦手なんだ。メイに聞いてみよう"
+    }
+   ]
+  },
+  {
+   "en": "Okay, that works. What about Mei? She hasn't said anything since class started.",
+   "ja": "うん、それでいこう。メイはどうする？授業が始まってから何も言ってないよね",
+   "hints": [
+    {
+     "en": "I'll text her tonight and ask what she wants.",
+     "ja": "今夜メッセージして、希望を聞いてみる"
+    },
+    {
+     "en": "Let's leave her the easiest part.",
+     "ja": "一番かんたんな担当を残しておこう"
+    },
+    {
+     "en": "She's right over there. Just go ask her.",
+     "ja": "あそこにいるよ。直接聞いてきなよ"
+    }
+   ]
+  },
+  {
+   "en": "Good idea. So when are you free to meet up? I can do Wednesday after school.",
+   "ja": "いい考えだね。それで、いつなら集まれる？私は水曜の放課後がいけるよ",
+   "hints": [
+    {
+     "en": "Wednesday works for me too.",
+     "ja": "水曜なら私も大丈夫"
+    },
+    {
+     "en": "I have practice until six. Can we do Thursday?",
+     "ja": "6時まで部活なんだ。木曜にできる？"
+    },
+    {
+     "en": "Could we just do it online instead?",
+     "ja": "オンラインで済ませるのはどう？"
+    }
+   ]
+  },
+  {
+   "en": "Perfect, let's go with that. It's due Monday, so I want to finish by Friday. Anything you're worried about?",
+   "ja": "よし、それで決まりね。締め切りは月曜だから、金曜までに終わらせたい。何か心配なことある？",
+   "hints": [
+    {
+     "en": "Just that we don't run out of time.",
+     "ja": "時間が足りなくならないかだけかな"
+    },
+    {
+     "en": "Nope, I think we've got a good plan.",
+     "ja": "ないよ、いい計画だと思う"
+    },
+    {
+     "en": "Can you check my English before we present?",
+     "ja": "発表の前に私の英語を見てくれる？"
+    }
+   ]
+  }
+ ]
+},
+{
+ "id": "lost_wallet",
+ "em": "👛",
+ "t": "財布をなくした",
+ "d": "落とし物センターで届け出る",
+ "cat": "trouble",
+ "role": "a police officer working the lost and found counter at a city police station in the US",
+ "sit": "The user lost their wallet somewhere in the city and has come to report it. Take the report, ask what it looks like, what was inside, and where they last had it.",
+ "script": [
+  {
+   "en": "Hi, come on in. What can I help you with today?",
+   "ja": "こんにちは、どうぞ。今日はどうされました？",
+   "hints": [
+    {
+     "en": "I lost my wallet. Can you help me?",
+     "ja": "財布をなくしました。助けてもらえますか？"
+    },
+    {
+     "en": "Is this where I report a lost item?",
+     "ja": "落とし物の届け出はここでいいですか？"
+    },
+    {
+     "en": "Sorry, my English isn't very good.",
+     "ja": "すみません、英語があまり得意じゃなくて"
+    }
+   ]
+  },
+  {
+   "en": "Oh no, sorry to hear that. Let's fill out a report. What does the wallet look like?",
+   "ja": "それは大変ですね。では届け出を書きましょう。どんな財布ですか？",
+   "hints": [
+    {
+     "en": "It's a small brown leather one.",
+     "ja": "小さい茶色の革の財布です"
+    },
+    {
+     "en": "It's black, with a zipper on top.",
+     "ja": "黒で、上にファスナーが付いています"
+    },
+    {
+     "en": "I have a photo of it on my phone.",
+     "ja": "スマホに写真があります"
+    }
+   ]
+  },
+  {
+   "en": "Got it. And what was inside? Anything important, like cards or ID?",
+   "ja": "わかりました。中身は何が入っていましたか？カードや身分証など、大事な物は？",
+   "hints": [
+    {
+     "en": "My credit card and about fifty dollars.",
+     "ja": "クレジットカードと50ドルくらいです"
+    },
+    {
+     "en": "My student ID and my train pass.",
+     "ja": "学生証と電車のパスです"
+    },
+    {
+     "en": "Should I call my bank right now?",
+     "ja": "今すぐ銀行に電話した方がいいですか？"
+    }
+   ]
+  },
+  {
+   "en": "Yes, call your bank soon and stop that card. Where do you think you lost it?",
+   "ja": "ええ、早めに銀行に電話してカードを止めてください。どこでなくしたと思いますか？",
+   "hints": [
+    {
+     "en": "Probably on the bus this morning.",
+     "ja": "たぶん今朝のバスの中です"
+    },
+    {
+     "en": "I'm not sure. Maybe at the station.",
+     "ja": "はっきりしません。駅かもしれないです"
+    },
+    {
+     "en": "The last time I used it was at lunch.",
+     "ja": "最後に使ったのはお昼ごはんの時です"
+    }
+   ]
+  },
+  {
+   "en": "Okay. Nothing like that has been turned in yet. Can I get a phone number to reach you?",
+   "ja": "わかりました。今のところ、それらしい物はまだ届いていません。連絡先の電話番号を教えてもらえますか？",
+   "hints": [
+    {
+     "en": "Sure, it's 555-0134.",
+     "ja": "はい、555-0134です"
+    },
+    {
+     "en": "I only have email. Is that okay?",
+     "ja": "メールしかないんですが、大丈夫ですか？"
+    },
+    {
+     "en": "Can I just come back tomorrow?",
+     "ja": "明日また来てもいいですか？"
+    }
+   ]
+  },
+  {
+   "en": "All set. We'll call you as soon as it turns up. Anything else I can do for you?",
+   "ja": "これで終わりです。見つかったらすぐお電話します。他に何かありますか？",
+   "hints": [
+    {
+     "en": "No, that's everything. Thank you so much.",
+     "ja": "いえ、大丈夫です。本当にありがとうございます"
+    },
+    {
+     "en": "How long do you keep lost items?",
+     "ja": "落とし物はどのくらい保管されますか？"
+    },
+    {
+     "en": "Should I ask the bus company too?",
+     "ja": "バス会社にも聞いた方がいいですか？"
+    }
+   ]
+  }
+ ]
+},
+{
+ "id": "complaint",
+ "em": "🧥",
+ "t": "返品・交換",
+ "d": "不良品を店で交換してもらう",
+ "cat": "trouble",
+ "role": "a customer service clerk at the returns counter of a clothing store in the US",
+ "sit": "The user bought a jacket that turned out to be defective and wants to return or exchange it. Ask what is wrong, check the receipt, and offer options.",
+ "script": [
+  {
+   "en": "Hi, welcome to the returns counter. What can I do for you?",
+   "ja": "こんにちは、返品カウンターです。今日はどうされました？",
+   "hints": [
+    {
+     "en": "I'd like to return this jacket.",
+     "ja": "このジャケットを返品したいです"
+    },
+    {
+     "en": "Something's wrong with the jacket I bought.",
+     "ja": "買ったジャケットに問題があって"
+    },
+    {
+     "en": "Can I exchange this for another size?",
+     "ja": "別のサイズに交換できますか？"
+    }
+   ]
+  },
+  {
+   "en": "Sure, let me take a look. What's wrong with it?",
+   "ja": "はい、見せてください。どこが悪いですか？",
+   "hints": [
+    {
+     "en": "The zipper broke the first day I wore it.",
+     "ja": "初めて着た日にファスナーが壊れました"
+    },
+    {
+     "en": "There's a hole right here on the sleeve.",
+     "ja": "ここ、袖に穴が空いているんです"
+    },
+    {
+     "en": "I found a stain after I got home.",
+     "ja": "家に帰ってからシミに気づきました"
+    }
+   ]
+  },
+  {
+   "en": "Oh, that's not good. Do you have the receipt with you?",
+   "ja": "うわ、それはひどいですね。レシートはお持ちですか？",
+   "hints": [
+    {
+     "en": "Yes, here you go.",
+     "ja": "はい、どうぞ"
+    },
+    {
+     "en": "I lost it, but I paid by card.",
+     "ja": "なくしましたが、カードで払いました"
+    },
+    {
+     "en": "It's in my email. Does that work?",
+     "ja": "メールに届いています。それでもいいですか？"
+    }
+   ]
+  },
+  {
+   "en": "That's fine. So, would you like your money back, or a new one instead?",
+   "ja": "それで大丈夫です。返金と、新しい物との交換、どちらがいいですか？",
+   "hints": [
+    {
+     "en": "I'd rather have a refund, please.",
+     "ja": "返金の方がいいです"
+    },
+    {
+     "en": "A new one would be great.",
+     "ja": "新しい物がいいです"
+    },
+    {
+     "en": "Do you have the same one in stock?",
+     "ja": "同じ物の在庫はありますか？"
+    }
+   ]
+  },
+  {
+   "en": "Let me check in the back. Looks like we have one left in your size. Want me to grab it?",
+   "ja": "奥を見てきますね。お客様のサイズが1つ残っているみたいです。持ってきましょうか？",
+   "hints": [
+    {
+     "en": "Yes, please. That would be great.",
+     "ja": "はい、お願いします。助かります"
+    },
+    {
+     "en": "Can I check it before I take it?",
+     "ja": "受け取る前に確認してもいいですか？"
+    },
+    {
+     "en": "Actually, could I get a different color?",
+     "ja": "やっぱり違う色にできますか？"
+    }
+   ]
+  },
+  {
+   "en": "All done. Sorry again for the trouble. Is there anything else you need?",
+   "ja": "はい、これで完了です。ご迷惑をおかけしてすみませんでした。他に何かありますか？",
+   "hints": [
+    {
+     "en": "Nope, I'm all good. Thanks for your help.",
+     "ja": "いえ、大丈夫です。ありがとうございました"
+    },
+    {
+     "en": "What if this one breaks too?",
+     "ja": "もしこれも壊れたらどうなりますか？"
+    },
+    {
+     "en": "Where can I find the winter coats?",
+     "ja": "冬用のコートはどこにありますか？"
+    }
+   ]
+  }
+ ]
+},
+{
+ "id": "phone",
+ "em": "📞",
+ "t": "電話をかける",
+ "d": "担当者につないでもらう",
+ "cat": "trouble",
+ "role": "a receptionist answering the main phone line at a US company",
+ "sit": "The user is calling the company to reach a staff member named Ms. Carter. Answer the phone, find out who they are and why they are calling, and handle the transfer.",
+ "script": [
+  {
+   "en": "Good morning, Bluewave Design. How can I direct your call?",
+   "ja": "おはようございます、ブルーウェーブ・デザインです。どちらにおつなぎしましょうか？",
+   "hints": [
+    {
+     "en": "Hi, could I speak to Ms. Carter?",
+     "ja": "こんにちは、カーターさんをお願いできますか？"
+    },
+    {
+     "en": "Hello, I'm calling about my order.",
+     "ja": "もしもし、注文の件でお電話しました"
+    },
+    {
+     "en": "Sorry, could you say that again?",
+     "ja": "すみません、もう一度言ってもらえますか？"
+    }
+   ]
+  },
+  {
+   "en": "Of course. May I ask who's calling?",
+   "ja": "かしこまりました。お名前を伺ってもよろしいですか？",
+   "hints": [
+    {
+     "en": "This is Shu Tanaka.",
+     "ja": "タナカ・シュウと申します"
+    },
+    {
+     "en": "My name is Shu Tanaka. She knows me.",
+     "ja": "タナカ・シュウといいます。ご存じのはずです"
+    },
+    {
+     "en": "I'm a customer. We've never spoken before.",
+     "ja": "客の者です。お話しするのは初めてです"
+    }
+   ]
+  },
+  {
+   "en": "Thanks, Shu. And what's this regarding?",
+   "ja": "ありがとうございます、シュウさん。ご用件は何でしょうか？",
+   "hints": [
+    {
+     "en": "It's about the email she sent me.",
+     "ja": "彼女から届いたメールの件です"
+    },
+    {
+     "en": "I need to change my appointment.",
+     "ja": "予約を変更したいんです"
+    },
+    {
+     "en": "It's kind of urgent, actually.",
+     "ja": "実はちょっと急ぎなんです"
+    }
+   ]
+  },
+  {
+   "en": "Got it. Hang on one moment while I try her line. Hmm, she's on another call right now.",
+   "ja": "わかりました。おつなぎしますので少々お待ちください。……あ、今ちょうど別の電話に出ています",
+   "hints": [
+    {
+     "en": "No problem, I can hold.",
+     "ja": "大丈夫です、このまま待てます"
+    },
+    {
+     "en": "Could I leave a message instead?",
+     "ja": "代わりに伝言をお願いできますか？"
+    },
+    {
+     "en": "When would be a good time to call back?",
+     "ja": "いつかけ直すのがいいですか？"
+    }
+   ]
+  },
+  {
+   "en": "It looks like she'll be a while. Would you like to leave a message?",
+   "ja": "しばらくかかりそうですね。伝言を承りましょうか？",
+   "hints": [
+    {
+     "en": "Yes, please tell her I called about Friday.",
+     "ja": "はい、金曜の件で電話したとお伝えください"
+    },
+    {
+     "en": "Please ask her to call me back today.",
+     "ja": "今日中に折り返しをお願いします"
+    },
+    {
+     "en": "That's okay, I'll try again later.",
+     "ja": "大丈夫です、あとでかけ直します"
+    }
+   ]
+  },
+  {
+   "en": "Perfect, I'll pass that along. Can I get a number where she can reach you?",
+   "ja": "承知しました、必ずお伝えします。折り返し先の番号を教えていただけますか？",
+   "hints": [
+    {
+     "en": "Yes, it's 555-0198.",
+     "ja": "はい、555-0198です"
+    },
+    {
+     "en": "I think she already has my number.",
+     "ja": "たぶん番号はもうご存じだと思います"
+    },
+    {
+     "en": "Could she email me instead?",
+     "ja": "代わりにメールをもらえますか？"
+    }
+   ]
+  }
+ ]
+},
+{id:'free', cat:'free', em:'💬', t:'フリートーク', d:'相手・話題・ミッションを選ぶ', apiOnly:true,
  role:'Sam, a warm and curious native English speaker who loves talking with learners',
  sit:'Free conversation. Ask about the user’s day, interests, and opinions. Keep the conversation going with follow-up questions.'},
-{id:'custom', em:'✏️', t:'自分で決める', d:'場面を書いて練習。AIキーが必要', apiOnly:true, custom:true,
+{id:'custom', cat:'free', em:'✏️', t:'自分で決める', d:'場面を書いて練習。AIキーが必要', apiOnly:true, custom:true,
  role:'', sit:''}
+];
+
+/* ---------- 1.6 パック／発音ドリル（エージェント生成データ） ---------- */
+const PACKS=[
+ {
+  "id": "aizuchi",
+  "em": "😲",
+  "t": "あいづち・リアクション",
+  "d": "会話を止めない反応のことば",
+  "items": [
+   {
+    "en": "Really?",
+    "ja": "ほんとに？",
+    "when_ja": "驚いた時のいちばん基本の反応"
+   },
+   {
+    "en": "No way!",
+    "ja": "うそでしょ！",
+    "when_ja": "信じられない話を聞いた時"
+   },
+   {
+    "en": "I know, right?",
+    "ja": "だよね！",
+    "when_ja": "強く共感した時"
+   },
+   {
+    "en": "Same here.",
+    "ja": "私もだよ",
+    "when_ja": "自分も同じだと伝える時"
+   },
+   {
+    "en": "That's awesome.",
+    "ja": "それすごいね",
+    "when_ja": "いい知らせを聞いた時"
+   },
+   {
+    "en": "That sucks.",
+    "ja": "それはつらいね",
+    "when_ja": "友達の残念な話を聞いた時"
+   },
+   {
+    "en": "Makes sense.",
+    "ja": "なるほどね",
+    "when_ja": "説明を聞いて納得した時"
+   },
+   {
+    "en": "And then what?",
+    "ja": "で、どうなったの？",
+    "when_ja": "話の続きを聞きたい時"
+   },
+   {
+    "en": "Lucky you!",
+    "ja": "いいなあ！",
+    "when_ja": "相手がうらやましい時"
+   },
+   {
+    "en": "Are you serious?",
+    "ja": "マジで？",
+    "when_ja": "驚いて確かめたい時"
+   },
+   {
+    "en": "Yeah, totally.",
+    "ja": "うん、ほんとそれ",
+    "when_ja": "完全に同意する時"
+   },
+   {
+    "en": "Oh, I hear you.",
+    "ja": "わかるわ、それ",
+    "when_ja": "相手の気持ちに寄りそう時"
+   }
+  ]
+ },
+ {
+  "id": "askback",
+  "em": "❓",
+  "t": "聞き返す・確認する",
+  "d": "聞き取れない時の一言",
+  "items": [
+   {
+    "en": "Sorry, what was that?",
+    "ja": "ごめん、今なんて？",
+    "when_ja": "ぱっと聞き取れなかった時"
+   },
+   {
+    "en": "Could you say that again?",
+    "ja": "もう一回言ってくれる？",
+    "when_ja": "もう一度言ってほしい時"
+   },
+   {
+    "en": "Sorry, I didn't catch that.",
+    "ja": "ごめん、聞き取れなかった",
+    "when_ja": "一部を聞き逃した時"
+   },
+   {
+    "en": "Can you slow down a little?",
+    "ja": "もう少しゆっくり話してくれる？",
+    "when_ja": "相手が速すぎる時"
+   },
+   {
+    "en": "What does that mean?",
+    "ja": "それどういう意味？",
+    "when_ja": "知らない言葉が出てきた時"
+   },
+   {
+    "en": "How do you spell that?",
+    "ja": "それ、つづりはどう書くの？",
+    "when_ja": "名前や単語を確かめる時"
+   },
+   {
+    "en": "So you mean...?",
+    "ja": "つまり、こういうこと？",
+    "when_ja": "自分の理解を確認する時"
+   },
+   {
+    "en": "Wait, who are we talking about?",
+    "ja": "待って、誰の話してる？",
+    "when_ja": "話が見えなくなった時"
+   },
+   {
+    "en": "Sorry, I'm not following.",
+    "ja": "ごめん、話についていけてない",
+    "when_ja": "内容がわからなくなった時"
+   },
+   {
+    "en": "Is this the right word?",
+    "ja": "この言い方で合ってる？",
+    "when_ja": "自分の英語を確かめたい時"
+   },
+   {
+    "en": "How do you say this in English?",
+    "ja": "これ英語でなんて言うの？",
+    "when_ja": "単語が出てこない時"
+   },
+   {
+    "en": "Sorry, my English isn't great yet.",
+    "ja": "ごめん、英語まだ得意じゃなくて",
+    "when_ja": "あせらず話したい時"
+   }
+  ]
+ },
+ {
+  "id": "feeling",
+  "em": "💗",
+  "t": "気持ちを伝える",
+  "d": "感情をそのまま言える表現",
+  "items": [
+   {
+    "en": "I'm so pumped.",
+    "ja": "めっちゃワクワクしてる",
+    "when_ja": "楽しみでたまらない時"
+   },
+   {
+    "en": "I can't wait.",
+    "ja": "待ちきれない",
+    "when_ja": "先の予定が楽しみな時"
+   },
+   {
+    "en": "I'm kind of nervous.",
+    "ja": "ちょっと緊張してる",
+    "when_ja": "本番や発表の前に"
+   },
+   {
+    "en": "That made my day.",
+    "ja": "おかげで最高の一日になった",
+    "when_ja": "うれしいことがあった時"
+   },
+   {
+    "en": "I'm wiped out.",
+    "ja": "もうくたくた",
+    "when_ja": "疲れきっている時"
+   },
+   {
+    "en": "I feel bad about it.",
+    "ja": "なんか申し訳なくて",
+    "when_ja": "悪いことをしたと思う時"
+   },
+   {
+    "en": "I'm kind of stuck.",
+    "ja": "ちょっと行きづまってる",
+    "when_ja": "どうしていいか困った時"
+   },
+   {
+    "en": "I'm so bummed.",
+    "ja": "めっちゃがっかりしてる",
+    "when_ja": "期待はずれだった時"
+   },
+   {
+    "en": "That's a relief.",
+    "ja": "よかった、安心した",
+    "when_ja": "心配ごとが消えた時"
+   },
+   {
+    "en": "I'm really into it.",
+    "ja": "今めっちゃハマってる",
+    "when_ja": "好きなものの話をする時"
+   },
+   {
+    "en": "It's driving me crazy.",
+    "ja": "イライラする",
+    "when_ja": "うんざりしている時"
+   },
+   {
+    "en": "I'm proud of you.",
+    "ja": "すごいじゃん、えらいよ",
+    "when_ja": "相手をほめたい時"
+   }
+  ]
+ },
+ {
+  "id": "filler",
+  "em": "🤔",
+  "t": "つなぎ言葉",
+  "d": "考える時間をかせぐ言葉",
+  "items": [
+   {
+    "en": "Well...",
+    "ja": "えっと…",
+    "when_ja": "話し出す前のひと呼吸に"
+   },
+   {
+    "en": "Let me think.",
+    "ja": "ちょっと考えさせて",
+    "when_ja": "すぐに答えが出ない時"
+   },
+   {
+    "en": "How should I put it?",
+    "ja": "なんて言えばいいかな",
+    "when_ja": "言い方を探している時"
+   },
+   {
+    "en": "You know what I mean?",
+    "ja": "言いたいこと伝わる？",
+    "when_ja": "説明があいまいになった時"
+   },
+   {
+    "en": "Hmm, good question.",
+    "ja": "うーん、いい質問だね",
+    "when_ja": "難しい質問をされた時"
+   },
+   {
+    "en": "It's kind of hard to explain.",
+    "ja": "なんか説明しにくいんだけど",
+    "when_ja": "うまく説明できない時"
+   },
+   {
+    "en": "I mean...",
+    "ja": "っていうか…",
+    "when_ja": "言い直したい時"
+   },
+   {
+    "en": "Give me a second.",
+    "ja": "ちょっと待ってね",
+    "when_ja": "考えをまとめたい時"
+   },
+   {
+    "en": "What's the word...",
+    "ja": "なんだっけ、あの言葉",
+    "when_ja": "単語が出てこない時"
+   },
+   {
+    "en": "Anyway,",
+    "ja": "とにかくさ",
+    "when_ja": "話を本題に戻す時"
+   },
+   {
+    "en": "Sort of, yeah.",
+    "ja": "まあ、そんな感じ",
+    "when_ja": "はっきり言い切れない時"
+   },
+   {
+    "en": "Where was I?",
+    "ja": "どこまで話したっけ？",
+    "when_ja": "話が脱線した時"
+   }
+  ]
+ },
+ {
+  "id": "opinion",
+  "em": "💬",
+  "t": "意見を言う・やんわり反対",
+  "d": "意見とやんわり反対の型",
+  "items": [
+   {
+    "en": "Personally, I think that's a good idea.",
+    "ja": "個人的には、それいいと思う",
+    "when_ja": "自分の考えを言う時"
+   },
+   {
+    "en": "Actually, it's the other way around.",
+    "ja": "実はね、逆なんだよ",
+    "when_ja": "相手の勘ちがいを直す時"
+   },
+   {
+    "en": "I see your point, but...",
+    "ja": "言いたいことはわかる、でもね",
+    "when_ja": "やんわり反対したい時"
+   },
+   {
+    "en": "I'm not so sure about that.",
+    "ja": "それはどうかなあ",
+    "when_ja": "賛成しきれない時"
+   },
+   {
+    "en": "That's true, but...",
+    "ja": "たしかに。でもさ",
+    "when_ja": "一度認めてから返す時"
+   },
+   {
+    "en": "I'd say it's worth a try.",
+    "ja": "やってみる価値はあると思うな",
+    "when_ja": "断定をさけて言う時"
+   },
+   {
+    "en": "Maybe it's just me, but...",
+    "ja": "私だけかもしれないけど",
+    "when_ja": "少数派の意見を言う時"
+   },
+   {
+    "en": "It depends.",
+    "ja": "場合によるね",
+    "when_ja": "一概に言えない時"
+   },
+   {
+    "en": "I'm with you on that.",
+    "ja": "それには賛成",
+    "when_ja": "しっかり同意を示す時"
+   },
+   {
+    "en": "To be honest,",
+    "ja": "正直に言うとね",
+    "when_ja": "本音を切り出す時"
+   },
+   {
+    "en": "Can I say something?",
+    "ja": "ちょっといい？",
+    "when_ja": "話に入りたい時"
+   },
+   {
+    "en": "What do you think?",
+    "ja": "君はどう思う？",
+    "when_ja": "相手に意見をふる時"
+   }
+  ]
+ },
+ {
+  "id": "startend",
+  "em": "👋",
+  "t": "会話の始め方・終わり方",
+  "d": "話しかけて自然に終える",
+  "items": [
+   {
+    "en": "Hey, how's it going?",
+    "ja": "やあ、調子どう？",
+    "when_ja": "友達に話しかける時"
+   },
+   {
+    "en": "Do you have a sec?",
+    "ja": "ちょっといいかな？",
+    "when_ja": "用事があって声をかける時"
+   },
+   {
+    "en": "Long time no see!",
+    "ja": "久しぶり！",
+    "when_ja": "久々に会った時"
+   },
+   {
+    "en": "What have you been up to?",
+    "ja": "最近どうしてた？",
+    "when_ja": "近ごろの様子を聞く時"
+   },
+   {
+    "en": "Is this seat taken?",
+    "ja": "ここ空いてますか？",
+    "when_ja": "知らない人に話しかける時"
+   },
+   {
+    "en": "I like your bag. Where'd you get it?",
+    "ja": "そのバッグいいね。どこで買ったの？",
+    "when_ja": "初対面の会話のきっかけに"
+   },
+   {
+    "en": "Anyway, I should get going.",
+    "ja": "そろそろ行かなきゃ",
+    "when_ja": "会話を切り上げたい時"
+   },
+   {
+    "en": "Sorry, I gotta run.",
+    "ja": "ごめん、もう行かなきゃ",
+    "when_ja": "急いでその場を離れる時"
+   },
+   {
+    "en": "It was nice talking to you.",
+    "ja": "話せてよかった",
+    "when_ja": "別れぎわのひとことに"
+   },
+   {
+    "en": "Let's catch up soon.",
+    "ja": "また近いうちに話そうよ",
+    "when_ja": "再会を約束する時"
+   },
+   {
+    "en": "Text me, okay?",
+    "ja": "連絡してね",
+    "when_ja": "連絡を続けたい時"
+   },
+   {
+    "en": "See you around.",
+    "ja": "じゃあ、またね",
+    "when_ja": "軽く別れる時"
+   }
+  ]
+ }
+];
+const PRON=[
+ {
+  "id": "r_l",
+  "t": "RとLの区別",
+  "tip_ja": "Rは舌をどこにもつけず奥へ丸める。Lは舌先を上の歯ぐきにしっかり当てる。",
+  "pairs": [
+   {
+    "a": "right",
+    "b": "light",
+    "ja": "rightは舌が浮く、lightは舌先が歯ぐきにつく"
+   },
+   {
+    "a": "rock",
+    "b": "lock",
+    "ja": "岩と鍵。出だしの舌の位置だけが違う"
+   },
+   {
+    "a": "grass",
+    "b": "glass",
+    "ja": "草とガラス。gの直後の舌でどちらか決まる"
+   },
+   {
+    "a": "fry",
+    "b": "fly",
+    "ja": "揚げると飛ぶ。fの後ろが浮く舌かつく舌か"
+   },
+   {
+    "a": "correct",
+    "b": "collect",
+    "ja": "正しいと集める。真ん中の音が入れ替わる"
+   },
+   {
+    "a": "arrive",
+    "b": "alive",
+    "ja": "到着すると生きている。中央のrとlに注目"
+   }
+  ],
+  "sentences": [
+   {
+    "en": "I'll probably be a little late, so start without me.",
+    "ja": "たぶんちょっと遅れるから、先に始めてて。"
+   },
+   {
+    "en": "Could you turn the light on? It's really dark in here.",
+    "ja": "電気つけてくれる？ここ、めっちゃ暗いんだけど。"
+   },
+   {
+    "en": "The train was really crowded, so I stood the whole ride.",
+    "ja": "電車がすごく混んでて、ずっと立ちっぱなしだった。"
+   }
+  ]
+ },
+ {
+  "id": "b_v",
+  "t": "BとVの区別",
+  "tip_ja": "Bは唇を一度きっちり閉じて破裂。Vは上の前歯を下唇に軽く当てて息を出す。",
+  "pairs": [
+   {
+    "a": "best",
+    "b": "vest",
+    "ja": "最高とベスト（服）。唇を閉じるか歯を当てるか"
+   },
+   {
+    "a": "boat",
+    "b": "vote",
+    "ja": "ボートと投票。出だしで唇が閉じるのはboat"
+   },
+   {
+    "a": "berry",
+    "b": "very",
+    "ja": "ベリーととても。veryは歯が下唇に触れる"
+   },
+   {
+    "a": "ban",
+    "b": "van",
+    "ja": "禁止と車のバン。息が続くのはvan"
+   },
+   {
+    "a": "bet",
+    "b": "vet",
+    "ja": "賭けると獣医。bは一瞬、vは伸ばせる"
+   },
+   {
+    "a": "base",
+    "b": "vase",
+    "ja": "土台と花びん。唇を閉じないとvaseになる"
+   }
+  ],
+  "sentences": [
+   {
+    "en": "I've never been in a van that big before.",
+    "ja": "あんな大きいバンに乗ったの、たぶん初めて。"
+   },
+   {
+    "en": "That movie was actually better than everybody said.",
+    "ja": "あの映画、みんなが言ってたより普通に良かった。"
+   },
+   {
+    "en": "I bought a black vest and a backpack yesterday.",
+    "ja": "昨日、黒いベストとリュックを買ったんだ。"
+   }
+  ]
+ },
+ {
+  "id": "s_th",
+  "t": "SとTH（息だけのth）",
+  "tip_ja": "thは舌先を上下の歯で軽くはさんで息を出す。Sは舌を歯につけずスーッと。",
+  "pairs": [
+   {
+    "a": "sink",
+    "b": "think",
+    "ja": "沈むと考える。thinkは舌先が歯の間から出る"
+   },
+   {
+    "a": "sing",
+    "b": "thing",
+    "ja": "歌うとモノ。出だしの舌の位置が違う"
+   },
+   {
+    "a": "mouse",
+    "b": "mouth",
+    "ja": "ねずみと口。語尾で舌を出すのがmouth"
+   },
+   {
+    "a": "sick",
+    "b": "thick",
+    "ja": "具合が悪いと分厚い。舌をはさむとthick"
+   },
+   {
+    "a": "pass",
+    "b": "path",
+    "ja": "通り過ぎると小道。最後の音だけが違う"
+   },
+   {
+    "a": "worse",
+    "b": "worth",
+    "ja": "もっと悪いと価値がある。語尾に注目"
+   }
+  ],
+  "sentences": [
+   {
+    "en": "I think I left something in the bathroom.",
+    "ja": "お風呂場になんか忘れてきた気がする。"
+   },
+   {
+    "en": "Thanks for everything you said this month.",
+    "ja": "今月はいろいろ言ってくれてありがとう。"
+   },
+   {
+    "en": "That's the third time she's said the same thing.",
+    "ja": "彼女が同じこと言うの、これで三回目だよ。"
+   }
+  ]
+ },
+ {
+  "id": "z_th",
+  "t": "ZとTH（声を出すth）",
+  "tip_ja": "有声thは舌先を歯にはさんだまま声を出す。Zは舌を歯につけずブーンと震わす。",
+  "pairs": [
+   {
+    "a": "breathe",
+    "b": "breeze",
+    "ja": "息をするとそよ風。舌を出すのがbreathe"
+   },
+   {
+    "a": "clothing",
+    "b": "closing",
+    "ja": "衣類と閉めること。真ん中の音が別物"
+   },
+   {
+    "a": "then",
+    "b": "Zen",
+    "ja": "そのときと禅。thenは舌先が歯の間に来る"
+   },
+   {
+    "a": "bathe",
+    "b": "bays",
+    "ja": "湯につかると入り江。語尾で舌を出すか出さないか"
+   },
+   {
+    "a": "teething",
+    "b": "teasing",
+    "ja": "歯が生えるとからかう。中央の音を聞き分ける"
+   },
+   {
+    "a": "either",
+    "b": "easier",
+    "ja": "どちらかとより簡単。thを「ジ」にしない"
+   }
+  ],
+  "sentences": [
+   {
+    "en": "My brother says they're moving there in either May or June.",
+    "ja": "兄が言うには、5月か6月にそっちへ引っ越すらしい。"
+   },
+   {
+    "en": "Just breathe. These things happen to everybody, okay?",
+    "ja": "落ち着いて。こういうのは誰にでもあるって。"
+   },
+   {
+    "en": "Those are my mother's clothes, not mine.",
+    "ja": "それ、お母さんの服だよ。私のじゃない。"
+   }
+  ]
+ },
+ {
+  "id": "f_h",
+  "t": "FとH（ファ行に注意）",
+  "tip_ja": "Fは上の前歯を下唇に当てて息を細く出す。Hはのどの奥から息だけ吐く。",
+  "pairs": [
+   {
+    "a": "food",
+    "b": "hood",
+    "ja": "食べ物とフード（かぶる部分）。歯を当てるのがfood"
+   },
+   {
+    "a": "fat",
+    "b": "hat",
+    "ja": "太ったと帽子。唇と歯が触れるかどうか"
+   },
+   {
+    "a": "fill",
+    "b": "hill",
+    "ja": "満たすと丘。息の出どころが口先かのどか"
+   },
+   {
+    "a": "fair",
+    "b": "hair",
+    "ja": "公平と髪。日本語のハ行にすると通じない"
+   },
+   {
+    "a": "fear",
+    "b": "hear",
+    "ja": "こわがると聞こえる。出だしを歯で作る"
+   },
+   {
+    "a": "fold",
+    "b": "hold",
+    "ja": "たたむと持つ。foldは息がこすれる音が入る"
+   }
+  ],
+  "sentences": [
+   {
+    "en": "The coffee here is fine, but the food is better.",
+    "ja": "ここのコーヒーは普通だけど、料理はもっといいよ。"
+   },
+   {
+    "en": "I forgot my phone at home again.",
+    "ja": "また家にスマホ忘れてきちゃった。"
+   },
+   {
+    "en": "How far is it from here to the festival?",
+    "ja": "ここからお祭りの会場まで、どれくらいある？"
+   }
+  ]
+ },
+ {
+  "id": "si_shi",
+  "t": "seeとsheの区別",
+  "tip_ja": "seeは口を横に引いてスーッ。sheは唇を少し丸めてシューッと息を出す。",
+  "pairs": [
+   {
+    "a": "see",
+    "b": "she",
+    "ja": "見ると彼女は。唇を丸めるとsheになる"
+   },
+   {
+    "a": "sip",
+    "b": "ship",
+    "ja": "一口飲むと船。出だしの息の広がりが違う"
+   },
+   {
+    "a": "seat",
+    "b": "sheet",
+    "ja": "席とシーツ。日本語の「シ」に寄せない"
+   },
+   {
+    "a": "same",
+    "b": "shame",
+    "ja": "同じと恥ずかしいこと。唇の形で決まる"
+   },
+   {
+    "a": "save",
+    "b": "shave",
+    "ja": "助けるとひげをそる。sは鋭く、shは太い音"
+   },
+   {
+    "a": "sell",
+    "b": "shell",
+    "ja": "売ると貝がら。出だしを聞き分ける"
+   }
+  ],
+  "sentences": [
+   {
+    "en": "She said she'd see us at seven, right?",
+    "ja": "彼女、7時に会おうって言ってたよね？"
+   },
+   {
+    "en": "Sorry, I didn't see the message she sent.",
+    "ja": "ごめん、彼女が送ったメッセージ見てなかった。"
+   },
+   {
+    "en": "This shirt is the same size as mine.",
+    "ja": "このシャツ、私のと同じサイズだ。"
+   }
+  ]
+ },
+ {
+  "id": "ae_a",
+  "t": "catとcutのア",
+  "tip_ja": "catは口を大きく横に開いて「エァ」。cutは力を抜いた短い「ア」。",
+  "pairs": [
+   {
+    "a": "cat",
+    "b": "cut",
+    "ja": "猫と切る。catは口が横に広がる"
+   },
+   {
+    "a": "bag",
+    "b": "bug",
+    "ja": "かばんと虫。bugはあごを下ろさず短く"
+   },
+   {
+    "a": "cap",
+    "b": "cup",
+    "ja": "帽子とコップ。口の開き方で意味が変わる"
+   },
+   {
+    "a": "match",
+    "b": "much",
+    "ja": "試合とたくさん。matchの方が口が横に開く"
+   },
+   {
+    "a": "ran",
+    "b": "run",
+    "ja": "走った（過去）と走る。過去形は口を広く"
+   },
+   {
+    "a": "track",
+    "b": "truck",
+    "ja": "線路とトラック。日本語だとどちらも同じに聞こえる"
+   }
+  ],
+  "sentences": [
+   {
+    "en": "That black cap actually matches your jacket.",
+    "ja": "その黒いキャップ、意外とジャケットに合ってる。"
+   },
+   {
+    "en": "My brother ran back to grab his lunch.",
+    "ja": "弟、お弁当を取りに走って戻ってった。"
+   },
+   {
+    "en": "I think a bug got into my backpack.",
+    "ja": "リュックに虫が入った気がするんだけど。"
+   }
+  ]
+ },
+ {
+  "id": "ending",
+  "t": "語末を母音で終わらせない",
+  "tip_ja": "最後のtやkは息を止めるだけ。「トゥ」「ク」と母音を足さないのがコツ。",
+  "pairs": [
+   {
+    "a": "bed",
+    "b": "bet",
+    "ja": "ベッドと賭ける。「ベッド」と伸ばすとbetに負ける"
+   },
+   {
+    "a": "back",
+    "b": "bag",
+    "ja": "背中とかばん。最後にのどが響けばbag"
+   },
+   {
+    "a": "kid",
+    "b": "kit",
+    "ja": "子どもと道具セット。語末を強く切るとkit"
+   },
+   {
+    "a": "hard",
+    "b": "heart",
+    "ja": "難しいと心臓。最後の音まで気を抜かない"
+   },
+   {
+    "a": "dog",
+    "b": "dock",
+    "ja": "犬と船着き場。「ドッグ」の「グ」を弱く"
+   },
+   {
+    "a": "ride",
+    "b": "right",
+    "ja": "乗ると正しい。語末を「ド」「ト」にしない"
+   }
+  ],
+  "sentences": [
+   {
+    "en": "I left my bag right next to the bed.",
+    "ja": "かばん、ベッドのすぐ横に置いてきたよ。"
+   },
+   {
+    "en": "That's a good point, but I still don't get it.",
+    "ja": "それはいい指摘だけど、やっぱりピンと来ない。"
+   },
+   {
+    "en": "He picked up the book and walked out.",
+    "ja": "彼は本を手に取って、そのまま出ていった。"
+   }
+  ]
+ }
+];
+
+const CATEGORIES=[
+ {id:'all', t:'すべて'},{id:'basic', t:'定番'},{id:'travel', t:'旅行'},
+ {id:'life', t:'暮らし'},{id:'work', t:'学校・仕事'},{id:'trouble', t:'トラブル'},{id:'free', t:'自由'}
 ];
 
 /* ---------- 1.5 フリートーク専用のデータ ---------- */
@@ -368,17 +2623,41 @@ const MISSIONS={
  a:[{id:'like',t:'I like / I don\u2019t like ~',d:'好き嫌いを言う'},
     {id:'because',t:'because ~',d:'理由をつけて話す'},
     {id:'howabout',t:'How about you?',d:'相手に聞き返す'},
-    {id:'canI',t:'Can I ~? / Could you ~?',d:'お願いしてみる'}],
+    {id:'canI',t:'Can I ~? / Could you ~?',d:'お願いしてみる'},
+    {id:"metoo",t:"Me too. / Me neither.",d:"自分も同じ、と返す",ex:"Me too! That song's been stuck in my head all week.",exja:"同じ！その曲、今週ずっと頭から離れない。"},
+    {id:"lets",t:"Let's ~",d:"一緒に〜しようと誘う",ex:"Let's grab something to eat after class.",exja:"授業のあと、何か食べに行こうよ。"},
+    {id:"wantto",t:"I want to ~",d:"〜したい気持ちを伝える",ex:"I want to try skateboarding sometime, but I'd probably fall right away.",exja:"いつかスケボーやってみたい。たぶんすぐ転ぶけど。"},
+    {id:"whatkind",t:"What kind of ~?",d:"どんな〜？と種類を聞く",ex:"What kind of music do you usually listen to?",exja:"普段はどんな音楽聴くの？"},
+    {id:"really",t:"Really? / Seriously?",d:"驚いて相づちを打つ",ex:"Seriously? You actually met him in person?",exja:"まじで？本人に会ったの？"},
+    {id:"thats",t:"That's ~!",d:"That's cool! と感想を返す",ex:"That's too bad. You were really looking forward to it.",exja:"それは残念だったね。すごく楽しみにしてたのに。"},
+    {id:"howwas",t:"How was ~?",d:"どうだった？と感想を聞く",ex:"How was the concert last night?",exja:"昨日のライブ、どうだった？"},
+    {id:"ithink",t:"I think ~ / I don't think ~",d:"自分の考えを言う",ex:"I don't think we have any homework today.",exja:"今日は宿題ないと思うよ。"}],
  b:[{id:'perf',t:"I've been ~ing",d:'ずっと続けていることを言う'},
     {id:'usedto',t:'I used to ~',d:'昔はこうだった、と話す'},
     {id:'actually',t:'Actually, ...',d:'「実はね」と切り出す'},
     {id:'reminds',t:'That reminds me of ~',d:'話をつなげる'},
-    {id:'ifI',t:'If I could ~, I would ~',d:'もしも話をする'}],
+    {id:'ifI',t:'If I could ~, I would ~',d:'もしも話をする'},
+    {id:"thinkingof",t:"I'm thinking of ~ing",d:"〜しようかなと考え中",ex:"I'm thinking of joining the tennis club next year.",exja:"来年テニス部に入ろうかなと思ってる。"},
+    {id:"depends",t:"It depends on ~",d:"〜によるね、と答える",ex:"It depends on the weather. If it rains, we'll just stay in.",exja:"天気次第かな。雨なら家にいる。"},
+    {id:"idrather",t:"I'd rather ~ (than ...)",d:"どちらかというと〜したい",ex:"I'd rather stay home and watch a movie than go all the way out there.",exja:"わざわざ出かけるより、家で映画見てたいかな。"},
+    {id:"notinto",t:"I'm not really into ~",d:"〜はあんまり好きじゃない",ex:"I'm not really into horror movies. They stick with me for days.",exja:"ホラーはあんまり得意じゃなくて。何日も引きずるんだよね。"},
+    {id:"aslongas",t:"as long as ~",d:"〜さえすれば大丈夫",ex:"We'll be fine as long as we leave by seven.",exja:"7時までに出れば間に合うよ。"},
+    {id:"wasgoingto",t:"I was going to ~, but ...",d:"〜する予定が変わった話",ex:"I was going to study last night, but I fell asleep at eight.",exja:"昨日勉強するつもりだったのに、8時に寝落ちした。"},
+    {id:"eventhough",t:"even though ~",d:"〜なのに、と付け足す",ex:"He showed up even though he had a fever.",exja:"熱があったのに、あいつ来たんだよ。"},
+    {id:"endedup",t:"I ended up ~ing",d:"結局〜することになった",ex:"We ended up talking for like three hours.",exja:"結局3時間くらい話しちゃった。"}],
  c:[{id:'thething',t:'The thing is, ...',d:'本題・言いにくいことを切り出す'},
     {id:'guess',t:'I guess / I suppose',d:'断定せずにぼかす'},
     {id:'notonly',t:'Not only ~ but also ~',d:'情報を重ねる'},
     {id:'honest',t:'To be honest, ...',d:'正直な気持ちを言う'},
-    {id:'ifiwere',t:"If I were you, I'd ~",d:'相手に助言する'}]
+    {id:'ifiwere',t:"If I were you, I'd ~",d:'相手に助言する'},
+    {id:"kindof",t:"kind of ~ / kinda ~",d:"なんか〜な感じ、とぼかす",ex:"It was kind of awkward at first, but we got past it.",exja:"最初はちょっと気まずかったけど、途中から平気になった。"},
+    {id:"orsomething",t:"~ or something",d:"〜とか、と曖昧に言う",ex:"Let's get bubble tea or something after this.",exja:"この後、タピオカとか飲みに行こうよ。"},
+    {id:"itsnotthat",t:"It's not that ~, it's just ~",d:"〜なんじゃなくて、ただ〜",ex:"It's not that I hate it, it's just not really my thing.",exja:"嫌いってわけじゃなくて、単に好みじゃないだけ。"},
+    {id:"youknow",t:"You know what I mean?",d:"伝わってる？と確認する",ex:"It's hard to put into words, you know what I mean?",exja:"うまく言葉にできないんだけど、伝わるかな？"},
+    {id:"supposedto",t:"I'm supposed to ~",d:"本当は〜することになってる",ex:"I'm supposed to be studying right now, honestly.",exja:"正直、今は勉強してるはずの時間なんだよね。"},
+    {id:"turnsout",t:"It turns out (that) ~",d:"実は〜だったと分かる",ex:"It turns out we were waiting at different exits the whole time.",exja:"実はずっと別々の出口で待ってたんだよね。"},
+    {id:"speakingof",t:"Speaking of ~, ...",d:"〜といえば、と話をつなぐ",ex:"Speaking of summer, are you going anywhere this year?",exja:"夏といえば、今年はどこか行くの？"},
+    {id:"nowonder",t:"No wonder ~",d:"どうりで〜なわけだ",ex:"No wonder you're tired. You only slept four hours.",exja:"そりゃ眠いよね。4時間しか寝てないんだから。"}]
 };
 const DAILY=[
  {en:"What is one small thing that made you happy this week?",ja:"今週、小さくても嬉しかったことは？"},
@@ -410,7 +2689,77 @@ const DAILY=[
  {en:"Do you like taking photos? What do you take pictures of?",ja:"写真は撮る？何を撮る？"},
  {en:"What food would you never eat again?",ja:"もう食べたくない食べ物は？"},
  {en:"If you could live anywhere in Japan, where would it be?",ja:"日本のどこにでも住めるなら？"},
- {en:"What is something you changed your mind about recently?",ja:"最近、考えが変わったことは？"}
+ {en:"What is something you changed your mind about recently?",ja:"最近、考えが変わったことは？"},
+ {en:"What's something small that always puts you in a good mood?",ja:"ちょっとしたことで気分が上がるものって何？"},
+ {en:"Who in your family are you most like?",ja:"家族の中で誰に一番似てる？"},
+ {en:"What's the best thing about the town you grew up in?",ja:"育った町の一番いいところって何？"},
+ {en:"If you could skip one chore forever, which one would you pick?",ja:"家の手伝いをひとつ永遠にサボれるなら、どれにする？"},
+ {en:"What's a movie or show you could watch over and over?",ja:"何回でも見ちゃう映画とかドラマってある？"},
+ {en:"What's the last thing you bought with your own money?",ja:"自分のお金で最後に買ったものって何？"},
+ {en:"What's your go-to order at a convenience store?",ja:"コンビニでつい買っちゃう定番って何？"},
+ {en:"Who was your favorite teacher, and what made them special?",ja:"一番好きだった先生は誰？どこが特別だった？"},
+ {en:"What were you scared of when you were little?",ja:"小さいころ、何が怖かった？"},
+ {en:"How do you get to school, and do you like the trip?",ja:"学校までどうやって行ってる？その時間って好き？"},
+ {en:"What's the longest you've ever waited in line for something?",ja:"何かのために並んだ最長時間ってどれくらい？"},
+ {en:"Is there a habit you'd really like to quit?",ja:"やめたいなって思ってる癖ってある？"},
+ {en:"What kind of weather puts you in the best mood?",ja:"どんな天気の日が一番気分いい？"},
+ {en:"What's the nicest thing a stranger has ever done for you?",ja:"知らない人にされた一番うれしかったことって何？"},
+ {en:"What smell brings back a memory for you?",ja:"嗅ぐと思い出がよみがえる匂いってある？"},
+ {en:"Do you own anything that's older than you are?",ja:"自分より年上のモノって持ってる？"},
+ {en:"Do you prefer big groups or hanging out one-on-one?",ja:"大人数と1対1、どっちで過ごすのが好き？"},
+ {en:"What's a subject you wish schools actually taught?",ja:"学校で本当は教えてほしい科目って何？"},
+ {en:"What's the worst haircut you've ever had?",ja:"今までで一番失敗した髪型は？"},
+ {en:"How do you cheer up a friend who's having a rough day?",ja:"落ち込んでる友達、どうやって元気づける？"},
+ {en:"What's something everybody loves that you just don't get?",ja:"みんな好きだけど自分にはピンとこないものって何？"},
+ {en:"What's the hardest you've ever worked for something?",ja:"今までで一番必死に頑張ったことって何？"},
+ {en:"If you had to eat one country's food for a month, whose?",ja:"1ヶ月ひとつの国の料理だけ食べるなら、どこの国にする？"},
+ {en:"What do you always do right before you fall asleep?",ja:"寝る直前に必ずやることってある？"},
+ {en:"What's a compliment you still remember?",ja:"今でも覚えてる褒め言葉ってある？"},
+ {en:"Would you rather be great at math or great at sports?",ja:"数学が得意なのとスポーツが得意なの、どっちがいい？"},
+ {en:"What's the most memorable school trip you've been on?",ja:"一番記憶に残ってる学校の旅行ってどれ？"},
+ {en:"What did you think was cool back in junior high?",ja:"中学のころ、何がカッコいいと思ってた？"},
+ {en:"Is your room usually clean, or kind of a mess?",ja:"部屋ってだいたい片付いてる？それとも散らかってる？"},
+ {en:"What's the biggest risk you've ever taken?",ja:"今までで一番思い切ったことって何？"},
+ {en:"Is there someone your age you really look up to?",ja:"同い年で本気で尊敬してる人っている？"},
+ {en:"What do you spend way too much time on?",ja:"時間を使いすぎてるなって思うことって何？"},
+ {en:"If you had to teach a class tomorrow, what would you teach?",ja:"明日授業をやるとしたら、何を教える？"},
+ {en:"What's the best gift you've ever gotten?",ja:"今までもらった中で一番のプレゼントは？"},
+ {en:"Are you saving up for anything right now?",ja:"今、何かのためにお金貯めてる？"},
+ {en:"Do you love surprises, or would you rather know ahead?",ja:"サプライズ好き？それとも先に知っておきたいタイプ？"},
+ {en:"What's a small thing that annoys you more than it should?",ja:"些細なことなのに、やたらイラッとすることって何？"},
+ {en:"What's something you've done that made your parents proud?",ja:"親が誇りに思ってくれたことって何かある？"},
+ {en:"If the week had an eighth day, how would you use it?",ja:"1週間が8日あったら、その1日どう使う？"},
+ {en:"What's the scariest thing you've done on purpose?",ja:"自分から進んでやった中で一番怖かったことって何？"},
+ {en:"Which season do you like best, and what do you do then?",ja:"どの季節が一番好き？その季節って何してる？"},
+ {en:"Do you read the comments online, or just scroll past?",ja:"ネットのコメントって読む？それとも飛ばしちゃう？"},
+ {en:"What are you better at now than you were last year?",ja:"去年より上手くなったことって何かある？"},
+ {en:"What's something you really want to try but haven't yet?",ja:"やってみたいのに、まだやれてないことって何？"},
+ {en:"Have you ever regretted something you said? What happened?",ja:"言わなきゃよかったって思ったことある？何があったの？"},
+ {en:"What's the kindest thing you've done for someone lately?",ja:"最近、誰かにした一番やさしいことって何？"},
+ {en:"What's a rule you grew up with at home?",ja:"家のルールで、ずっと守らされてたことって何？"},
+ {en:"What's a spot near you that tourists never find?",ja:"地元で観光客が絶対来ない穴場ってある？"},
+ {en:"If you could live one day again, which day would it be?",ja:"1日だけやり直せるなら、どの日にする？"},
+ {en:"What did you believe as a kid that turned out wrong?",ja:"子供のころ信じてたけど、実は違ったことって何？"},
+ {en:"What do you do when you're really nervous?",ja:"すごく緊張したとき、どうしてる？"},
+ {en:"What's the best advice anyone has given you?",ja:"今までもらった中で一番いいアドバイスって何？"},
+ {en:"How do you feel about speaking in front of the class?",ja:"クラスの前で発表するのって、どんな気持ち？"},
+ {en:"What's something you quit? Do you regret quitting it?",ja:"途中でやめたことってある？やめて後悔してる？"},
+ {en:"What does a perfect Saturday morning look like for you?",ja:"完璧な土曜の朝ってどんな感じ？"},
+ {en:"Would you rather live in a big city or the countryside?",ja:"大きい街と田舎、どっちに住みたい？"},
+ {en:"What's the most expensive thing you've ever broken?",ja:"今までで一番高いもので壊しちゃったのは何？"},
+ {en:"What's a trend right now that you think is kind of silly?",ja:"今流行ってるので「それどうなの」って思うものある？"},
+ {en:"Who do you talk to when something's bothering you?",ja:"モヤモヤすることがあるとき、誰に話す？"},
+ {en:"What are you looking forward to next month?",ja:"来月、楽しみにしてることって何？"},
+ {en:"What's the toughest decision you've had to make so far?",ja:"今までで一番迷った決断って何？"},
+ {en:"Do you think you'd make a good older brother or sister?",ja:"自分っていいお兄ちゃん・お姉ちゃんになれると思う？"},
+ {en:"What's a job you'd never want to do?",ja:"絶対やりたくない仕事って何？"},
+ {en:"What do your friends always come to you for?",ja:"友達っていつも、どんなことで頼ってくる？"},
+ {en:"If money weren't an issue, what would you study?",ja:"お金が関係ないなら、何を勉強したい？"},
+ {en:"What's the last thing that really surprised you?",ja:"最近、本気でびっくりしたことって何？"},
+ {en:"How much sleep do you actually get on school nights?",ja:"学校がある日って、実際どれくらい寝てる？"},
+ {en:"What's something you use literally every single day?",ja:"毎日欠かさず使ってるものって何？"},
+ {en:"If you designed your own school day, when would it start?",ja:"学校の1日を自分で決めていいなら、何時始まりにする？"},
+ {en:"What do you want people to remember about you?",ja:"自分のどんなところを覚えていてほしい？"}
 ];
 const dailyQ = ()=>{ const d=new Date(); return DAILY[(Math.floor(d.getTime()/86400000)+d.getTimezoneOffset())%DAILY.length] || DAILY[0]; };
 
@@ -660,7 +3009,7 @@ const app = {
 };
 const TABS=[
   {id:'talk', ic:'💬', t:'会話'},
-  {id:'phrase', ic:'📒', t:'フレーズ帳'},
+  {id:'phrase', ic:'🎯', t:'練習'},
   {id:'stats', ic:'📈', t:'記録'},
   {id:'set', ic:'⚙️', t:'設定'}
 ];
@@ -684,13 +3033,13 @@ function render(){
   $('#composer').classList.toggle('hidden', !live);
   document.body.style.paddingBottom = live? '76px':'';
   if(app.tab==='talk'){ app.chat? renderChat(m) : renderSetup(m); }
-  else if(app.tab==='phrase') renderPhrases(m);
+  else if(app.tab==='phrase') renderPractice(m);
   else if(app.tab==='stats') renderStats(m);
   else renderSettings(m);
 }
 
 /* ---------- 8. スタート画面 ---------- */
-let pick={scene:'cafe', custom:''};
+let pick={scene:'cafe', custom:'', cat:'all'};
 function renderSetup(m){
   $('#hTitle').textContent='Talkie';
   $('#hSub').textContent='じぶん英会話';
@@ -728,9 +3077,14 @@ function renderSetup(m){
       <button class="btn ghost sm" id="lvNo">このままでいい</button></div>
   </div>`:''; })()}
   <div>
-    <h2 style="font-size:15px;margin:4px 0 10px">場面をえらぶ</h2>
+    <div class="row" style="margin:4px 0 9px"><h2 style="font-size:15px;margin:0" class="grow">場面をえらぶ</h2>
+      <span class="muted" style="font-size:12px">${SCENES.length}種類</span></div>
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:9px;-webkit-overflow-scrolling:touch">
+      ${CATEGORIES.filter(c=>c.id==='all'||SCENES.some(s=>s.cat===c.id)).map(c=>`<button class="chip" data-cat="${c.id}"
+        style="${pick.cat===c.id?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft);':''}white-space:nowrap;padding:7px 13px;font-size:13px">${c.t}</button>`).join('')}
+    </div>
     <div class="scenes" id="scenes">
-      ${SCENES.map(s=>`<button class="scene ${pick.scene===s.id?'on':''}" data-s="${s.id}">
+      ${SCENES.filter(s=>pick.cat==='all'||s.cat===pick.cat).map(s=>`<button class="scene ${pick.scene===s.id?'on':''}" data-s="${s.id}">
         <span class="em">${s.em}</span><span class="t">${s.t}</span><span class="d">${s.d}</span></button>`).join('')}
     </div>
   </div>
@@ -756,6 +3110,7 @@ function renderSetup(m){
   const lg=$('#lvGo'); if(lg) lg.onclick=()=>{ const sg=levelSuggestion(); if(sg){ cfg.level=sg.to.id; saveCfg(); toast('むずかしさを「'+sg.to.t+'」にしました'); render(); } };
   const ln=$('#lvNo'); if(ln) ln.onclick=()=>{ cfg.autoLevel=false; saveCfg(); render(); };
   $('#scenes').onclick=e=>{ const b=e.target.closest('[data-s]'); if(!b) return; pick.scene=b.dataset.s; render(); };
+  m.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{ pick.cat=b.dataset.cat; render(); });
   $('#lvl').onclick=e=>{ const b=e.target.closest('[data-l]'); if(!b) return; cfg.level=b.dataset.l; saveCfg(); render(); };
   const cu=$('#customSit'); if(cu) cu.oninput=e=>{ pick.custom=e.target.value; };
   bindFreePanel();
@@ -793,7 +3148,11 @@ function freePanel(){
       <button class="chip" data-ms="auto" style="${F.mission==='auto'?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft)':''};padding:7px 12px;font-size:13px">🎲 おまかせ</button>
       ${ms.map(x=>`<button class="chip" data-ms="${x.id}" style="${F.mission===x.id?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft)':''};padding:7px 12px;font-size:13px">${esc(x.t)}</button>`).join('')}
     </div>
-    ${(()=>{ const cur=ms.find(x=>x.id===F.mission); return cur?`<p class="muted" style="margin:9px 0 0">${esc(cur.d)}　会話中にこの言い方が使えたら ⭐️ が付きます。</p>`:''; })()}
+    ${(()=>{ const cur=ms.find(x=>x.id===F.mission); return cur?`
+      <p class="muted" style="margin:9px 0 0">${esc(cur.d)}　会話中にこの言い方が使えたら ⭐️ が付きます。</p>
+      ${cur.ex?`<div style="margin-top:8px;padding:9px 11px;border:1px solid var(--line);border-radius:11px">
+        <div style="font-size:13.5px;font-weight:600">${esc(cur.ex)} <button class="chip" data-sayt="${esc(cur.ex)}">🔊</button></div>
+        <div class="muted" style="font-size:12px">${esc(cur.exja||'')}</div></div>`:''}`:''; })()}
   </div>
   <div class="card">
     <h2>会話の長さ</h2>
@@ -812,6 +3171,7 @@ function bindFreePanel(){
   const tc=$('#topicCustom'); if(tc) tc.oninput=e=>{ F.topicCustom=e.target.value; cfg.free.topicCustom=e.target.value; saveCfg(); };
   const fl=$('#freeLen'); if(fl) fl.onclick=e=>{ const b=e.target.closest('[data-fl]'); if(!b) return; F.len=b.dataset.fl; saveCfg(); render(); };
   const ud=$('#useDaily'); if(ud) ud.onclick=()=>{ F.topic='custom'; F.topicCustom=dailyQ().en; saveCfg(); render(); toast('今日のお題を話題にしました'); };
+  document.querySelectorAll('#main [data-sayt]').forEach(b=>b.onclick=()=>speak(b.dataset.sayt));
   const rf=$('#randomFree'); if(rf) rf.onclick=()=>{
     const pk=a=>a[Math.floor(Math.random()*a.length)];
     F.char=pk(CHARS).id; F.topic=pk(TOPICS.filter(t=>t.id!=='custom'&&t.id!=='auto')).id;
@@ -943,7 +3303,7 @@ function paintMsgs(){
       <button class="btn ghost sm" id="bEnd">🏁 会話を終える</button>
     </div>`;
     if(free && c.mission){
-      h+=`<div class="muted" style="text-align:center;font-size:12px">${c.missionDone?'⭐️ 今日のミッション達成！':'🎯 今日のミッション：<b>'+esc(c.mission.t)+'</b>（'+esc(c.mission.d)+'）'}</div>`;
+      h+=`<div class="muted" style="text-align:center;font-size:12px">${c.missionDone?'⭐️ 今日のミッション達成！':'🎯 今日のミッション：<b>'+esc(c.mission.t)+'</b>（'+esc(c.mission.d)+'）'+(c.mission.ex?'<br>例：'+esc(c.mission.ex):'')}</div>`;
     }
   }
   if(c.report) h+=reportHtml(c.report,c);
@@ -1342,7 +3702,193 @@ function pronHtml(r){
   <div class="muted" style="font-size:12px;margin-top:6px">聞き取られた音：「${esc(r.said||'（無音）')}」</div>`;
 }
 
-/* ---------- 11. フレーズ帳（間隔反復＋発音チェック） ---------- */
+/* ---------- 11. 練習タブ（フレーズ帳／パック／発音ドリル） ---------- */
+let prTab='srs', openPack=null, openPron=null, pronQuiz=null;
+function renderPractice(m){
+  if(phMode==='quiz'){ renderQuiz(m); return; }
+  if(prTab==='packs' && openPack){ renderPackDetail(m); return; }
+  if(prTab==='pron' && openPron){ renderPronDrill(m); return; }
+  const seg=`<div class="seg" id="prTab" style="margin-bottom:2px">
+    <button data-pr="srs" class="${prTab==='srs'?'on':''}">📒 フレーズ帳</button>
+    <button data-pr="packs" class="${prTab==='packs'?'on':''}">📦 パック</button>
+    <button data-pr="pron" class="${prTab==='pron'?'on':''}">🎤 発音</button></div>`;
+  m.innerHTML=seg+'<div id="prBody"></div>';
+  $('#prTab').onclick=e=>{ const b=e.target.closest('[data-pr]'); if(!b) return; prTab=b.dataset.pr; openPack=null; openPron=null; render(); };
+  const body=$('#prBody');
+  body.style.display='flex'; body.style.flexDirection='column'; body.style.gap='14px';
+  if(prTab==='srs') renderPhrases(body);
+  else if(prTab==='packs') renderPacks(body);
+  else renderPronList(body);
+}
+
+/* --- フレーズパック --- */
+const packHas = p => phrases.some(x=>x.en.toLowerCase()===p.en.toLowerCase());
+function renderPacks(m){
+  $('#hTitle').textContent='📦 フレーズパック';
+  $('#hSub').textContent='会話が止まらなくなる決まり文句';
+  if(!PACKS.length){ m.innerHTML=`<div class="empty">パックがありません</div>`; return; }
+  m.innerHTML=`<p class="muted" style="margin:0">話が続かない原因のほとんどは「相づち・聞き返し・つなぎ」を知らないことです。ここから選んでフレーズ帳に入れると、次の会話でそのまま使えます。</p>
+  ${PACKS.map(p=>{ const got=p.items.filter(packHas).length; return `
+    <button class="card" style="text-align:left;display:block;width:100%" data-pack="${p.id}">
+      <div class="row"><div style="font-size:26px">${p.em}</div>
+        <div class="grow"><div style="font-weight:700">${esc(p.t)}</div>
+          <div class="muted" style="font-size:12px">${esc(p.d)}</div></div>
+        <div class="muted" style="font-size:12px">${got}/${p.items.length}</div></div>
+      <div class="bar" style="margin-top:9px"><i style="width:${got/p.items.length*100}%"></i></div>
+    </button>`; }).join('')}`;
+  m.querySelectorAll('[data-pack]').forEach(b=>b.onclick=()=>{ openPack=b.dataset.pack; render(); });
+}
+function renderPackDetail(m){
+  const p=PACKS.find(x=>x.id===openPack); if(!p){ openPack=null; render(); return; }
+  $('#hTitle').textContent=p.em+' '+p.t;
+  $('#hSub').textContent=p.d;
+  const got=p.items.filter(packHas).length;
+  m.innerHTML=`<button class="btn ghost sm" id="pkBack" style="align-self:flex-start">← パック一覧</button>
+   <div class="row"><button class="btn grow" id="pkAll">${got===p.items.length?'✅ ぜんぶ入っています':`📒 まとめてフレーズ帳に入れる（残り${p.items.length-got}）`}</button></div>
+   <div style="display:flex;flex-direction:column;gap:9px">
+   ${p.items.map((it,i)=>`<div class="pcard">
+     <div class="grow"><div class="pe">${esc(it.en)}</div>
+       <div class="pj">${esc(it.ja)}</div>
+       <div class="pj" style="margin-top:2px;opacity:.85">🗣 ${esc(it.when_ja||'')}</div></div>
+     <button class="chip" data-sayt="${esc(it.en)}">🔊</button>
+     <button class="chip" data-add="${i}" ${packHas(it)?'disabled style="opacity:.4"':''}>${packHas(it)?'✓':'＋'}</button>
+   </div>`).join('')}</div>`;
+  $('#pkBack').onclick=()=>{ openPack=null; render(); };
+  $('#pkAll').onclick=()=>{ p.items.forEach(it=>addPhrase(it.en,it.ja,p.t,true)); save(LS.ph,phrases); toast('フレーズ帳に入れました'); render(); };
+  m.querySelectorAll('[data-sayt]').forEach(b=>b.onclick=()=>speak(b.dataset.sayt));
+  m.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{ const it=p.items[+b.dataset.add]; addPhrase(it.en,it.ja,p.t); render(); });
+}
+
+/* --- 発音ドリル --- */
+function renderPronList(m){
+  $('#hTitle').textContent='🎤 発音ドリル';
+  $('#hSub').textContent='日本語話者がつまずく音を集中的に';
+  if(!PRON.length){ m.innerHTML=`<div class="empty">ドリルがありません</div>`; return; }
+  m.innerHTML=`<p class="muted" style="margin:0">通じない原因は語彙より「音」のことが多いです。聞き分けクイズ → 単語 → 文 の順に練習します。</p>
+  ${PRON.map(d=>`<button class="card" style="text-align:left;display:block;width:100%" data-pron="${d.id}">
+    <div style="font-weight:700">${esc(d.t)}</div>
+    <div class="muted" style="font-size:12px;margin-top:3px">${esc(d.tip_ja)}</div>
+    <div class="muted" style="font-size:11.5px;margin-top:5px">${d.pairs.slice(0,3).map(x=>esc(x.a)+' / '+esc(x.b)).join('　')} …</div>
+  </button>`).join('')}`;
+  m.querySelectorAll('[data-pron]').forEach(b=>b.onclick=()=>{ openPron=b.dataset.pron; pronQuiz=null; render(); });
+}
+function renderPronDrill(m){
+  const d=PRON.find(x=>x.id===openPron); if(!d){ openPron=null; render(); return; }
+  $('#hTitle').textContent='🎤 '+d.t;
+  $('#hSub').textContent='聞き分け → 単語 → 文';
+  if(!pronQuiz) pronQuiz={stage:'listen', i:0, right:0, order:shuffle(d.pairs.map((_,i)=>i)), which:null, picked:null, sent:0, pron:null};
+  const q=pronQuiz;
+
+  if(q.stage==='listen'){
+    const pair=d.pairs[q.order[q.i]];
+    if(q.which===null) q.which=Math.random()<0.5?'a':'b';
+    m.innerHTML=`<button class="btn ghost sm" id="prBack" style="align-self:flex-start">← ドリル一覧</button>
+     <div class="muted">① 聞き分け　${q.i+1} / ${d.pairs.length}</div>
+     <div class="bar"><i style="width:${q.i/d.pairs.length*100}%"></i></div>
+     <div class="card" style="text-align:center;padding:24px 16px">
+       <div style="font-size:13px;color:var(--sub)">どちらが聞こえた？</div>
+       <button class="btn soft" id="plays" style="margin:14px auto">🔊 もう一度きく</button>
+       <div class="row" style="gap:10px">
+         <button class="btn ${q.picked?(pair.a===pair[q.which]?'':'ghost'):'ghost'} grow" data-pick="a" style="font-size:17px;padding:16px 8px;${q.picked?(q.picked==='a'?(q.picked===q.which?'background:var(--ok);color:#fff':'background:var(--danger);color:#fff'):''):''}">${esc(pair.a)}</button>
+         <button class="btn ghost grow" data-pick="b" style="font-size:17px;padding:16px 8px;${q.picked?(q.picked==='b'?(q.picked===q.which?'background:var(--ok);color:#fff':'background:var(--danger);color:#fff'):''):''}">${esc(pair.b)}</button>
+       </div>
+       ${q.picked?`<div style="margin-top:14px">
+         <div style="font-weight:800;color:${q.picked===q.which?'var(--ok)':'var(--danger)'}">${q.picked===q.which?'⭕️ 正解':'❌ ちがいます'}　答え：${esc(pair[q.which])}</div>
+         <div class="muted" style="font-size:12.5px;margin-top:4px">${esc(pair.ja)}</div>
+         <div class="row" style="justify-content:center;margin-top:10px">
+           <button class="chip" data-sayt="${esc(pair.a)}">🔊 ${esc(pair.a)}</button>
+           <button class="chip" data-sayt="${esc(pair.b)}">🔊 ${esc(pair.b)}</button></div>
+         <button class="btn block" id="prNext" style="margin-top:12px">次へ</button>
+       </div>`:''}
+     </div>
+     <div class="card"><div style="font-size:12.5px">💡 ${esc(d.tip_ja)}</div></div>`;
+    const play=()=>speak(pair[q.which]);
+    if(q.picked===null && !q.played){ q.played=true; setTimeout(play,250); }
+    $('#plays').onclick=play;
+    m.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ if(q.picked) return; q.picked=b.dataset.pick; if(q.picked===q.which) q.right++; render(); });
+    m.querySelectorAll('[data-sayt]').forEach(b=>b.onclick=()=>speak(b.dataset.sayt));
+    const nx=$('#prNext'); if(nx) nx.onclick=()=>{ q.i++; q.picked=null; q.which=null; q.played=false;
+      if(q.i>=d.pairs.length){ q.stage='say'; q.i=0; } render(); };
+    $('#prBack').onclick=()=>{ openPron=null; pronQuiz=null; render(); };
+    return;
+  }
+
+  if(q.stage==='say'){
+    const pair=d.pairs[q.i];
+    m.innerHTML=`<button class="btn ghost sm" id="prBack" style="align-self:flex-start">← ドリル一覧</button>
+     <div class="muted">② 単語を言う　${q.i+1} / ${d.pairs.length}　（聞き分け ${q.right}/${d.pairs.length}正解）</div>
+     <div class="card" style="text-align:center;padding:22px 16px">
+       <div style="font-size:13px;color:var(--sub)">2つを言い分けてみよう</div>
+       <div style="font-size:24px;font-weight:800;margin:12px 0 4px">${esc(pair.a)}　/　${esc(pair.b)}</div>
+       <div class="muted" style="font-size:12.5px">${esc(pair.ja)}</div>
+       <div class="row" style="justify-content:center;margin-top:12px">
+         <button class="chip" data-sayt="${esc(pair.a)}">🔊 ${esc(pair.a)}</button>
+         <button class="chip" data-sayt="${esc(pair.b)}">🔊 ${esc(pair.b)}</button></div>
+       <button class="mic" id="pmic" style="margin:16px auto 0">🎙</button>
+       <div class="muted" style="font-size:12px;margin-top:8px" id="pmsg">マイクを押して「${esc(pair.a)}」と言ってみる</div>
+       ${q.pron?`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+         <div style="font-size:26px;font-weight:800;color:${q.pron.rate>=100?'var(--ok)':'var(--danger)'}">${q.pron.rate>=100?'⭕️ 伝わりました':'❌ '+esc(q.pron.said||'（無音）')+' に聞こえています'}</div>
+         <div class="muted" style="font-size:12px;margin-top:6px">${q.pron.rate>=100?'その音で通じます。次へ進みましょう。':esc(d.tip_ja)}</div></div>`:''}
+     </div>
+     <div class="row"><button class="btn ghost grow" id="prSkip">とばす</button><button class="btn grow" id="prNext">次へ</button></div>`;
+    $('#pmic').onclick=()=>{
+      const b=$('#pmic'); if(b.classList.contains('rec')){ stopRec(); return; }
+      b.classList.add('rec'); $('#pmsg').textContent='聞いています…';
+      startRec('en-US', fin=>{ q.pron=pronScore(pair.a,fin); render(); },
+        itr=>{ const el=$('#pmsg'); if(el) el.textContent='「'+itr+'」'; },
+        ()=>{ const el=$('#pmic'); if(el) el.classList.remove('rec'); });
+    };
+    m.querySelectorAll('[data-sayt]').forEach(b=>b.onclick=()=>speak(b.dataset.sayt));
+    const go=()=>{ q.i++; q.pron=null; if(q.i>=d.pairs.length){ q.stage='sent'; q.i=0; } render(); };
+    $('#prNext').onclick=go; $('#prSkip').onclick=go;
+    $('#prBack').onclick=()=>{ openPron=null; pronQuiz=null; render(); };
+    return;
+  }
+
+  // ③ 文で仕上げ
+  if(q.i>=d.sentences.length){
+    m.innerHTML=`<div class="card" style="text-align:center">
+      <h2>おつかれさま！</h2>
+      <div style="font-size:34px;font-weight:800">${q.right} / ${d.pairs.length}</div>
+      <p class="muted">聞き分けの正解数</p>
+      <p class="muted">${esc(d.tip_ja)}</p>
+      <button class="btn block" id="prAgain">もう一度</button>
+      <button class="btn ghost block" id="prBack" style="margin-top:8px">ドリル一覧へ</button></div>`;
+    $('#prAgain').onclick=()=>{ pronQuiz=null; render(); };
+    $('#prBack').onclick=()=>{ openPron=null; pronQuiz=null; render(); };
+    return;
+  }
+  const st=d.sentences[q.i];
+  m.innerHTML=`<button class="btn ghost sm" id="prBack" style="align-self:flex-start">← ドリル一覧</button>
+   <div class="muted">③ 文で仕上げ　${q.i+1} / ${d.sentences.length}</div>
+   <div class="card" style="text-align:center;padding:22px 16px">
+     <div style="font-size:18px;font-weight:700;line-height:1.5">${esc(st.en)}</div>
+     <div class="muted" style="font-size:12.5px;margin-top:6px">${esc(st.ja)}</div>
+     <div class="row" style="justify-content:center;margin-top:12px">
+       <button class="btn soft sm" id="say">🔊 お手本</button>
+       <button class="btn soft sm" id="slow">🐢 ゆっくり</button></div>
+     <button class="mic" id="pmic" style="margin:16px auto 0">🎙</button>
+     <div class="muted" style="font-size:12px;margin-top:8px" id="pmsg">お手本のあとに続けて言ってみよう</div>
+     ${q.pron?`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+       <div style="font-size:30px;font-weight:800;color:${q.pron.rate>=80?'var(--ok)':q.pron.rate>=50?'var(--warn)':'var(--danger)'}">${q.pron.rate}%</div>
+       ${pronHtml(q.pron)}</div>`:''}
+   </div>
+   <div class="row"><button class="btn ghost grow" id="prSkip">とばす</button><button class="btn grow" id="prNext">次へ</button></div>`;
+  $('#say').onclick=()=>speak(st.en);
+  $('#slow').onclick=()=>speak(st.en,Math.max(0.55,cfg.rate-0.25));
+  $('#pmic').onclick=()=>{
+    const b=$('#pmic'); if(b.classList.contains('rec')){ stopRec(); return; }
+    b.classList.add('rec'); $('#pmsg').textContent='聞いています…';
+    startRec('en-US', fin=>{ q.pron=pronScore(st.en,fin); render(); },
+      itr=>{ const el=$('#pmsg'); if(el) el.textContent='「'+itr+'」'; },
+      ()=>{ const el=$('#pmic'); if(el) el.classList.remove('rec'); });
+  };
+  const go2=()=>{ q.i++; q.pron=null; render(); };
+  $('#prNext').onclick=go2; $('#prSkip').onclick=go2;
+  $('#prBack').onclick=()=>{ openPron=null; pronQuiz=null; render(); };
+}
+
+/* ---------- 11.2 フレーズ帳（間隔反復＋発音チェック） ---------- */
 let phMode='list', phQuery='';
 const QMODES=[
  {id:'mix', t:'おまかせ', d:'3種類を混ぜて出す'},
@@ -1425,7 +3971,7 @@ function renderQuiz(m){
       <button class="btn block" id="qagain">もう一度やる</button>
       <button class="btn ghost block" id="qback" style="margin-top:8px">一覧にもどる</button></div>`;
     $('#qagain').onclick=()=>{ quiz={...quiz,i:0,right:0,open:false,phase:'q',pron:null,list:shuffle(quiz.list)}; render(); };
-    $('#qback').onclick=()=>{ quiz=null; phMode='list'; render(); };
+    $('#qback').onclick=()=>{ quiz=null; phMode='list'; prTab='srs'; render(); };
     return;
   }
   const p=quiz.list[quiz.i], mode=quiz.forced||modeFor(p);
@@ -1468,7 +4014,7 @@ function renderQuiz(m){
     };
     if(pr){ $('#ok').onclick=()=>next(pr.rate>=70); $('#ng').onclick=()=>{ quiz.pron=null; render(); }; }
     $('#qskip').onclick=()=>{ quiz.i++; quiz.pron=null; render(); };
-    $('#qback').onclick=()=>{ quiz=null; phMode='list'; render(); };
+    $('#qback').onclick=()=>{ quiz=null; phMode='list'; prTab='srs'; render(); };
     return;
   }
 
@@ -1497,7 +4043,7 @@ function renderQuiz(m){
   }else{
     $('#open').onclick=()=>{ quiz.open=true; render(); };
   }
-  $('#qback').onclick=()=>{ quiz=null; phMode='list'; render(); };
+  $('#qback').onclick=()=>{ quiz=null; phMode='list'; prTab='srs'; render(); };
 }
 
 /* ---------- 11.5 弱点ノート ---------- */
