@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>集めた写真 - airport terminal window morning light</title>
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#0B1020; --surface:#151C33; --line:#26304D;
+  --text:#E8ECF7; --muted:#93A0C0; --accent:#6C8CFF;
+  --r:14px; --r-sm:10px; --maxw:1180px;
+}
+:root[data-theme="light"]{
+  color-scheme: light;
+  --bg:#F7F8FB; --surface:#FFFFFF; --line:#E2E6EF;
+  --text:#141821; --muted:#5C6779; --accent:#3D5AFE;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  font-size:15px; line-height:1.65; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:24px 20px 64px}
+header{
+  position:sticky; top:0; z-index:10; padding:16px 20px;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(14px); border-bottom:1px solid var(--line);
+}
+.hd{max-width:var(--maxw); margin:0 auto; display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+h1{font-size:19px; font-weight:700; margin:0}
+.sub{color:var(--muted); font-size:13px; margin:0}
+.spacer{flex:1}
+button{
+  font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--line); border-radius:var(--r-sm);
+  padding:8px 14px; transition:transform .12s ease;
+}
+button:active{transform:scale(.97)}
+.grid{
+  display:grid; gap:24px; margin-top:24px;
+  grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+}
+.card{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:16px; overflow:hidden; display:flex; flex-direction:column;
+}
+.ph{
+  position:relative; aspect-ratio:4/3; background:var(--bg);
+  display:block; width:100%; border:0; padding:0; cursor:pointer; border-radius:0;
+}
+.ph img{width:100%; height:100%; object-fit:cover; display:block}
+.badge{
+  position:absolute; top:8px; right:8px; font-size:11px; font-weight:700;
+  padding:3px 8px; border-radius:999px;
+  background:rgba(0,0,0,.62); color:#fff; backdrop-filter:blur(4px);
+}
+.badge.sa{background:#C2410C}
+.meta{padding:12px 14px 14px; display:flex; flex-direction:column; gap:8px}
+.fn{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px;
+  color:var(--text); word-break:break-all;
+}
+.by{font-size:12px; color:var(--muted); line-height:1.5}
+.by a{color:var(--muted)}
+.dims{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+.chips{display:flex; gap:0; border-radius:var(--r-sm); overflow:hidden; height:34px}
+.chip{flex:1; position:relative; cursor:pointer}
+.chip span{
+  position:absolute; inset:auto 0 0 0; font-size:9px; text-align:center;
+  padding:1px 0; background:rgba(0,0,0,.5); color:#fff; opacity:0;
+  transition:opacity .12s ease; font-family:ui-monospace,monospace;
+}
+.chip:hover span{opacity:1}
+.acc{font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px}
+.acc i{width:12px; height:12px; border-radius:3px; display:inline-block}
+.toast{
+  position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(14px);
+  background:var(--accent); color:#fff; font-size:13px; font-weight:600;
+  padding:10px 18px; border-radius:999px; opacity:0; pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease; z-index:50;
+}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+.empty{text-align:center; padding:56px 16px; color:var(--muted)}
+.empty .big{font-size:44px; line-height:1; margin-bottom:12px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important; transition-duration:.01ms!important}
+}
+</style></head><body>
+<header><div class='hd'>
+<div><h1>集めた写真 0枚</h1>
+<p class='sub'>検索した言葉: airport terminal window morning light ／ 写真をクリックするとファイル名、色をクリックするとカラーコードがコピーされます</p></div>
+<div class='spacer'></div>
+<button id='themeBtn'>ライト背景で見る</button>
+</div></header>
+<div class='wrap'>
+<div class='empty'><div class='big'>&#128247;</div><p>写真が1枚も集まりませんでした。</p><p>検索の言葉を変えるか、<code>--min-width</code> を小さくして試してみてください。</p></div>
+</div>
+<div class='toast' id='toast'></div>
+<script>
+(function(){
+  var root = document.documentElement;
+  var btn = document.getElementById('themeBtn');
+  var LABEL = {dark:'ライト背景で見る', light:'ダーク背景で見る'};
+  function setTheme(t){
+    root.setAttribute('data-theme', t);
+    btn.textContent = LABEL[t];
+    try{ localStorage.setItem('dk-preview-theme', t); }catch(e){}
+  }
+  var saved = 'dark';
+  try{ saved = localStorage.getItem('dk-preview-theme') || 'dark'; }catch(e){}
+  setTheme(saved);
+  btn.addEventListener('click', function(){
+    setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+
+  var toast = document.getElementById('toast'), timer = null;
+  function say(msg){
+    toast.textContent = msg; toast.classList.add('on');
+    clearTimeout(timer); timer = setTimeout(function(){ toast.classList.remove('on'); }, 1500);
+  }
+  function copy(text, label){
+    // file:// で開くと navigator.clipboard が使えないブラウザがあるので、古い方法も用意する
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); say(label + ' をコピーしました'); }
+      catch(e){ say('コピーできませんでした: ' + text); }
+      document.body.removeChild(ta);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){
+        say(label + ' をコピーしました');
+      }, fallback);
+    } else { fallback(); }
+  }
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-copy]');
+    if(!t) return;
+    copy(t.getAttribute('data-copy'), t.getAttribute('data-label') || 'テキスト');
+  });
+})();
+</script>
+</body></html>

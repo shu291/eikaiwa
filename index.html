@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#4f46e5">
+<meta name="theme-color" content="#0B1020">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap">
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="icon" href="./icon-192.png">
@@ -14,25 +17,133 @@
 <title>Talkie — じぶん英会話</title>
 <style>
 :root{
-  --bg:#f6f7fb; --card:#ffffff; --ink:#111827; --sub:#6b7280; --line:#e5e7eb;
-  --accent:#4f46e5; --accent-soft:#eef2ff; --ai:#ffffff; --me:#4f46e5;
-  --ok:#059669; --warn:#d97706; --danger:#dc2626;
-  --radius:16px; --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
+  color-scheme: dark;                 /* 入力欄やスクロールバーを浮かせないため必須 */
+
+  /* ===== 契約の10色（direction.json の palette と1:1） ===== */
+  --bg:#0B1020;
+  --surface:#151C33;
+  --border:#26304D;
+  --text:#E8ECF7;
+  --muted:#93A0C0;
+  --primary:#6C8CFF;
+  --on-primary:#0B1020;
+  --accent:#FFB86B;
+  --danger:#FF6B6B;
+  --success:#4ADE80;
+
+  /* ===== 今までのアプリで使っていた名前（同じ値の別名。消さない） ===== */
+  --card:var(--surface); --panel:var(--surface); --surface-1:var(--surface);
+  --line:var(--border);
+  --ink:var(--text); --fg:var(--text); --tx:var(--text); --txt:var(--text);
+  --dim:var(--muted); --sub:var(--muted); --text-dim:var(--muted); --tx2:var(--muted); --ink-2:var(--muted);
+  --acc:var(--primary); --on-accent:var(--on-primary);
+  --ok:var(--success); --good:var(--success); --bad:var(--danger); --warn:var(--accent);
+  --on-danger:#0B0B0B; --on-success:#0B0B0B; --on-accent-solid:#0B0B0B;
+
+  /* ===== 「もう一段」（全プロジェクトが必ず作るやつ） ===== */
+  --bg-2:#0F162B;       --bg2:var(--bg-2);
+  --surface-2:#1C2645;  --card2:var(--surface-2); --panel2:var(--surface-2);
+  --line-2:#323F65;     --line2:var(--line-2);
+  --muted-2:#7081AB;    --dim2:var(--muted-2);   --tx3:var(--muted-2);
+
+  /* ===== 半透明（color-mix で作る。rgba のベタ書きより保守が楽） ===== */
+  --primary-soft: color-mix(in srgb, var(--primary) 16%, transparent);
+  --accent-soft:  color-mix(in srgb, var(--accent)  16%, transparent);
+  --danger-soft:  color-mix(in srgb, var(--danger)  14%, transparent);
+  --success-soft: color-mix(in srgb, var(--success) 14%, transparent);
+  --overlay:      color-mix(in srgb, var(--bg) 88%, transparent);  /* ヘッダ/タブバーの下地 */
+  --scrim:        color-mix(in srgb, var(--bg) 55%, transparent);  /* モーダルの暗幕 */
+  --ring:         color-mix(in srgb, var(--text) 10%, transparent);
+
+  /* ===== 形 ===== */
+  --r-sm:12px; --r:16px; --r-lg:20px; --r-pill:999px;
+  --radius:var(--r); --radius-sm:var(--r-sm); --radius-lg:var(--r-lg);
+
+  /* ===== 影 ===== */
+  --shadow:none;
+  --shadow-lg:0 12px 40px rgba(0,0,0,.22);
+  --shadow-accent:0 8px 24px color-mix(in srgb, var(--primary) 30%, transparent);
+
+  /* ===== 文字（システムフォントのフォールバックを必ず残す） ===== */
+  --font-heading:"Zen Kaku Gothic New",-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --font-body:"Zen Kaku Gothic New",-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono","Zen Kaku Gothic New",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --fw-body:400; --fw-mid:600; --fw-bold:700; --fw-head:700;
+  --fs-xs:12px; --fs-sm:13px; --fs:15px; --fs-lg:17px; --fs-xl:22px; --fs-2xl:28px; --fs-3xl:36px;
+  --lh:1.65; --lh-tight:1.35;
+
+  /* ===== 余白（24/32 を必ず使う。今までここが無くて全部詰まっていた） ===== */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px;
+
+  /* ===== レイアウト ===== */
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --maxw:560px; --tabbar-h:62px; --header-h:54px;
 }
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#0b1020; --card:#121a30; --ink:#e8ecf5; --sub:#94a3b8; --line:#243050;
-    --accent:#818cf8; --accent-soft:#1c2545; --ai:#182242; --me:#4f46e5;
-    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+
+/* ---- 反対の明るさのテーマ（自動生成。auto / light / dark の3段） ---- */
+/*    OSの設定に自動で合わせる。ユーザーが手で選んだら data-theme が勝つ。 */
+@media (prefers-color-scheme: light){
+  :root:where(:not([data-theme="dark"])){
+    color-scheme:light;
+    --bg:#F8F9FA;
+    --surface:#FDFDFE;
+    --border:#C1C5D0;
+    --text:#151A26;
+    --muted:#51618B;
+    --primary:#6889FF;
+    --on-primary:#0B0B0B;
+    --accent:#DF7400;
+    --danger:#E70000;
+    --success:#18833F;
+    --bg-2:#EFF1F4; --surface-2:#F1F1F8; --line-2:#ADB2C1; --muted-2:#6B7CA9;
+    --shadow:0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.07);
   }
 }
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#F8F9FA;
+  --surface:#FDFDFE;
+  --border:#C1C5D0;
+  --text:#151A26;
+  --muted:#51618B;
+  --primary:#6889FF;
+  --on-primary:#0B0B0B;
+  --accent:#DF7400;
+  --danger:#E70000;
+  --success:#18833F;
+  --bg-2:#EFF1F4; --surface-2:#F1F1F8; --line-2:#ADB2C1; --muted-2:#6B7CA9;
+  --shadow:0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.07);
+}
+:root[data-theme="dark"]{ color-scheme:dark; }
+/* JS側:  t==='auto' なら removeAttribute('data-theme')、それ以外は setAttribute('data-theme', t) */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+/* ---- このアプリ固有の色（吹き出し） ---- */
+:root{ --ai:var(--surface); --me:var(--primary); --on-me:var(--on-primary); }
+
+/* ---- 背景。写真は使わず、光をうっすら2枚重ねる ---- */
+body{
+  background:
+    radial-gradient(1200px 620px at 82% -12%, color-mix(in srgb,var(--primary) 17%,transparent), transparent 62%),
+    radial-gradient(900px 520px at -5% 108%, color-mix(in srgb,var(--accent) 9%,transparent), transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;height:100%}
 body{
-  background:var(--bg);color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Segoe UI",Roboto,sans-serif;
-  font-size:16px;line-height:1.6;overscroll-behavior-y:none;
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:var(--fs-lg);line-height:var(--lh);
+  -webkit-font-smoothing:antialiased;overscroll-behavior-y:none;
 }
+h1,h2,h3{font-family:var(--font-heading);line-height:var(--lh-tight)}
+.num,.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
 button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
 
@@ -45,54 +156,70 @@ header.top h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.02em;flex:
 header.top .sub{font-size:12px;color:var(--sub);font-weight:500}
 .iconbtn{background:transparent;border:1px solid var(--line);border-radius:10px;width:36px;height:36px;
   display:grid;place-items:center;font-size:16px}
-main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
+main{flex:1;padding:var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-5)}
 
 nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:40;background:color-mix(in srgb,var(--card) 94%,transparent);
   backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;
   padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
 nav.tabs button{flex:1;background:none;border:0;padding:6px 2px;border-radius:12px;
   display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--sub);font-weight:600}
-nav.tabs button .ic{font-size:19px;line-height:1}
-nav.tabs button.on{color:var(--accent);background:var(--accent-soft)}
+nav.tabs button .ic{display:grid;place-items:center;height:21px}
+nav.tabs button.on{color:var(--primary);background:var(--primary-soft)}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--sp-4);box-shadow:var(--shadow)}
 .card h2{margin:0 0 10px;font-size:15px;font-weight:700}
 .muted{color:var(--sub);font-size:13px}
 .row{display:flex;gap:10px;align-items:center}
 .grow{flex:1}
-.btn{background:var(--accent);color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:700;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.btn:disabled{opacity:.45}
-.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:600}
-.btn.soft{background:var(--accent-soft);color:var(--accent);font-weight:700}
-.btn.sm{padding:8px 12px;font-size:13px;border-radius:10px}
+.btn{background:var(--primary);color:var(--on-primary);border:1px solid transparent;border-radius:var(--r);
+  padding:12px 16px;min-height:44px;font-weight:var(--fw-bold);
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);
+  transition:transform .12s ease,background .12s ease,border-color .12s ease}
+.btn:active{transform:scale(.98)}
+.btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.btn:disabled{opacity:.45;transform:none}
+.btn.ghost{background:transparent;color:var(--text);border-color:var(--line);font-weight:var(--fw-mid)}
+.btn.soft{background:var(--primary-soft);color:var(--primary);font-weight:var(--fw-bold)}
+.btn.sm{padding:9px 13px;min-height:38px;font-size:var(--fs-sm);border-radius:var(--r-sm)}
 .btn.block{width:100%}
-.btn.danger{background:var(--danger)}
+.btn.danger{background:var(--danger);color:var(--on-danger)}
 
 .scenes{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.scene{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:left;
-  display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow)}
-.scene.on{border-color:var(--accent);background:var(--accent-soft)}
+.scene{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:var(--sp-3);
+  text-align:left;min-height:44px;
+  display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);
+  transition:transform .12s ease,border-color .12s ease,background .12s ease}
+.scene:active{transform:scale(.98)}
+.scene:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.scene.on{border-color:var(--primary);background:var(--primary-soft)}
 .scene .em{font-size:22px}
 .scene .t{font-weight:700;font-size:14px}
 .scene .d{font-size:11.5px;color:var(--sub);line-height:1.4}
-.seg{display:flex;background:var(--accent-soft);border-radius:12px;padding:4px;gap:4px}
+.seg{display:flex;background:var(--primary-soft);border-radius:12px;padding:4px;gap:4px}
 .seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:9px 4px;font-size:13px;font-weight:700;color:var(--sub)}
-.seg button.on{background:var(--card);color:var(--accent);box-shadow:var(--shadow)}
+.seg button.on{background:var(--card);color:var(--primary);box-shadow:var(--shadow)}
 
 /* chat */
 #chatScroll{display:flex;flex-direction:column;gap:14px;padding-bottom:8px}
-.msg{max-width:88%;display:flex;flex-direction:column;gap:6px}
+.msg{max-width:90%;display:flex;flex-direction:column;gap:var(--sp-2)}
 .msg.ai{align-self:flex-start}
 .msg.me{align-self:flex-end;align-items:flex-end}
-.bub{padding:12px 14px;border-radius:16px;box-shadow:var(--shadow);word-break:break-word}
-.msg.ai .bub{background:var(--ai);border:1px solid var(--line);border-bottom-left-radius:5px}
-.msg.me .bub{background:var(--me);color:#fff;border-bottom-right-radius:5px}
-.bub .en{font-size:16.5px;line-height:1.55}
-.bub .ja{font-size:13px;color:var(--sub);margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
-.msg.me .bub .ja{color:rgba(255,255,255,.8);border-top-color:rgba(255,255,255,.3)}
-.msg .tools{display:flex;gap:6px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 10px;font-size:11.5px;color:var(--sub);font-weight:600}
+.bub{padding:var(--sp-3) var(--sp-4);border-radius:var(--r-lg);word-break:break-word}
+.msg.ai .bub{background:var(--ai);border:1px solid var(--line);border-bottom-left-radius:6px}
+.msg.me .bub{background:var(--me);color:var(--on-me);border-bottom-right-radius:6px;font-weight:500}
+/* 相手の英文がこの画面の主役。ここだけ大きく明るく。 */
+.msg.ai .bub .en{font-size:var(--fs-xl);line-height:1.5;letter-spacing:.005em;color:var(--text)}
+.msg.me .bub .en{font-size:var(--fs-lg);line-height:1.5}
+.bub .ja{font-size:var(--fs-sm);color:var(--muted);margin-top:var(--sp-2);padding-top:var(--sp-2);
+  border-top:1px dashed var(--line);line-height:1.6}
+.msg.me .bub .ja{color:color-mix(in srgb,var(--on-me) 72%,transparent);
+  border-top-color:color-mix(in srgb,var(--on-me) 28%,transparent)}
+.msg .tools{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:var(--r-pill);
+  padding:7px 12px;font-size:var(--fs-xs);color:var(--muted);font-weight:600;min-height:32px;
+  display:inline-flex;align-items:center;gap:5px;transition:transform .12s ease,border-color .12s ease}
+.chip:active{transform:scale(.97)}
+.chip:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .fb{border-radius:12px;padding:9px 12px;font-size:13px;border:1px solid var(--line);background:var(--card);max-width:88%;align-self:flex-end}
 .fb.good{border-color:color-mix(in srgb,var(--ok) 45%,var(--line));color:var(--ok)}
 .fb.tip{border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
@@ -103,9 +230,9 @@ nav.tabs button.on{color:var(--accent);background:var(--accent-soft)}
 .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
 @keyframes bo{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
 
-.hintbox{background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));
+.hintbox{background:var(--primary-soft);border:1px solid color-mix(in srgb,var(--primary) 30%,var(--line));
   border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
-.hintbox .hh{font-size:12px;font-weight:700;color:var(--accent)}
+.hintbox .hh{font-size:12px;font-weight:700;color:var(--primary)}
 .hint{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:9px 11px;text-align:left;width:100%}
 .hint .he{font-size:14.5px;font-weight:600}
 .hint .hj{font-size:12px;color:var(--sub)}
@@ -115,11 +242,17 @@ nav.tabs button.on{color:var(--accent);background:var(--accent-soft)}
 #composerInner{max-width:680px;margin:0 auto;padding:9px 12px;display:flex;gap:8px;align-items:flex-end}
 #txt{flex:1;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:10px 14px;resize:none;
   max-height:110px;min-height:42px;line-height:1.45}
-.mic{width:52px;height:52px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:22px;
-  display:grid;place-items:center;flex:none;box-shadow:var(--shadow)}
-.mic.rec{background:var(--danger);animation:pulse 1.3s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}70%{box-shadow:0 0 0 14px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
-.mic.sm{width:42px;height:42px;font-size:17px;background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.mic{width:54px;height:54px;border-radius:50%;border:0;background:var(--primary);color:var(--on-primary);
+  font-size:22px;display:grid;place-items:center;flex:none;box-shadow:var(--shadow-accent);
+  transition:transform .12s ease,background .15s ease}
+.mic:active{transform:scale(.94)}
+.mic:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+.mic.rec{background:var(--danger);color:#fff;animation:pulse 1.3s infinite;box-shadow:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--danger) 55%,transparent)}
+  70%{box-shadow:0 0 0 15px color-mix(in srgb,var(--danger) 0%,transparent)}
+  100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--danger) 0%,transparent)}}
+.mic.sm{width:44px;height:44px;font-size:17px;background:var(--card);color:var(--text);
+  border:1px solid var(--line);box-shadow:none;font-weight:var(--fw-bold)}
 .mic.sm.rec{background:var(--danger);color:#fff}
 
 .stat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -140,14 +273,23 @@ input.f,select.f,textarea.f{width:100%;border:1px solid var(--line);background:v
 .sw .l{font-size:14px;font-weight:600}
 .sw .l small{display:block;font-weight:400;color:var(--sub);font-size:11.5px}
 .toggle{width:48px;height:28px;border-radius:99px;background:var(--line);border:0;position:relative;flex:none;transition:.18s}
-.toggle.on{background:var(--accent)}
+.toggle.on{background:var(--primary)}
 .toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.18s}
 .toggle.on::after{transform:translateX(20px)}
-.empty{text-align:center;color:var(--sub);padding:34px 12px;font-size:13.5px}
-a{color:var(--accent)}
+.empty{text-align:center;color:var(--muted);padding:var(--sp-6) var(--sp-3);font-size:var(--fs-sm)}
+/* 空っぽの画面：絵 + 一言 + ボタン1つ。ここを寂しくしない */
+.emptybox{display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:var(--sp-6) var(--sp-4);gap:var(--sp-3)}
+.emptybox .art{width:112px;height:88px;color:var(--primary);opacity:.9;
+  animation:emptyIn .28s ease-out}
+@keyframes emptyIn{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:.9;transform:none}}
+.emptybox .tt{font-family:var(--font-heading);font-weight:var(--fw-bold);font-size:var(--fs-lg);color:var(--text)}
+.emptybox .ds{font-size:var(--fs-sm);color:var(--muted);line-height:1.7;max-width:30em}
+.emptybox .btn{margin-top:var(--sp-2)}
+a{color:var(--primary)}
 .hidden{display:none!important}
 .bar{height:7px;border-radius:99px;background:var(--line);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.bar i{display:block;height:100%;background:var(--primary);border-radius:99px}
 .toast{position:fixed;bottom:130px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;
   padding:10px 16px;border-radius:99px;font-size:13px;z-index:100;box-shadow:var(--shadow);max-width:90%;text-align:center}
 /* ---- 聞いています表示（ネイティブ/クラウド共通） ---- */
@@ -166,7 +308,7 @@ a{color:var(--accent)}
 #hearSub{font-size:11px;color:var(--sub);font-weight:500;margin-top:-2px}
 #hearStop{flex:none;border:0;border-radius:999px;background:var(--danger);color:#fff;
   font-size:12.5px;font-weight:700;padding:8px 14px}
-#hear.busy #hearBars i{background:var(--accent);animation:wave .9s ease-in-out infinite}
+#hear.busy #hearBars i{background:var(--primary);animation:wave .9s ease-in-out infinite}
 #hear.busy #hearBars i:nth-child(2){animation-delay:.12s}
 #hear.busy #hearBars i:nth-child(3){animation-delay:.24s}
 #hear.busy #hearBars i:nth-child(4){animation-delay:.36s}
@@ -174,14 +316,14 @@ a{color:var(--accent)}
 @keyframes wave{0%,100%{height:5px}50%{height:19px}}
 
 /* ---- 環境の注意バナー ---- */
-.envbar{display:flex;gap:10px;align-items:flex-start;background:var(--accent-soft);
-  border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);border-radius:14px;padding:12px 13px}
+.envbar{display:flex;gap:10px;align-items:flex-start;background:var(--primary-soft);
+  border:1px solid color-mix(in srgb,var(--primary) 28%,transparent);border-radius:14px;padding:12px 13px}
 .envbar .em{font-size:18px;line-height:1.2;flex:none}
 .envbar .tt{font-size:13.5px;font-weight:700;margin-bottom:2px}
 .envbar .ds{font-size:12.5px;color:var(--sub);line-height:1.55}
 .envbar .row{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
-.envbar button{border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);background:var(--card);
-  border-radius:9px;padding:6px 11px;font-size:12px;font-weight:700;color:var(--accent)}
+.envbar button{border:1px solid color-mix(in srgb,var(--primary) 34%,transparent);background:var(--card);
+  border-radius:9px;padding:6px 11px;font-size:12px;font-weight:700;color:var(--primary)}
 .envbar .x{background:none;border:0;color:var(--sub);font-size:16px;padding:0 2px;align-self:flex-start}
 
 /* ---- 失敗したときの復帰カード ---- */
@@ -208,14 +350,14 @@ button[disabled],button.off{opacity:.42;cursor:not-allowed;filter:grayscale(.5)}
       <h1 id="hTitle">Talkie</h1>
       <div class="sub" id="hSub">じぶん英会話</div>
     </div>
-    <button class="iconbtn hidden" id="btnEnd" title="会話を終える">🏁</button>
+    <button class="iconbtn hidden" id="btnEnd" title="会話を終える" aria-label="会話を終える"></button>
   </header>
   <main id="main"></main>
   <div id="composer" class="hidden">
     <div id="composerInner">
-      <button class="mic sm" id="micJa" title="日本語で言う → 英語にしてもらう">あ</button>
+      <button class="mic sm" id="micJa" title="日本語で言う → 英語にしてもらう" aria-label="日本語で言う">あ</button>
       <textarea id="txt" rows="1" placeholder="英語で入力 / マイクで話す"></textarea>
-      <button class="mic" id="micEn" title="英語で話す">🎙</button>
+      <button class="mic" id="micEn" title="英語で話す" aria-label="英語で話す"></button>
     </div>
   </div>
   <div id="hear"><div id="hearIn">
@@ -230,6 +372,79 @@ button[disabled],button.off{opacity:.42;cursor:not-allowed;filter:grayscale(.5)}
    Talkie — じぶん英会話  (single file / no build / no server)
    音声認識・読み上げ = ブラウザ標準 / AI = Gemini 無料枠(任意)
    ============================================================ */
+
+/* ---------- 0.5 アイコン（lucide / design/icons から生成） ---------- */
+const ICONS={
+  'mic':'<path d="M12 19v3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><rect x="9" y="2" width="6" height="13" rx="3"/>',
+  'volume-2':'<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>',
+  'message-circle':'<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>',
+  'target':'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  'chart-column':'<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  'settings':'<path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/>',
+  'flag':'<path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/>',
+  'circle-alert':'<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+  'lightbulb':'<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  'book-open':'<path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/>',
+  'turtle':'<path d="m12 10 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a8 8 0 1 0-16 0v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3l2-4h4Z"/><path d="M4.82 7.9 8 10"/><path d="M15.18 7.9 12 10"/><path d="M16.93 10H20a2 2 0 0 1 0 4H2"/>',
+  'rotate-ccw':'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  'headphones':'<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/>',
+  'languages':'<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
+  'sparkles':'<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>',
+  'check':'<path d="M20 6 9 17l-5-5"/>',
+  'x':'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  'chevron-right':'<path d="m9 18 6-6-6-6"/>',
+  'play':'<path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/>',
+  'mic-off':'<path d="M12 19v3"/><path d="M15 9.34V5a3 3 0 0 0-5.68-1.33"/><path d="M16.95 16.95A7 7 0 0 1 5 12v-2"/><path d="M18.89 13.23A7 7 0 0 0 19 12v-2"/><path d="m2 2 20 20"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12"/>'
+};
+function icon(name,size){
+  const p=ICONS[name]; if(!p) return '';
+  const n=size||20;
+  return `<svg viewBox="0 0 24 24" width="${n}" height="${n}" fill="none" stroke="currentColor"
+    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+    style="flex:none;display:block">${p}</svg>`;
+}
+
+/* ---------- 0.6 空っぽの画面 ---------- */
+const EMPTY_ART={
+  chat:`<svg viewBox="0 0 112 88" fill="none" aria-hidden="true">
+    <rect x="6" y="10" width="66" height="42" rx="12" stroke="currentColor" stroke-width="2.5"/>
+    <path d="M22 62 L30 52 L18 52 Z" fill="currentColor" opacity=".55"/>
+    <path d="M20 26h34M20 36h22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".55"/>
+    <rect x="44" y="38" width="62" height="38" rx="11" stroke="currentColor" stroke-width="2.5" opacity=".45"/>
+    <path d="M90 78 L82 68 L94 68 Z" fill="currentColor" opacity=".25"/>
+    <path d="M58 52h34M58 62h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".3"/>
+  </svg>`,
+  cards:`<svg viewBox="0 0 112 88" fill="none" aria-hidden="true">
+    <rect x="16" y="20" width="66" height="46" rx="10" stroke="currentColor" stroke-width="2.5" opacity=".3" transform="rotate(-7 49 43)"/>
+    <rect x="26" y="16" width="66" height="46" rx="10" stroke="currentColor" stroke-width="2.5" opacity=".5" transform="rotate(4 59 39)"/>
+    <rect x="22" y="26" width="66" height="46" rx="10" stroke="currentColor" stroke-width="2.5" fill="var(--card)"/>
+    <path d="M36 42h30M36 54h18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".6"/>
+  </svg>`,
+  chart:`<svg viewBox="0 0 112 88" fill="none" aria-hidden="true">
+    <path d="M18 72h78" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".45"/>
+    <rect x="26" y="52" width="13" height="20" rx="4" fill="currentColor" opacity=".3"/>
+    <rect x="46" y="40" width="13" height="32" rx="4" fill="currentColor" opacity=".5"/>
+    <rect x="66" y="26" width="13" height="46" rx="4" fill="currentColor" opacity=".75"/>
+    <path d="M26 30 L44 22 L60 28 L86 12" stroke="currentColor" stroke-width="2.5"
+      stroke-linecap="round" stroke-linejoin="round" opacity=".35"/>
+  </svg>`,
+  fix:`<svg viewBox="0 0 112 88" fill="none" aria-hidden="true">
+    <rect x="22" y="14" width="68" height="60" rx="11" stroke="currentColor" stroke-width="2.5"/>
+    <path d="M36 34h30M36 46h40M36 58h22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".45"/>
+    <circle cx="82" cy="60" r="15" fill="var(--card)"/>
+    <circle cx="82" cy="60" r="13" stroke="currentColor" stroke-width="2.5"/>
+    <path d="M76 60l4.5 4.5L89 56" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`
+};
+function emptyBox(art,title,desc,btnLabel,btnId){
+  return `<div class="emptybox">
+    <div class="art">${EMPTY_ART[art]||''}</div>
+    <div class="tt">${title}</div>
+    <div class="ds">${desc}</div>
+    ${btnLabel?`<button class="btn" id="${btnId}">${btnLabel}</button>`:''}
+  </div>`;
+}
+function goTalk(){ app.tab='talk'; render(); }
 
 /* ---------- 1. シーン定義 + キーなし用の台本 ---------- */
 const SCENES = [
@@ -3362,13 +3577,13 @@ const app = {
   busy:false
 };
 const TABS=[
-  {id:'talk', ic:'💬', t:'会話'},
-  {id:'phrase', ic:'🎯', t:'練習'},
-  {id:'stats', ic:'📈', t:'記録'},
-  {id:'set', ic:'⚙️', t:'設定'}
+  {id:'talk', ic:'message-circle', t:'会話'},
+  {id:'phrase', ic:'target', t:'練習'},
+  {id:'stats', ic:'chart-column', t:'記録'},
+  {id:'set', ic:'settings', t:'設定'}
 ];
 function renderTabs(){
-  $('#tabs').innerHTML=TABS.map(t=>`<button data-tab="${t.id}" class="${app.tab===t.id?'on':''}"><span class="ic">${t.ic}</span>${t.t}</button>`).join('');
+  $('#tabs').innerHTML=TABS.map(t=>`<button data-tab="${t.id}" class="${app.tab===t.id?'on':''}" aria-label="${t.t}"><span class="ic">${icon(t.ic,21)}</span>${t.t}</button>`).join('');
 }
 $('#tabs').addEventListener('click',e=>{
   const b=e.target.closest('button[data-tab]'); if(!b) return;
@@ -3379,6 +3594,7 @@ $('#tabs').addEventListener('click',e=>{
   app.tab=b.dataset.tab; render();
 });
 
+function bindEmpty(){ ['emGo','emGo2','emGo3'].forEach(id=>{ const b=$('#'+id); if(b) b.onclick=goTalk; }); }
 function render(){
   renderTabs();
   const m=$('#main');
@@ -3392,6 +3608,7 @@ function render(){
   else if(app.tab==='phrase') renderPractice(m);
   else if(app.tab==='stats') renderStats(m);
   else renderSettings(m);
+  bindEmpty();
 }
 
 /* ---------- 8. スタート画面 ---------- */
@@ -3475,7 +3692,7 @@ function renderSetup(m){
       <div class="row"><button class="btn grow" id="resume">▶︎ つづきから</button>
         <button class="btn ghost" id="dropDraft">やめる</button></div>
     </div>`; })()}
-  ${dueList().length?`<div class="card" style="border-color:color-mix(in srgb,var(--accent) 40%,var(--line))">
+  ${dueList().length?`<div class="card" style="border-color:color-mix(in srgb,var(--primary) 40%,var(--line))">
     <h2>📒 そろそろ忘れそうなフレーズが ${dueList().length}個</h2>
     <p class="muted" style="margin:0 0 10px">前に覚えたフレーズの復習どきです。1〜2分で終わります。</p>
     <button class="btn block" id="goReview">▶︎ 今日の復習をやる</button>
@@ -3491,7 +3708,7 @@ function renderSetup(m){
       <span class="muted" style="font-size:12px">${SCENES.length}種類</span></div>
     <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:9px;-webkit-overflow-scrolling:touch">
       ${CATEGORIES.filter(c=>c.id==='all'||SCENES.some(s=>s.cat===c.id)).map(c=>`<button class="chip" data-cat="${c.id}"
-        style="${pick.cat===c.id?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft);':''}white-space:nowrap;padding:7px 13px;font-size:13px">${c.t}</button>`).join('')}
+        style="${pick.cat===c.id?'border-color:var(--primary);color:var(--primary);background:var(--primary-soft);':''}white-space:nowrap;padding:7px 13px;font-size:13px">${c.t}</button>`).join('')}
     </div>
     <div class="scenes" id="scenes">
       ${SCENES.filter(s=>pick.cat==='all'||s.cat===pick.cat).map(s=>`<button class="scene ${pick.scene===s.id?'on':''}" data-s="${s.id}">
@@ -3507,14 +3724,14 @@ function renderSetup(m){
     <h2>むずかしさ</h2>
     <div style="display:flex;flex-wrap:wrap;gap:7px" id="lvl">
       ${LEVELS.map(l=>`<button class="chip" data-l="${l.id}"
-        style="${cfg.level===l.id?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft);':''}padding:8px 13px;font-size:13px;font-weight:700">${l.t}<span style="opacity:.6;font-weight:400"> ${l.cefr}</span></button>`).join('')}
+        style="${cfg.level===l.id?'border-color:var(--primary);color:var(--primary);background:var(--primary-soft);':''}padding:8px 13px;font-size:13px;font-weight:700">${l.t}<span style="opacity:.6;font-weight:400"> ${l.cefr}</span></button>`).join('')}
     </div>
     <p class="muted" style="margin:9px 0 0">${esc(LV(cfg.level).d)}</p>
     ${cfg.level==='e'?`<p class="muted" style="margin:6px 0 0;color:var(--warn)">⚠️ 手加減なしです。聞き取れなくて当たり前なので、🐢ボタンをどんどん使ってください。</p>`:''}
     <label class="f">相手の手加減</label>
     <div style="display:flex;gap:7px" id="sty">
       ${STYLES.map(x=>`<button class="chip grow" data-st="${x.id}"
-        style="${cfg.style===x.id?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft);':''}padding:9px 6px;font-size:13px;font-weight:700;text-align:center">${x.em} ${x.t}</button>`).join('')}
+        style="${cfg.style===x.id?'border-color:var(--primary);color:var(--primary);background:var(--primary-soft);':''}padding:9px 6px;font-size:13px;font-weight:700;text-align:center">${x.em} ${x.t}</button>`).join('')}
     </div>
     <p class="muted" style="margin:8px 0 0">${esc(ST(cfg.style).d)}${cfg.style!=='normal'?`　（話す速さも${cfg.style==='tough'?'少し速く':'少しゆっくり'}なります）`:''}</p>
   </div>
@@ -3558,11 +3775,11 @@ function freePanel(){
   <div class="card">
     <h2>何を話す？</h2>
     <div style="display:flex;flex-wrap:wrap;gap:7px">
-      ${TOPICS.map(t=>`<button class="chip" data-tp="${t.id}" style="${F.topic===t.id?'border-color:var(--accent);color:var(--accent);background:var(--accent-soft)':''};padding:7px 12px;font-size:13px">${t.em} ${t.t}</button>`).join('')}
+      ${TOPICS.map(t=>`<button class="chip" data-tp="${t.id}" style="${F.topic===t.id?'border-color:var(--primary);color:var(--primary);background:var(--primary-soft)':''};padding:7px 12px;font-size:13px">${t.em} ${t.t}</button>`).join('')}
     </div>
     ${F.topic==='custom'?`<input class="f" id="topicCustom" style="margin-top:10px" placeholder="例：昨日みた映画の話／部活のこと" value="${esc(F.topicCustom)}">`:''}
-    <div style="margin-top:12px;padding:11px 13px;background:var(--accent-soft);border-radius:12px">
-      <div style="font-size:11.5px;font-weight:700;color:var(--accent)">🗓 今日のお題</div>
+    <div style="margin-top:12px;padding:11px 13px;background:var(--primary-soft);border-radius:12px">
+      <div style="font-size:11.5px;font-weight:700;color:var(--primary)">🗓 今日のお題</div>
       <div style="font-weight:600;margin-top:3px">${esc(q.en)}</div>
       <div class="muted" style="font-size:12px">${esc(q.ja)}</div>
       <button class="btn soft sm" id="useDaily" style="margin-top:8px">このお題で話す</button>
@@ -3626,7 +3843,7 @@ function missionCard(){
   const ms=MISSIONS[cfg.level]||MISSIONS.b;
   const wt=weakTop(30).slice(0,2);
   const cur = cfg.mission&&cfg.mission.startsWith('weak:')? null : ms.find(x=>x.id===cfg.mission);
-  const sel = v => cfg.mission===v? 'border-color:var(--accent);color:var(--accent);background:var(--accent-soft);':'';
+  const sel = v => cfg.mission===v? 'border-color:var(--primary);color:var(--primary);background:var(--primary-soft);':'';
   return `<div class="card">
     <h2>今日のミッション <span class="muted" style="font-weight:400;font-size:12px">（会話中に使えたら ⭐️）</span></h2>
     <div style="display:flex;flex-wrap:wrap;gap:7px">
@@ -3648,7 +3865,7 @@ function ring(done,goal){
   const r=30, c=2*Math.PI*r, pct=Math.min(1,goal? done/goal:0);
   return `<svg width="78" height="78" viewBox="0 0 78 78" style="flex:none">
     <circle cx="39" cy="39" r="${r}" fill="none" stroke="var(--line)" stroke-width="8"/>
-    <circle cx="39" cy="39" r="${r}" fill="none" stroke="${pct>=1?'var(--ok)':'var(--accent)'}" stroke-width="8"
+    <circle cx="39" cy="39" r="${r}" fill="none" stroke="${pct>=1?'var(--ok)':'var(--primary)'}" stroke-width="8"
       stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-pct)}" transform="rotate(-90 39 39)"/>
     <text x="39" y="37" text-anchor="middle" font-size="19" font-weight="800" fill="currentColor">${done}</text>
     <text x="39" y="52" text-anchor="middle" font-size="10" fill="var(--sub)">/ ${goal}</text>
@@ -3739,16 +3956,16 @@ function paintMsgs(){
         <div class="bub"><div class="en">${hid?`<span style="filter:blur(7px);user-select:none;opacity:.75">${esc(msg.en)}</span>`:esc(msg.en)}</div>
         ${!hid&&(cfg.showJa||msg.open)&&msg.ja?`<div class="ja">${esc(msg.ja)}</div>`:''}</div>
         <div class="tools">
-          <button class="chip" data-say="${i}">🔊 もう一度</button>
-          <button class="chip" data-slow="${i}">🐢 ゆっくり</button>
-          ${hid?`<button class="chip" data-see="${i}" style="border-color:var(--accent);color:var(--accent)">👀 文字を見る</button>`:''}
-          ${!hid&&msg.ja?`<button class="chip" data-ja="${i}">${(cfg.showJa||msg.open)?'訳をかくす':'日本語で見る'}</button>`:''}
-          ${(msg.nw&&msg.nw.length)?`<button class="chip" data-nw="${i}" style="border-color:color-mix(in srgb,var(--accent) 45%,var(--line));color:var(--accent)">📖 いまの表現 ${msg.nw.length}</button>`:''}
+          <button class="chip" data-say="${i}">${icon('volume-2',14)}もう一度</button>
+          <button class="chip" data-slow="${i}">${icon('turtle',14)}ゆっくり</button>
+          ${hid?`<button class="chip" data-see="${i}" style="border-color:var(--primary);color:var(--primary)">${icon('book-open',14)}文字を見る</button>`:''}
+          ${!hid&&msg.ja?`<button class="chip" data-ja="${i}">${icon('languages',14)}${(cfg.showJa||msg.open)?'訳をかくす':'日本語で見る'}</button>`:''}
+          ${(msg.nw&&msg.nw.length)?`<button class="chip" data-nw="${i}" style="border-color:color-mix(in srgb,var(--primary) 45%,var(--line));color:var(--primary)">${icon('sparkles',14)}いまの表現 ${msg.nw.length}</button>`:''}
         </div>
         ${(msg.nw&&msg.nw.length&&msg.nwOpen)?`<div class="hintbox" style="max-width:none">
           <div class="hh">📖 いまの言い方（少し上のレベル）</div>
           ${msg.nw.map((x,k)=>`<div class="hint" style="cursor:default">
-            <div class="he">${esc(x.en)} <button class="chip" data-sayt="${esc(x.en)}">🔊</button></div>
+            <div class="he">${esc(x.en)} <button class="chip" data-sayt="${esc(x.en)}" aria-label="読み上げ">${icon('volume-2',14)}</button></div>
             <div class="hj">${esc(x.ja)}</div>
             ${x.why_ja?`<div class="hj" style="margin-top:3px">💡 ${esc(x.why_ja)}</div>`:''}
             <button class="chip" data-nwkeep="${i}:${k}" style="margin-top:6px">📒 フレーズ帳に入れる</button>
@@ -3760,7 +3977,7 @@ function paintMsgs(){
       if(msg.fb && msg.fb.status && msg.fb.status!=='none'){
         h+=`<div class="fb ${msg.fb.status==='good'?'good':'tip'}">
           ${msg.fb.status==='good'?'✅ 自然な言い方です':'💡 もっと自然に言うなら'}
-          ${msg.fb.better?`<div class="better">${esc(msg.fb.better)} <button class="chip" data-sayt="${esc(msg.fb.better)}">🔊</button></div>`:''}
+          ${msg.fb.better?`<div class="better">${esc(msg.fb.better)} <button class="chip" data-sayt="${esc(msg.fb.better)}" aria-label="読み上げ">${icon('volume-2',14)}</button></div>`:''}
           ${msg.fb.why_ja?`<div class="why">${esc(msg.fb.why_ja)}</div>`:''}
           ${msg.fb.better?`<div style="margin-top:6px"><button class="chip" data-keep="${i}">📒 フレーズ帳に入れる</button></div>`:''}
         </div>`;
@@ -3769,7 +3986,7 @@ function paintMsgs(){
   });
   if(app.busy) h+=`<div class="typing"><i></i><i></i><i></i>${app.retrying?`<span class="retrying">つながりにくいので ${app.retrying}回目のやり直し中…</span>`:''}</div>`;
   if(c.error && !app.busy){
-    h+=`<div class="errcard"><div class="em">⚠️</div><div style="flex:1;min-width:0">
+    h+=`<div class="errcard"><div class="em">${icon('circle-alert',18)}</div><div style="flex:1;min-width:0">
       <div class="tt">AIの返事が届きませんでした</div>
       <div class="ds">${esc(c.error)}</div>
       <div class="row">
@@ -3805,13 +4022,13 @@ function paintMsgs(){
   if(!c.ended){
     const free=c.scene.id==='free';
     h+=`<div class="row" style="margin-top:2px;justify-content:center;flex-wrap:wrap;gap:7px">
-      <button class="btn soft sm" id="bHint">${c.showHints?'ヒントを閉じる':'💡 なんて言えばいい？'}</button>
-      ${hasKey()?`<button class="btn ghost sm" id="bSimple">🐢 やさしく言い直して</button>`:''}
-      ${hasKey()?`<button class="btn ghost sm" id="bWord">🔤 英語でなんて言う？</button>`:''}
-      ${hasKey()&&free?`<button class="btn ghost sm" id="bTopic">🔀 話題を変える</button>`:''}
-      <button class="btn ghost sm" id="bHide" style="${cfg.hideEn?'border-color:var(--accent);color:var(--accent)':''}">${cfg.hideEn?'🎧 字幕オフ中':'🎧 字幕を消す'}</button>
-      ${hasKey()?`<button class="btn ghost sm" id="bLevel">🎚 ${LV(c.level).t}にしている</button>`:''}
-      <button class="btn ghost sm" id="bEnd">🏁 会話を終える</button>
+      <button class="btn soft sm" id="bHint">${icon(c.showHints?'x':'lightbulb',16)}${c.showHints?'ヒントを閉じる':'なんて言えばいい？'}</button>
+      ${hasKey()?`<button class="btn ghost sm" id="bSimple">${icon('turtle',16)}やさしく言い直して</button>`:''}
+      ${hasKey()?`<button class="btn ghost sm" id="bWord">${icon('languages',16)}英語でなんて言う？</button>`:''}
+      ${hasKey()&&free?`<button class="btn ghost sm" id="bTopic">${icon('rotate-ccw',16)}話題を変える</button>`:''}
+      <button class="btn ghost sm" id="bHide" style="${cfg.hideEn?'border-color:var(--primary);color:var(--primary)':''}">${icon('headphones',16)}${cfg.hideEn?'字幕オフ中':'字幕を消す'}</button>
+      ${hasKey()?`<button class="btn ghost sm" id="bLevel">${icon('sparkles',16)}${LV(c.level).t}にしている</button>`:''}
+      <button class="btn ghost sm" id="bEnd">${icon('flag',16)}会話を終える</button>
     </div>`;
     if(c.mission){
       h+=`<div class="muted" style="text-align:center;font-size:12px">${c.missionDone?'⭐️ 今日のミッション達成！':'🎯 今日のミッション：<b>'+esc(c.mission.t)+'</b>（'+esc(c.mission.d)+'）'+(c.mission.ex?'<br>例：'+esc(c.mission.ex):'')}</div>`;
@@ -4138,8 +4355,8 @@ function reportHtml(r,c){
     <div class="row" style="margin-bottom:8px">
       <div style="font-size:32px;font-weight:800;line-height:1">${r.score??'-'}</div>
       <div class="muted grow">点／100<div class="bar" style="margin-top:5px"><i style="width:${Math.max(4,Math.min(100,r.score||0))}%"></i></div></div>
-      ${r.cefr?`<div style="text-align:center;padding:6px 12px;border:1px solid var(--accent);border-radius:12px">
-        <div style="font-size:19px;font-weight:800;color:var(--accent);line-height:1.1">${esc(r.cefr)}</div>
+      ${r.cefr?`<div style="text-align:center;padding:6px 12px;border:1px solid var(--primary);border-radius:12px">
+        <div style="font-size:19px;font-weight:800;color:var(--primary);line-height:1.1">${esc(r.cefr)}</div>
         <div style="font-size:9.5px;color:var(--sub)">今日の英語</div></div>`:''}
     </div>
     ${r.cefr_why_ja?`<p class="muted" style="margin:0 0 10px;font-size:12.5px">📏 ${esc(r.cefr_why_ja)}　<span style="opacity:.8">（相手のレベル設定は ${esc(LV(c.level).cefr)}）</span></p>`:''}
@@ -4164,7 +4381,7 @@ function reportHtml(r,c){
         <div class="muted" style="font-size:12.5px">${esc(p.ja)}</div>
         ${p.when_ja?`<div class="muted" style="font-size:11.5px;margin-top:2px">🗣 ${esc(p.when_ja)}</div>`:''}</div>`).join('')}
       <button class="btn soft block sm" id="keepNext" style="margin-top:9px">📒 この4つをフレーズ帳に入れる</button></div>`:''}
-    <p style="margin:14px 0 0;padding:10px 12px;background:var(--accent-soft);border-radius:12px;font-size:14px">🎯 次の目標：${esc(r.next_goal_ja||'')}</p>
+    <p style="margin:14px 0 0;padding:10px 12px;background:var(--primary-soft);border-radius:12px;font-size:14px">🎯 次の目標：${esc(r.next_goal_ja||'')}</p>
     <div class="row" style="margin-top:12px">
       <button class="btn grow" id="again">もう一度おなじ場面で</button>
       <button class="btn ghost" id="home">えらび直す</button>
@@ -4207,6 +4424,8 @@ function setMicUI(btn,on){ btn.classList.toggle('rec',on); }
 function syncMicUI(){
   const mode=micMode(), en=$('#micEn'), ja=$('#micJa');
   if(!en||!ja) return;
+  if(!en.firstChild) en.innerHTML=icon('mic',24);
+  const be=$('#btnEnd'); if(be && !be.firstChild) be.innerHTML=icon('flag',17);
   const dead = mode==='none';
   en.classList.toggle('off',dead);
   en.title = dead? 'この端末では音声が使えません（設定でAIキーを入れると使えます）'
@@ -4305,10 +4524,10 @@ function renderPractice(m){
   if(prTab==='pron' && openPron){ renderPronDrill(m); return; }
   if(prTab==='shadow' && shadow){ renderShadowRun(m); return; }
   const seg=`<div class="seg" id="prTab" style="margin-bottom:2px">
-    <button data-pr="srs" class="${prTab==='srs'?'on':''}" style="font-size:12px">📒 フレーズ</button>
-    <button data-pr="packs" class="${prTab==='packs'?'on':''}" style="font-size:12px">📦 パック</button>
-    <button data-pr="pron" class="${prTab==='pron'?'on':''}" style="font-size:12px">🎤 発音</button>
-    <button data-pr="shadow" class="${prTab==='shadow'?'on':''}" style="font-size:12px">🗣 音読</button></div>`;
+    <button data-pr="srs" class="${prTab==='srs'?'on':''}" style="font-size:12px">${icon('book-open',15)}フレーズ</button>
+    <button data-pr="packs" class="${prTab==='packs'?'on':''}" style="font-size:12px">${icon('sparkles',15)}パック</button>
+    <button data-pr="pron" class="${prTab==='pron'?'on':''}" style="font-size:12px">${icon('mic',15)}発音</button>
+    <button data-pr="shadow" class="${prTab==='shadow'?'on':''}" style="font-size:12px">${icon('volume-2',15)}音読</button></div>`;
   m.innerHTML=seg+'<div id="prBody"></div>';
   $('#prTab').onclick=e=>{ const b=e.target.closest('[data-pr]'); if(!b) return; prTab=b.dataset.pr; openPack=null; openPron=null; render(); };
   const body=$('#prBody');
@@ -4332,7 +4551,7 @@ function shadowMaterial(){
   return pk? pk.items.slice(0,12).map(i=>({en:i.en, ja:i.ja, from:pk.t})) : [];
 }
 function renderShadow(m){
-  $('#hTitle').textContent='🗣 音読・シャドーイング';
+  $('#hTitle').textContent='音読・シャドーイング';
   $('#hSub').textContent='お手本を追いかけて声に出す';
   const scenes=SCENES.filter(x=>x.script);
   m.innerHTML=`
@@ -4418,7 +4637,7 @@ function renderShadowRun(m){
 /* --- フレーズパック --- */
 const packHas = p => phrases.some(x=>x.en.toLowerCase()===p.en.toLowerCase());
 function renderPacks(m){
-  $('#hTitle').textContent='📦 フレーズパック';
+  $('#hTitle').textContent='フレーズパック';
   $('#hSub').textContent='会話が止まらなくなる決まり文句';
   if(!PACKS.length){ m.innerHTML=`<div class="empty">パックがありません</div>`; return; }
   m.innerHTML=`<p class="muted" style="margin:0">話が続かない原因のほとんどは「相づち・聞き返し・つなぎ」を知らないことです。ここから選んでフレーズ帳に入れると、次の会話でそのまま使えます。</p>
@@ -4455,7 +4674,7 @@ function renderPackDetail(m){
 
 /* --- 発音ドリル --- */
 function renderPronList(m){
-  $('#hTitle').textContent='🎤 発音ドリル';
+  $('#hTitle').textContent='発音ドリル';
   $('#hSub').textContent='日本語話者がつまずく音を集中的に';
   if(!PRON.length){ m.innerHTML=`<div class="empty">ドリルがありません</div>`; return; }
   m.innerHTML=`<p class="muted" style="margin:0">通じない原因は語彙より「音」のことが多いです。聞き分けクイズ → 単語 → 文 の順に練習します。</p>
@@ -4468,7 +4687,7 @@ function renderPronList(m){
 }
 function renderPronDrill(m){
   const d=PRON.find(x=>x.id===openPron); if(!d){ openPron=null; render(); return; }
-  $('#hTitle').textContent='🎤 '+d.t;
+  $('#hTitle').textContent=d.t;
   $('#hSub').textContent='聞き分け → 単語 → 文';
   if(!pronQuiz) pronQuiz={stage:'listen', i:0, right:0, order:shuffle(d.pairs.map((_,i)=>i)), which:null, picked:null, sent:0, pron:null};
   const q=pronQuiz;
@@ -4593,12 +4812,15 @@ const QMODES=[
  {id:'speak', t:'🎤 発音', d:'お手本と同じに言えるか'}
 ];
 function renderPhrases(m){
-  $('#hTitle').textContent='📒 フレーズ帳';
+  $('#hTitle').textContent='練習';
   const due=dueList();
   $('#hSub').textContent=phrases.length? `${phrases.length}個 ／ 覚えた ${learned()}個 ／ 今日 ${due.length}個` : '会話のふりかえりから追加できます';
   if(!phrases.length && !phAdd){
-    m.innerHTML=`<div class="empty">まだフレーズがありません。<br>会話のあとのふりかえりや「📦 パック」からたまります。</div>
-      <button class="btn ghost block sm" id="paOpen">＋ 覚えたい言い方を自分で追加</button>`;
+    m.innerHTML=emptyBox('cards','まだフレーズがありません',
+        '会話を1回すると、そのとき覚えたい言い方がここに自動でたまります。<br>たまった分は忘れかけた頃に出題されます。',
+        '会話をはじめる','emGo')
+      + `<button class="btn ghost block sm" id="paOpen" style="margin-top:var(--sp-3)">＋ 覚えたい言い方を自分で追加</button>`;
+    $('#emGo').onclick=goTalk;
     $('#paOpen').onclick=()=>{ phAdd={en:'',ja:''}; render(); }; return;
   }
   if(phMode==='quiz'){ renderQuiz(m); return; }
@@ -4624,7 +4846,7 @@ function renderPhrases(m){
      <div style="display:flex;align-items:flex-end;gap:5px;height:70px">
        ${boxCount.map((c2,b)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end">
          <div style="font-size:10px;color:var(--sub)">${c2||''}</div>
-         <div style="width:100%;height:${c2?Math.max(5,c2/Math.max(1,...boxCount)*44):5}px;border-radius:5px;background:${b>=4?'var(--ok)':b>=2?'var(--accent)':'var(--line)'}"></div>
+         <div style="width:100%;height:${c2?Math.max(5,c2/Math.max(1,...boxCount)*44):5}px;border-radius:5px;background:${b>=4?'var(--ok)':b>=2?'var(--primary)':'var(--line)'}"></div>
          <div style="font-size:9.5px;color:var(--sub)">${b===0?'新':SRS_DAYS[b]+'日'}</div></div>`).join('')}
      </div>
      <p class="muted" style="margin:8px 0 0">正解すると次に会うのが「1→3→7→16→35日後」と伸びていきます。忘れた頃に出てくるので記憶に残ります。</p>
@@ -4757,7 +4979,7 @@ function renderQuiz(m){
        ? `<button class="btn soft" id="play" style="margin:16px auto 6px">🔊 もう一度聞く</button>
           <div class="muted" style="font-size:12px">${quiz.open?'':'まず声に出して言ってみてから答えを見よう'}</div>`
        : `<div style="font-size:19px;font-weight:700;margin:10px 0 18px">${esc(p.ja||p.scene||'（訳なし）')}</div>`}
-     ${quiz.open?`<div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:12px">${esc(p.en)}</div>
+     ${quiz.open?`<div style="font-size:20px;font-weight:800;color:var(--primary);margin-top:12px">${esc(p.en)}</div>
        <div class="muted" style="margin-top:4px">${esc(p.ja)}</div>
        <button class="btn soft sm" id="say" style="margin-top:10px">🔊 聞く</button>`
       :`<button class="btn block" id="open" style="margin-top:14px">答えを見る</button>`}
@@ -4813,7 +5035,7 @@ function levelSuggestion(){
 /* ---------- 12. 記録 ---------- */
 let openSession=null, openWeak=false, logQuery='';
 function renderStats(m){
-  $('#hTitle').textContent='📈 記録';
+  $('#hTitle').textContent='記録';
   $('#hSub').textContent='がんばりの見える化';
   const st=streak();
   const tot=sessions.reduce((a,s)=>({t:a.t+(s.turns||0),w:a.w+(s.words||0),s:a.s+(s.sec||0)}),{t:0,w:0,s:0});
@@ -4821,6 +5043,12 @@ function renderStats(m){
     const k=todayKey(d); const n=sessions.filter(s=>todayKey(new Date(s.ts))===k).reduce((a,s)=>a+(s.turns||0),0);
     return {k,n,lb:'日月火水木金土'[d.getDay()]}; });
   const mx=Math.max(1,...week.map(w=>w.n));
+  if(!sessions.length){
+    m.innerHTML=emptyBox('chat','まだ記録がありません',
+      '1回話し終えると、連続日数・1週間のグラフ・直された文の傾向がここに出ます。<br>まずは1分でいいので声を出してみてください。',
+      '会話をはじめる','emGo3');
+    return;
+  }
   m.innerHTML=`
   <div class="stat">
     <div><b>${st.streak}</b><span>連続日数</span></div>
@@ -4834,18 +5062,18 @@ function renderStats(m){
       ${(()=>{const cs=sessions.filter(x=>x.cefr).slice(0,5); if(!cs.length) return '';
         const order=['A1','A2','B1','B2','C1','C2'];
         const top=order[Math.round(cs.reduce((a,x)=>a+order.indexOf(x.cefr),0)/cs.length)]||cs[0].cefr;
-        return `<div style="text-align:center;padding:6px 12px;border:1px solid var(--accent);border-radius:12px">
-          <div style="font-size:19px;font-weight:800;color:var(--accent);line-height:1.1">${esc(top)}</div>
+        return `<div style="text-align:center;padding:6px 12px;border:1px solid var(--primary);border-radius:12px">
+          <div style="font-size:19px;font-weight:800;color:var(--primary);line-height:1.1">${esc(top)}</div>
           <div style="font-size:9.5px;color:var(--sub)">最近の英語</div></div>`; })()}
     </div>
     ${(()=>{const cs=sessions.filter(x=>x.cefr).slice(0,8).reverse(); if(cs.length<2) return '';
       const order=['A1','A2','B1','B2','C1','C2'];
       return `<div style="display:flex;align-items:flex-end;gap:5px;height:52px;margin-top:10px">
         ${cs.map(x=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end">
-          <div style="width:100%;height:${(order.indexOf(x.cefr)+1)/6*36}px;border-radius:5px;background:var(--accent)"></div>
+          <div style="width:100%;height:${(order.indexOf(x.cefr)+1)/6*36}px;border-radius:5px;background:var(--primary)"></div>
           <div style="font-size:9px;color:var(--sub)">${esc(x.cefr)}</div></div>`).join('')}
       </div><div class="muted" style="font-size:11.5px;margin-top:4px">実際に話した英語のレベルの推移（古い→新しい）</div>`; })()}
-    ${(()=>{const sg=levelSuggestion(); return sg?`<div style="margin-top:12px;padding:11px 13px;background:var(--accent-soft);border-radius:12px">
+    ${(()=>{const sg=levelSuggestion(); return sg?`<div style="margin-top:12px;padding:11px 13px;background:var(--primary-soft);border-radius:12px">
       <div style="font-size:13.5px;font-weight:700">${sg.up?'⬆️ そろそろ上げてみませんか？':'⬇️ 少し下げてみませんか？'}</div>
       <div class="muted" style="font-size:12px;margin:3px 0 8px">${esc(sg.why)}</div>
       <button class="btn soft sm" id="lvUp">「${esc(sg.to.t)}」にする</button></div>`:''; })()}
@@ -4854,7 +5082,7 @@ function renderStats(m){
     <div style="display:flex;align-items:flex-end;gap:7px;height:110px">
       ${week.map(w=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end">
         <div style="font-size:10px;color:var(--sub)">${w.n||''}</div>
-        <div style="width:100%;background:${w.n?'var(--accent)':'var(--line)'};height:${w.n?Math.max(6,w.n/mx*80):6}px;border-radius:6px"></div>
+        <div style="width:100%;background:${w.n?'var(--primary)':'var(--line)'};height:${w.n?Math.max(6,w.n/mx*80):6}px;border-radius:6px"></div>
         <div style="font-size:11px;color:var(--sub)">${w.lb}</div></div>`).join('')}
     </div>
     <p class="muted" style="margin:10px 0 0">総単語数 ${tot.w} 語</p>
@@ -4865,10 +5093,10 @@ function renderStats(m){
       ${top.slice(0,6).map(([cat,cnt])=>`
         <div style="margin-bottom:9px">
           <div class="row" style="font-size:13.5px"><div class="grow"><b>${esc(CATS[cat]||cat)}</b></div><div class="muted">${cnt}回</div></div>
-          <div class="bar" style="margin-top:3px"><i style="width:${cnt/max*100}%;background:${cnt>=max?'var(--danger)':'var(--accent)'}"></i></div>
+          <div class="bar" style="margin-top:3px"><i style="width:${cnt/max*100}%;background:${cnt>=max?'var(--danger)':'var(--primary)'}"></i></div>
         </div>`).join('')}
-      <div style="margin-top:12px;padding:11px 13px;background:var(--accent-soft);border-radius:12px">
-        <div style="font-size:12px;font-weight:700;color:var(--accent)">いちばん多いのは「${esc(CATS[top[0][0]]||top[0][0])}」</div>
+      <div style="margin-top:12px;padding:11px 13px;background:var(--primary-soft);border-radius:12px">
+        <div style="font-size:12px;font-weight:700;color:var(--primary)">いちばん多いのは「${esc(CATS[top[0][0]]||top[0][0])}」</div>
         <div style="font-size:13px;margin-top:4px">${esc(CAT_TIP[top[0][0]]||'')}</div>
         <div class="row" style="margin-top:10px;flex-wrap:wrap">
           <button class="btn sm" data-wtalk="${top[0][0]}">🎯 この弱点をねらって会話する</button>
@@ -4885,7 +5113,9 @@ function renderStats(m){
           <div class="muted" style="font-size:12px">${esc(w.why_ja)}</div>
         </div>`).join('')}
       </div>`:''}`; })()
-     : `<div class="empty">まだありません。会話のふりかえりで直された文が、ここに自動でたまります。</div>`}
+     : emptyBox('fix','まだ弱点はありません',
+         '会話のふりかえりで直された文が、ここに種類ごとにたまります。<br>「時制がよく抜ける」のような癖が見えてきます。',
+         '会話をはじめる','emGo2')}
   </div>
   ${(()=>{ const bySc={};
      sessions.filter(x=>x.score!=null).forEach(x=>{ (bySc[x.scene]=bySc[x.scene]||[]).push(x.score); });
@@ -4895,7 +5125,7 @@ function renderStats(m){
      return `<div class="card"><h2>場面ごとの得意・苦手</h2>
        ${rows.map(r=>`<div style="margin-bottom:8px">
          <div class="row" style="font-size:13px"><div class="grow">${esc(r[0])} <span class="muted">(${r[2]}回)</span></div><div class="muted">${r[1]}点</div></div>
-         <div class="bar" style="margin-top:3px"><i style="width:${r[1]}%;background:${r[1]>=80?'var(--ok)':r[1]>=60?'var(--accent)':'var(--warn)'}"></i></div></div>`).join('')}
+         <div class="bar" style="margin-top:3px"><i style="width:${r[1]}%;background:${r[1]>=80?'var(--ok)':r[1]>=60?'var(--primary)':'var(--warn)'}"></i></div></div>`).join('')}
        <p class="muted" style="margin:8px 0 0">いちばん低い「${esc(rows[rows.length-1][0])}」をもう一度やると伸びしろが大きいです。</p>
      </div>`; })()}
   <div class="card"><h2>これまでの会話</h2>
@@ -4908,17 +5138,20 @@ function renderStats(m){
        <div class="row"><div class="grow"><b style="font-size:14px">${esc(s.scene)}</b>
          <div class="muted" style="font-size:11.5px">${fmtDate(s.ts)} ・ ${s.turns}回話した ・ ${s.words}語 ・ ${Math.max(1,Math.round(s.sec/60))}分${s.char?' ・ '+esc(s.char):''}</div>
          ${s.mission?`<div class="muted" style="font-size:11.5px">${s.missionDone?'⭐️':'🎯'} ${esc(s.mission)}</div>`:''}</div>
-         ${s.score!=null?`<div style="font-weight:800;color:var(--accent)">${s.score}</div>`:''}
+         ${s.score!=null?`<div style="font-weight:800;color:var(--primary)">${s.score}</div>`:''}
          <button class="chip" data-op="${s.id}">${openSession===s.id?'閉じる':'見る'}</button></div>
        ${openSession===s.id?`<div style="margin-top:8px;font-size:13.5px;display:flex;flex-direction:column;gap:6px">
-          ${(s.msgs||[]).map(x=>`<div style="padding:7px 10px;border-radius:10px;background:${x.r==='ai'?'var(--bg)':'var(--accent-soft)'}">
+          ${(s.msgs||[]).map(x=>`<div style="padding:7px 10px;border-radius:10px;background:${x.r==='ai'?'var(--bg)':'var(--primary-soft)'}">
              <b style="font-size:10.5px;color:var(--sub)">${x.r==='ai'?'相手':'自分'}</b><div>${esc(x.en)}</div>
              ${x.ja?`<div class="muted" style="font-size:11.5px">${esc(x.ja)}</div>`:''}</div>`).join('')}
           ${s.report?`<div class="muted" style="margin-top:4px">${esc(s.report.summary_ja||'')}</div>`:''}
           <div class="row"><button class="btn ghost sm grow" data-copy="${s.id}">📋 テキストでコピー</button>
             <button class="btn ghost sm" data-del2="${s.id}">🗑 消す</button></div>
         </div>`:''}
-     </div>`).join('') : `<div class="empty">${q?'見つかりませんでした':'まだ記録がありません'}</div>`; })()}
+     </div>`).join('') : (q? `<div class="empty">「${esc(q)}」に合う記録は見つかりませんでした</div>`
+        : emptyBox('chat','まだ会話の記録がありません',
+            '1回話し終えると、点数・直すところ・覚えるフレーズがここに残ります。<br>まずは1分でいいので声を出してみてください。',
+            '会話をはじめる','emGo3')); })()}
   </div>`;
   const sq=$('#sq'); if(sq) sq.oninput=e=>{ logQuery=e.target.value; const at=e.target.selectionStart; render(); const el=$('#sq'); if(el){ el.focus(); el.setSelectionRange(at,at); } };
   m.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{
@@ -4946,7 +5179,7 @@ function renderStats(m){
 
 /* ---------- 13. 設定 ---------- */
 function renderSettings(m){
-  $('#hTitle').textContent='⚙️ 設定';
+  $('#hTitle').textContent='設定';
   $('#hSub').textContent='キーは この端末の中だけ に保存されます';
   loadVoices();
   m.innerHTML=`

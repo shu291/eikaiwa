@@ -1,0 +1,104 @@
+{
+  "app": {
+    "name": "Talkie — じぶん英会話",
+    "purpose": "英語を声に出して練習して、通じた経験を積む",
+    "users": "高校生の自分。読めるけど話すのは苦手",
+    "platform": "単一HTML PWA",
+    "scene": "自室で1人、iPhoneを手に持って10〜15分。声を出すので人がいないとき"
+  },
+  "directions": [
+    {
+      "id": "A",
+      "name": "向かいの席",
+      "mood": "落ち着き / 深い青 / 余白多め / 相手のセリフが主役",
+      "why": "夜に自室で1人で声を出す場面。眩しくなく、間違えても責められない静けさが要る",
+      "palette": {
+        "bg": "#0B1020",
+        "surface": "#151C33",
+        "border": "#26304D",
+        "text": "#E8ECF7",
+        "muted": "#93A0C0",
+        "primary": "#6C8CFF",
+        "onPrimary": "#0B1020",
+        "accent": "#FFB86B",
+        "danger": "#FF6B6B",
+        "success": "#4ADE80"
+      },
+      "fonts": {
+        "heading": "Zen Kaku Gothic New",
+        "body": "Zen Kaku Gothic New",
+        "mono": "JetBrains Mono",
+        "headingWeight": 700,
+        "bodyWeight": 400
+      },
+      "radius": {"sm": 12, "md": 16, "lg": 20},
+      "shadow": "none",
+      "density": "ゆったり",
+      "scheme": "dark",
+      "keyImages": [],
+      "icons": ["mic", "volume-2", "lightbulb", "message-circle", "flag", "book-open"]
+    },
+    {
+      "id": "B",
+      "name": "英語の教科書",
+      "mood": "紙とインク / 教科書体 / 音読しやすい / 英文が主役",
+      "why": "音読とシャドーイングが要の機能。紙の教材と同じ読み心地にすると声に出しやすい",
+      "palette": {
+        "bg": "#F7F3E9",
+        "surface": "#FFFDF7",
+        "border": "#E3DAC6",
+        "text": "#22201B",
+        "muted": "#6E6656",
+        "primary": "#1F3A5F",
+        "onPrimary": "#FFFDF7",
+        "accent": "#A8352A",
+        "danger": "#A93226",
+        "success": "#33691E"
+      },
+      "fonts": {
+        "heading": "Klee One",
+        "body": "Klee One",
+        "mono": "JetBrains Mono",
+        "headingWeight": 600,
+        "bodyWeight": 400
+      },
+      "radius": {"sm": 8, "md": 10, "lg": 12},
+      "shadow": "0 1px 2px rgba(34,32,27,.05), 0 8px 24px rgba(34,32,27,.07)",
+      "density": "標準",
+      "scheme": "light",
+      "keyImages": [],
+      "icons": ["book-open", "volume-2", "mic", "turtle", "check", "chevron-right"]
+    },
+    {
+      "id": "C",
+      "name": "通話中",
+      "mood": "真っ黒 / 特大の文字 / ボタンは丸くて大きい / 画面を見ないで使う",
+      "why": "話している最中は画面をじっくり読めない。離れた位置からでも状態が一目で分かる方が実際に喋れる",
+      "palette": {
+        "bg": "#000000",
+        "surface": "#101010",
+        "border": "#8A8A8A",
+        "text": "#FFFFFF",
+        "muted": "#C7C7C7",
+        "primary": "#7FB4FF",
+        "onPrimary": "#000000",
+        "accent": "#FFD24A",
+        "danger": "#FF8A80",
+        "success": "#6BE39A"
+      },
+      "fonts": {
+        "heading": "BIZ UDPGothic",
+        "body": "BIZ UDPGothic",
+        "mono": "JetBrains Mono",
+        "headingWeight": 700,
+        "bodyWeight": 400
+      },
+      "radius": {"sm": 10, "md": 14, "lg": 18},
+      "shadow": "none",
+      "density": "ゆったり",
+      "scheme": "dark",
+      "keyImages": [],
+      "icons": ["mic", "mic-off", "headphones", "flag", "circle-alert", "rotate-ccw"]
+    }
+  ]
+}

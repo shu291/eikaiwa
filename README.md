@@ -4,6 +4,30 @@
 
 👉 **https://shu291.github.io/eikaiwa/**
 
+## 見た目のルール
+
+`design/` にデザインの設計図がある（design-kit で生成）。
+
+| ファイル | 中身 |
+|---|---|
+| `design/design-brief.html` | 3案を見比べるページ。ブラウザで開く |
+| `design/direction.json` | 3案の定義（A 向かいの席 / B 英語の教科書 / C 通話中） |
+| `design/tokens.css` | 採用案Aの色・文字・余白の変数。index.html に貼ってある |
+| `design/DESIGN.md` | 実装中に守るルール |
+| `design/icons/` | lucide アイコン20個。`icon(name,size)` で使う |
+
+**採用は A「向かいの席」**（深い青のダーク・余白多め）。
+この画面の主役は **相手が今言った英文** ひとつなので、そこだけ 22px で明るくし、
+訳・ヒント・フィードバックは 13px の弱い色にして順位を固定してある。
+
+案を変えたいときはゼロから作り直さず、これだけ実行して貼り替える。
+
+```bash
+python3 ~/.claude/skills/design-kit/scripts/make_moodboard.py \
+  --spec design/direction.json --out design/design-brief.html \
+  --emit-tokens B --tokens-out design/tokens.css
+```
+
 ## 完全無料で動く理由
 
 | パーツ | 使っているもの | 費用 |
