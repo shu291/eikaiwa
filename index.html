@@ -150,6 +150,55 @@ a{color:var(--accent)}
 .bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
 .toast{position:fixed;bottom:130px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;
   padding:10px 16px;border-radius:99px;font-size:13px;z-index:100;box-shadow:var(--shadow);max-width:90%;text-align:center}
+/* ---- 聞いています表示（ネイティブ/クラウド共通） ---- */
+#hear{position:fixed;left:0;right:0;bottom:calc(122px + env(safe-area-inset-bottom));z-index:36;
+  display:none;justify-content:center;pointer-events:none;padding:0 12px}
+#hear.on{display:flex}
+#hearIn{pointer-events:auto;display:flex;align-items:center;gap:11px;max-width:min(680px,100%);
+  background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 8px 8px 15px;
+  box-shadow:0 6px 26px rgba(16,24,40,.16);animation:hearIn .18s ease-out}
+@keyframes hearIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+#hearBars{display:flex;align-items:center;gap:3px;height:22px;flex:none}
+#hearBars i{display:block;width:3.5px;border-radius:2px;background:var(--danger);height:5px;
+  transition:height .09s linear}
+#hearTxt{font-size:13.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hearTxt b{color:var(--danger)}
+#hearSub{font-size:11px;color:var(--sub);font-weight:500;margin-top:-2px}
+#hearStop{flex:none;border:0;border-radius:999px;background:var(--danger);color:#fff;
+  font-size:12.5px;font-weight:700;padding:8px 14px}
+#hear.busy #hearBars i{background:var(--accent);animation:wave .9s ease-in-out infinite}
+#hear.busy #hearBars i:nth-child(2){animation-delay:.12s}
+#hear.busy #hearBars i:nth-child(3){animation-delay:.24s}
+#hear.busy #hearBars i:nth-child(4){animation-delay:.36s}
+#hear.busy #hearBars i:nth-child(5){animation-delay:.48s}
+@keyframes wave{0%,100%{height:5px}50%{height:19px}}
+
+/* ---- 環境の注意バナー ---- */
+.envbar{display:flex;gap:10px;align-items:flex-start;background:var(--accent-soft);
+  border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);border-radius:14px;padding:12px 13px}
+.envbar .em{font-size:18px;line-height:1.2;flex:none}
+.envbar .tt{font-size:13.5px;font-weight:700;margin-bottom:2px}
+.envbar .ds{font-size:12.5px;color:var(--sub);line-height:1.55}
+.envbar .row{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+.envbar button{border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);background:var(--card);
+  border-radius:9px;padding:6px 11px;font-size:12px;font-weight:700;color:var(--accent)}
+.envbar .x{background:none;border:0;color:var(--sub);font-size:16px;padding:0 2px;align-self:flex-start}
+
+/* ---- 失敗したときの復帰カード ---- */
+.errcard{background:color-mix(in srgb,var(--danger) 9%,var(--card));
+  border:1px solid color-mix(in srgb,var(--danger) 34%,transparent);border-radius:14px;padding:13px;
+  display:flex;gap:10px;align-items:flex-start;margin:4px 0}
+.errcard .em{font-size:17px;flex:none}
+.errcard .tt{font-size:13.5px;font-weight:700;color:var(--danger)}
+.errcard .ds{font-size:12.5px;color:var(--sub);margin-top:2px;line-height:1.55}
+.errcard .row{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.errcard button{border:0;border-radius:9px;padding:7px 13px;font-size:12.5px;font-weight:700;
+  background:var(--danger);color:#fff}
+.errcard button.gh{background:var(--card);color:var(--sub);border:1px solid var(--line)}
+
+/* ---- 使えないボタンは押せないと見て分かるように ---- */
+button[disabled],button.off{opacity:.42;cursor:not-allowed;filter:grayscale(.5)}
+.retrying{font-size:11.5px;color:var(--warn);font-weight:650;margin-left:6px}
 </style>
 </head>
 <body>
@@ -169,6 +218,11 @@ a{color:var(--accent)}
       <button class="mic" id="micEn" title="英語で話す">🎙</button>
     </div>
   </div>
+  <div id="hear"><div id="hearIn">
+    <div id="hearBars"><i></i><i></i><i></i><i></i><i></i></div>
+    <div style="min-width:0"><div id="hearTxt">聞いています</div><div id="hearSub"></div></div>
+    <button id="hearStop">とめる</button>
+  </div></div>
   <nav class="tabs" id="tabs"></nav>
 </div>
 <script>
@@ -2816,7 +2870,7 @@ const cfg = Object.assign({
   handsFree:true, silence:4.5,
   free:{char:'sam', topic:'auto', topicCustom:'', mission:'auto', len:'normal'},
   mission:'auto', hideEn:false, seenGuide:false,
-  goal:12, quizMode:'mix', autoLevel:true, style:'normal'
+  goal:12, quizMode:'mix', autoLevel:true, style:'normal', hideEnvTip:false
 }, load(LS.cfg,{}));
 cfg.free=Object.assign({char:'sam',topic:'auto',topicCustom:'',mission:'auto',len:'normal'},cfg.free||{});
 if(cfg.mission==null) cfg.mission=cfg.free.mission||'auto';
@@ -2934,11 +2988,20 @@ const stopSpeak = ()=>{ speakSeq++; try{ speechSynthesis.cancel(); }catch(e){} }
 /* ---------- 5. 音声認識（無料・ブラウザ標準） ---------- */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const srAvailable = !!SR;
+/* iOS は全ブラウザが WebKit 中身。だが Apple は音声認識を Safari 本体にしか出していないので、
+   iOS の Chrome/Edge/Firefox では SpeechRecognition が存在しない。 */
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+               (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+const IOS_NON_SAFARI = IS_IOS && /CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent);
+function micMode(){
+  if(SR) return 'native';
+  if(hasKey()) return 'cloud';
+  return 'none';
+}
 let rec=null, recFinish=null, recStopping=false, silT=null;
 /* ブラウザ標準の音声認識は「少し黙るとすぐ切れる」ので、
    continuous で開きっぱなしにして、無音の長さは自分のタイマーで測る。 */
-function startRec(lang, onFinal, onInterim, onEnd){
-  if(!SR){ toast('このブラウザは音声認識に非対応です。文字で入力してください'); onEnd&&onEnd(); return; }
+function startRecNative(lang, onFinal, onInterim, onEnd){
   stopSpeak();
   if(recFinish) recFinish();
   let finalTxt='', heard=false, ended=false, restarts=0;
@@ -2985,36 +3048,282 @@ function startRec(lang, onFinal, onInterim, onEnd){
   try{ rec=mk(); rec.start(); arm(firstGap()); }
   catch(e){ recFinish=null; onEnd&&onEnd(); }
 }
-function stopRec(){ if(recFinish) recFinish(); else { recStopping=true; clearTimeout(silT); try{ rec&&rec.stop(); }catch(e){} } }
+function stopRecNative(){ if(recFinish) recFinish(); else { recStopping=true; clearTimeout(silT); try{ rec&&rec.stop(); }catch(e){} } }
+
+/* ---------- 5b. 音声認識が無い端末むけ（iPhone の Chrome など） ----------
+   Apple の決まりで iOS のブラウザは全部 WebKit を使う。しかし Apple は
+   音声認識を Safari 本体にしか開放していないので、iOS の Chrome / Edge /
+   Firefox には SpeechRecognition が「存在しない」。
+   そこで自分で録音して、Gemini に文字起こしさせる。無料枠のままで動く。 */
+let audioCtx=null, micStream=null, cloudRec=null;
+function ensureAudioCtx(){
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if(!AC) return null;
+  if(!audioCtx) audioCtx=new AC();
+  if(audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
+  return audioCtx;
+}
+async function ensureMic(){
+  if(micStream && micStream.active) return micStream;
+  micStream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+  return micStream;
+}
+function releaseMic(){
+  try{ micStream && micStream.getTracks().forEach(t=>t.stop()); }catch(e){}
+  micStream=null;
+}
+/* Float32 の波を 16kHz モノラルの WAV にする（Gemini がそのまま受け取れる形） */
+function encodeWav(chunks, srcRate){
+  const total = chunks.reduce((n,c)=>n+c.length,0);
+  const flat = new Float32Array(total);
+  let o=0; for(const c of chunks){ flat.set(c,o); o+=c.length; }
+  const dstRate = 16000;
+  const ratio = srcRate/dstRate;
+  const outLen = Math.floor(flat.length/ratio);
+  const pcm = new Int16Array(outLen);
+  for(let i=0;i<outLen;i++){
+    const start=Math.floor(i*ratio), end=Math.min(flat.length,Math.floor((i+1)*ratio));
+    let sum=0,n=0; for(let j=start;j<end;j++){ sum+=flat[j]; n++; }
+    const v=Math.max(-1,Math.min(1, n? sum/n : 0));
+    pcm[i]= v<0? v*0x8000 : v*0x7FFF;
+  }
+  const buf=new ArrayBuffer(44+pcm.length*2), dv=new DataView(buf);
+  const str=(off,t)=>{ for(let i=0;i<t.length;i++) dv.setUint8(off+i,t.charCodeAt(i)); };
+  str(0,'RIFF'); dv.setUint32(4,36+pcm.length*2,true); str(8,'WAVE'); str(12,'fmt ');
+  dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true);
+  dv.setUint32(24,dstRate,true); dv.setUint32(28,dstRate*2,true);
+  dv.setUint16(32,2,true); dv.setUint16(34,16,true);
+  str(36,'data'); dv.setUint32(40,pcm.length*2,true);
+  new Int16Array(buf,44).set(pcm);
+  return { buf, seconds: outLen/dstRate };
+}
+function toBase64(buf){
+  const b=new Uint8Array(buf); let s='';
+  for(let i=0;i<b.length;i+=0x8000) s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));
+  return btoa(s);
+}
+async function transcribe(wavB64, lang){
+  const ja = /^ja/i.test(lang);
+  const sys = ja
+    ? 'You are a speech-to-text engine. Transcribe the Japanese speech in the audio exactly as spoken. Output ONLY the transcript, no quotes, no explanation. If there is no intelligible speech, output exactly: (none)'
+    : 'You are a speech-to-text engine. Transcribe the English speech in the audio exactly as spoken, including any grammatical mistakes the speaker made. Do not correct or paraphrase. Output ONLY the transcript, no quotes, no explanation. If there is no intelligible speech, output exactly: (none)';
+  const out = await gemini({
+    system: sys, temp: 0, tries: 2, timeout: 25000,
+    contents:[{role:'user',parts:[
+      {text: ja? '次の音声を文字にしてください。' : 'Transcribe this audio.'},
+      {inlineData:{mimeType:'audio/wav', data:wavB64}}
+    ]}]
+  });
+  const t=String(out||'').trim().replace(/^["'「]|["'」]$/g,'').trim();
+  if(!t || /^\(none\)$/i.test(t)) return '';
+  return t;
+}
+function startRecCloud(lang, onFinal, onInterim, onEnd){
+  if(!hasKey()){ toast('この端末で話すにはAIキーが必要です（設定から登録）'); onEnd&&onEnd(); return; }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ toast('この端末ではマイクが使えません。文字で入力してください'); onEnd&&onEnd(); return; }
+  let stopped=false, heard=false, chunks=[], node=null, src=null, mute=null;
+  let lastLoud=0, t0=Date.now();
+  const gapMs = ()=> Math.round((cfg.silence||4.5)*1000);
+  const firstMs = ()=> Math.max(gapMs()+2500, 7000);
+  cloudRec = { stop:()=>finish(true) };
+  async function finish(send){
+    if(stopped) return; stopped=true; cloudRec=null;
+    try{ node&&node.disconnect(); src&&src.disconnect(); mute&&mute.disconnect(); }catch(e){}
+    try{ node&&(node.onaudioprocess=null); }catch(e){}
+    recLevel(0);
+    onEnd&&onEnd();
+    if(!send || !heard || !chunks.length) return;
+    const {buf,seconds}=encodeWav(chunks, (audioCtx&&audioCtx.sampleRate)||48000);
+    chunks=[];
+    if(seconds<0.35) return;                       // 咳ばらい程度は捨てる
+    recBusy(true);
+    try{
+      const t=await transcribe(toBase64(buf), lang);
+      recBusy(false);
+      if(t) onFinal&&onFinal(t); else toast('うまく聞き取れませんでした。もう一度どうぞ');
+    }catch(e){ recBusy(false); toast(e.message||'聞き取りに失敗しました'); }
+  }
+  (async ()=>{
+    try{
+      stopSpeak();                                   // 読み上げの声を録らない
+      const ctx=ensureAudioCtx(); if(!ctx) throw new Error('audio');
+      const stream=await ensureMic();
+      if(stopped) return;
+      src=ctx.createMediaStreamSource(stream);
+      node=ctx.createScriptProcessor(4096,1,1);
+      lastLoud=Date.now();
+      node.onaudioprocess=e=>{
+        if(stopped) return;
+        const d=e.inputBuffer.getChannelData(0);
+        chunks.push(new Float32Array(d));
+        let sum=0; for(let i=0;i<d.length;i++) sum+=d[i]*d[i];
+        const rms=Math.sqrt(sum/d.length);
+        recLevel(Math.min(1, rms*12));
+        if(rms>0.018){ heard=true; lastLoud=Date.now(); hearMark(); }
+        const quiet=Date.now()-lastLoud;
+        if(heard && quiet>gapMs()) finish(true);
+        else if(!heard && Date.now()-t0>firstMs()) finish(false);
+        else if(Date.now()-t0>60000) finish(true);
+        if(heard && chunks.length>800) chunks.shift();   // 上限をつけて暴走を防ぐ
+      };
+      // ScriptProcessor は出力に繋がないと動かないが、そのまま繋ぐと自分の声が
+      // スピーカーから出てハウリングする。音量ゼロを挟んで黙らせる。
+      mute=ctx.createGain(); mute.gain.value=0;
+      src.connect(node); node.connect(mute); mute.connect(ctx.destination);
+    }catch(e){
+      const msg = (e && (e.name==='NotAllowedError'||e.name==='SecurityError'))
+        ? 'マイクが許可されていません。ブラウザの設定で許可してください'
+        : 'マイクを開けませんでした。文字で入力してください';
+      toast(msg); finish(false);
+    }
+  })();
+}
+/* ---- 「聞いています」表示 ---- */
+let hearTimer=null, hearLast=0, hearSubT=null;
+let hearInfo={heard:false, last:0, on:false};
+function hearMark(){ hearInfo.heard=true; hearInfo.last=Date.now(); }
+function hearSubTick(){
+  const el=$('#hearSub'); if(!el || !hearInfo.on) return;
+  const gap=(cfg.silence||4.5)*1000;
+  if(!hearInfo.heard){ el.textContent='まだ聞こえていません。話しはじめてください'; return; }
+  const left=Math.max(0,(gap-(Date.now()-hearInfo.last))/1000);
+  el.textContent = left>0.15? `あと ${left.toFixed(1)}秒 だまると送ります` : 'おくります…';
+}
+const HEAR_H=[5,9,14,9,5];
+function hearBars(v){
+  const bs=document.querySelectorAll('#hearBars i');
+  if(!bs.length) return;
+  bs.forEach((b,i)=>{ b.style.height = Math.round(4 + HEAR_H[i]*0.35 + v*HEAR_H[i]*1.5) + 'px'; });
+}
+function recLevel(v){ hearLast=v; if(!document.getElementById('hear').classList.contains('busy')) hearBars(v); }
+function hearOn(lang){
+  const h=$('#hear'); if(!h) return;
+  h.className='on';
+  hearInfo={heard:false, last:Date.now(), on:true};
+  $('#hearTxt').innerHTML = /^ja/i.test(lang)? '日本語で<b>どうぞ</b>' : '英語で<b>どうぞ</b>';
+  $('#hearSub').textContent = 'まだ聞こえていません。話しはじめてください';
+  clearInterval(hearSubT); hearSubT=setInterval(hearSubTick,120);
+  clearInterval(hearTimer);
+  if(SR){ // 標準の音声認識は音量が取れないので、ゆるく波打たせる
+    let t=0; hearTimer=setInterval(()=>{ t+=0.35; hearBars(0.25+0.22*Math.sin(t)+0.12*Math.sin(t*2.3)); },110);
+  }
+}
+function hearOff(){
+  const h=$('#hear'); if(!h) return;
+  hearInfo.on=false; clearInterval(hearSubT); hearSubT=null;
+  if(h.classList.contains('busy')) return;      // 文字起こし中は消さない
+  clearInterval(hearTimer); hearTimer=null;
+  h.className=''; hearBars(0);
+}
+function recBusy(on){
+  const h=$('#hear'); if(!h) return;
+  hearInfo.on=false; clearInterval(hearSubT); hearSubT=null;
+  clearInterval(hearTimer); hearTimer=null;
+  if(on){
+    h.className='on busy';
+    $('#hearTxt').textContent='文字にしています…';
+    $('#hearSub').textContent='あと1〜2秒';
+    $('#hearStop').style.display='none';
+  }else{
+    h.className=''; $('#hearStop').style.display='';
+    hearBars(0);
+  }
+}
+
+/* 呼び出し側はどちらか意識しなくていい */
+const CLOUD_MIC = ()=> !SR;
+function startRec(lang,onFinal,onInterim,onEnd){
+  hearOn(lang);
+  const end=()=>{ hearOff(); onEnd&&onEnd(); };
+  if(SR) return startRecNative(lang,onFinal,itr=>{ hearMark(); onInterim&&onInterim(itr); },end);
+  return startRecCloud(lang,onFinal,onInterim,end);
+}
+function stopRec(){ if(cloudRec) cloudRec.stop(); else stopRecNative(); }
+function recActive(){ return !!cloudRec || !!recFinish; }
+
+/* ---- iOS は「最初のタップ」でしか音を鳴らす許可が下りない ----
+   読み上げも録音も、1回だけ空打ちして権利を確保しておく。 */
+let unlocked=false;
+function unlockAudio(){
+  if(unlocked) return; unlocked=true;
+  try{
+    const ctx=ensureAudioCtx();
+    if(ctx){ const b=ctx.createBuffer(1,1,22050), sn=ctx.createBufferSource(); sn.buffer=b; sn.connect(ctx.destination); sn.start(0); }
+  }catch(e){}
+  try{
+    if('speechSynthesis' in window){
+      const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u);
+    }
+  }catch(e){}
+}
+document.addEventListener('touchend',unlockAudio,{once:true,passive:true});
+document.addEventListener('click',unlockAudio,{once:true});
 
 /* ---------- 6. Gemini（無料枠 / キーは端末内だけに保存） ---------- */
 const hasKey = ()=> !!cfg.apiKey.trim();
-async function gemini({system, contents, schema, temp=0.9}){
-  if(!hasKey()) throw new Error('NO_KEY');
-  const url=`https://generativelanguage.googleapis.com/v1beta/models/${cfg.model}:generateContent?key=${encodeURIComponent(cfg.apiKey.trim())}`;
-  const body={ contents, generationConfig:{ temperature:temp } };
+const sleep = ms=> new Promise(r=>setTimeout(r,ms));
+/* 一時的な失敗（混雑・空返事・回線）は自動で数回やり直す。
+   ここで粘らないと会話が途中で死んで、ユーザーには「バグった」ようにしか見えない。 */
+class GemError extends Error{ constructor(msg,kind){ super(msg); this.kind=kind; } }
+async function geminiOnce({system, contents, schema, temp, thinking, model, timeout}){
+  const mdl = model || cfg.model;
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/${mdl}:generateContent?key=${encodeURIComponent(cfg.apiKey.trim())}`;
+  const body={ contents, generationConfig:{ temperature:temp, maxOutputTokens:4096 } };
   if(system) body.systemInstruction={parts:[{text:system}]};
   if(schema){ body.generationConfig.responseMimeType='application/json'; body.generationConfig.responseSchema=schema; }
+  // 2.5 系は既定で「考える」ぶんのトークンを食い、structured output だと本文が空で返ることがある
+  if(/2\.5/.test(mdl)) body.generationConfig.thinkingConfig={ thinkingBudget: (thinking==null? 0 : thinking) };
   bumpUsage();
-  if(useMinute()>=limit().rpm) toast(`1分あたりの目安（${limit().rpm}回）に達しました。少し待つと安定します`);
-  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const ac = new AbortController();
+  const killer = setTimeout(()=>ac.abort(), timeout||30000);   // 固まったまま永久に待たない
+  let res;
+  try{ res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ac.signal}); }
+  catch(e){
+    if(e.name==='AbortError') throw new GemError('AIの応答が時間内に返りませんでした','retry');
+    throw new GemError('ネットにつながりませんでした（電波を確認してください）','retry');
+  }
+  finally{ clearTimeout(killer); }
   if(!res.ok){
     const t=await res.text().catch(()=> '');
-    if(res.status===400 && /API key/i.test(t)) throw new Error('APIキーが正しくないようです（設定で確認）');
-    if(res.status===429) throw new Error(`無料枠の上限です（今日 ${useToday()}回目）。1分ほど待つか、設定で flash-lite に変えてください`);
-    if(res.status===403) throw new Error('APIキーが無効か、権限がありません');
-    throw new Error('通信エラー ('+res.status+')');
+    if(res.status===400 && /API[_ ]?key|API key not valid/i.test(t)) throw new GemError('APIキーが正しくないようです（設定で確認）','key');
+    if(res.status===400) throw new GemError('リクエストが受け付けられませんでした（設定でモデルを変えてみてください）','fatal');
+    if(res.status===429) throw new GemError(`無料枠の上限に当たりました（今日 ${useToday()}回目）。1分ほど待つか、設定で flash-lite に変えてください`,'retry');
+    if(res.status===403) throw new GemError('APIキーが無効か、権限がありません','key');
+    if(res.status===404) throw new GemError('このモデルが見つかりません（設定で別のモデルを選んでください）','fatal');
+    if(res.status>=500) throw new GemError('AI側が混み合っています','retry');
+    throw new GemError('通信エラー ('+res.status+')','retry');
   }
   const j=await res.json();
-  const txt=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('').trim();
-  if(!txt) throw new Error('AIの返事が空でした。もう一度試してください');
+  const cand=j.candidates?.[0];
+  const txt=(cand?.content?.parts||[]).map(p=>p.text||'').join('').trim();
+  if(!txt){
+    const fr=cand?.finishReason||j.promptFeedback?.blockReason||'';
+    if(/SAFETY|BLOCK/i.test(fr)) throw new GemError('内容が安全フィルタに引っかかりました。言い方を変えてみてください','fatal');
+    throw new GemError('AIの返事が空でした','retry');
+  }
   if(!schema) return txt;
   try{ return JSON.parse(txt); }
   catch(e){
     const m=txt.match(/\{[\s\S]*\}/);
     if(m){ try{ return JSON.parse(m[0]); }catch(_){} }
-    throw new Error('返事の形式が読めませんでした');
+    throw new GemError('返事の形式が読めませんでした','retry');
   }
+}
+async function gemini(opts){
+  if(!hasKey()) throw new Error('NO_KEY');
+  if(useMinute()>=limit().rpm) toast(`1分あたりの目安（${limit().rpm}回）に達しました。少し待つと安定します`);
+  const tries = (opts && opts.tries!=null)? opts.tries : 3;
+  let last;
+  for(let i=0;i<tries;i++){
+    try{ return await geminiOnce(Object.assign({temp:0.9},opts)); }
+    catch(e){
+      last=e;
+      if(e.kind!=='retry' || i===tries-1) throw e;
+      if(app) { app.retrying=i+1; try{ paintMsgs(); }catch(_){} }
+      await sleep(700*Math.pow(2,i));                            // 0.7秒 → 1.4秒 と間を空ける
+    }
+  }
+  throw last;
 }
 const S = (props,req)=>({type:'object',properties:props,required:req});
 const TURN_SCHEMA = S({
@@ -3076,6 +3385,8 @@ function render(){
   const live = !!app.chat && !app.chat.ended;
   $('#btnEnd').classList.toggle('hidden', !live);
   $('#composer').classList.toggle('hidden', !live);
+  if(!live) hearOff();
+  syncMicUI();
   document.body.style.paddingBottom = live? '76px':'';
   if(app.tab==='talk'){ app.chat? renderChat(m) : renderSetup(m); }
   else if(app.tab==='phrase') renderPractice(m);
@@ -3085,6 +3396,41 @@ function render(){
 
 /* ---------- 8. スタート画面 ---------- */
 let pick={scene:'cafe', custom:'', cat:'all'};
+let envOpen=false;
+function envBanner(){
+  if(cfg.hideEnvTip || SR) return '';
+  const cloud = micMode()==='cloud';
+  const why = IOS_NON_SAFARI
+    ? 'iPhone・iPad は Apple の決まりでブラウザの中身が全部 Safari と同じですが、<b>音声認識だけは Safari 本体にしか開放されていません</b>。そのため Chrome では 🎙 が動きません。アプリ側では直せない、iOS 側の制約です。'
+    : 'このブラウザには音声認識の機能がありません。';
+  const more = cloud
+    ? why+'<br>そこで<b>録音して AI に文字起こしさせる方式</b>に自動で切り替えました。無料枠のままで、🎙・シャドーイング・発音チェックはそのまま使えます。話し終わりの判定が少しゆっくりで、文字になるまで1〜2秒かかります。<br><b>Safari で開くと</b>その場で文字になり、AIの回数も節約できます。'
+    : why+'<br><b>直し方は2つ</b>：① <b>Safari で開く</b>（無料・すぐ話せる）／② <b>AIキーを入れる</b>と録音式マイクに自動で切り替わり、Chrome のままでも話せます。';
+  const head = cloud
+    ? {em:'🎙', tt:'録音式マイクで動いています', ds:'この端末は音声認識が使えないので、自動で切り替えました。<b>そのまま話せます。</b>'}
+    : {em:'⚠️', tt:'この端末では 🎙 が使えません', ds:'<b>Safari で開く</b>か、<b>AIキーを入れる</b>と話せるようになります。'};
+  const warn = cloud? '' : 'style="background:color-mix(in srgb,var(--warn) 12%,var(--card));border-color:color-mix(in srgb,var(--warn) 35%,transparent)"';
+  return `<div class="envbar" ${warn}><div class="em">${head.em}</div><div style="flex:1;min-width:0">
+    <div class="tt">${head.tt}</div>
+    <div class="ds">${head.ds}</div>
+    ${envOpen?`<div class="ds" style="margin-top:7px;padding-top:7px;border-top:1px solid var(--line)">${more}</div>`:''}
+    <div class="row">
+      ${cloud?'':`<button data-envkey="1">AIキーを入れる</button>`}
+      <button data-envsafari="1">Safari で開く</button>
+      <button data-envmore="1">${envOpen?'とじる':'なぜ？'}</button>
+      ${cloud?`<button data-envhide="1">この案内を消す</button>`:''}
+    </div></div>
+    ${cloud?`<button class="x" data-envhide="1">✕</button>`:''}</div>`;
+}
+function safariHow(){
+  const url=location.href.split('#')[0];
+  const body = IS_IOS
+    ? '画面の下（または上）の「⋯」や共有ボタン → 「Safariで開く」を選んでください。\n\n出てこないときは、Safari を開いてこのURLを貼ってください：\n'+url
+    : 'Safari でこのURLを開いてください：\n'+url;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(()=>alert(body+'\n\n（URLはコピーしました）')).catch(()=>alert(body));
+  } else alert(body);
+}
 function renderSetup(m){
   $('#hTitle').textContent='Talkie';
   $('#hSub').textContent='じぶん英会話';
@@ -3102,6 +3448,7 @@ function renderSetup(m){
     <p class="muted" style="margin:0 0 10px;font-size:12px">うまく言えなくて大丈夫です。伝わらなかった経験がそのまま教材になります。</p>
     <button class="btn block" id="guideOk">わかった</button>
   </div>`:''}
+  ${envBanner()}
   ${!hasKey()?`<div class="card" style="border-color:color-mix(in srgb,var(--warn) 40%,var(--line))">
      <h2>🔑 まずは無料のAIキーを入れると本領発揮</h2>
      <p class="muted" style="margin:0 0 10px">キーなしでも「台本モード」で練習できますが、返事が決まっています。<br>
@@ -3177,7 +3524,7 @@ function renderSetup(m){
   </button>
   <p class="muted" style="text-align:center;margin:0 0 8px">
     ${hasKey()?'AIモード：自由に会話できます':'台本モード：決まった流れで練習します'}
-    ${srAvailable?'':' ／ ⚠️ このブラウザは音声認識に非対応（文字入力で練習できます）'}
+    ${srAvailable?'':(micMode()==='cloud'?' ／ 🎙 録音式マイク（この端末むけ）':' ／ ⚠️ 音声は使えません（文字入力で練習できます）')}
   </p>`;
   const gk=$('#goKey'); if(gk) gk.onclick=()=>{ app.tab='set'; render(); };
   const gok=$('#guideOk'); if(gok) gok.onclick=()=>{ cfg.seenGuide=true; saveCfg(); render(); };
@@ -3420,7 +3767,17 @@ function paintMsgs(){
       }
     }
   });
-  if(app.busy) h+=`<div class="typing"><i></i><i></i><i></i></div>`;
+  if(app.busy) h+=`<div class="typing"><i></i><i></i><i></i>${app.retrying?`<span class="retrying">つながりにくいので ${app.retrying}回目のやり直し中…</span>`:''}</div>`;
+  if(c.error && !app.busy){
+    h+=`<div class="errcard"><div class="em">⚠️</div><div style="flex:1;min-width:0">
+      <div class="tt">AIの返事が届きませんでした</div>
+      <div class="ds">${esc(c.error)}</div>
+      <div class="row">
+        <button data-eretry="1">もう一度おくる</button>
+        ${c.error.indexOf('キー')>=0?`<button class="gh" data-ecfg="1">設定をひらく</button>`:''}
+        <button class="gh" data-eend="1">ここで終わる</button>
+      </div></div></div>`;
+  }
   if(c.wordPanel && !c.ended){
     const w=c.wordPanel;
     h+=`<div class="hintbox"><div class="hh">🔤 これ英語でなんて言う？</div>
@@ -3564,14 +3921,14 @@ function historyContents(c){
 /* --- AIの番 --- */
 async function nextAiTurn(first,directive){
   const c=app.chat;
-  app.busy=true; paintMsgs();
+  app.busy=true; app.retrying=0; c.error=null; c.retry=null; paintMsgs();
   try{
     if(hasKey()){
       const contents=historyContents(c);
       if(first) contents.push({role:'user',parts:[{text:'(The learner has just arrived. Start the conversation with your first line.'+(c.topic?' Open with the topic given in your instructions.':'')+')'}]});
       else if(directive) contents.push({role:'user',parts:[{text:directive}]});
       const r=await gemini({system:systemPrompt(c), contents, schema:TURN_SCHEMA});
-      app.busy=false;
+      app.busy=false; app.retrying=0;
       c.msgs.push({role:'ai', en:r.reply, ja:r.reply_ja, nw:(r.new_words||[]).slice(0,2)});
       const last=[...c.msgs].reverse().find(m=>m.role==='me');
       if(last && r.feedback && !(directive && r.feedback.status==='none' && last.fb)) last.fb=r.feedback;
@@ -3598,9 +3955,10 @@ async function nextAiTurn(first,directive){
       afterAiSpoke(line.en);
     }
   }catch(e){
-    app.busy=false;
-    if(e.message==='NO_KEY'){ toast('AIキーが未設定です'); }
-    else toast(e.message);
+    app.busy=false; app.retrying=0;
+    // 消えるトーストだと「固まった」ようにしか見えないので、画面に残して復帰させる
+    c.error = (e.message==='NO_KEY')? 'AIキーが設定されていません。設定から登録してください。' : (e.message||'原因不明のエラー');
+    c.retry = ()=> nextAiTurn(first,directive);
     paintMsgs();
   }
 }
@@ -3696,6 +4054,7 @@ async function finishChat(){
   const mine=c.msgs.filter(m=>m.role==='me');
   if(!mine.length){ app.chat=null; stopSpeak(); render(); return; }
   c.ended=true; clearDraft(); stopSpeak(); stopRec();
+  recBusy(false); hearOff(); releaseMic();
   $('#composer').classList.add('hidden');
   $('#btnEnd').classList.add('hidden');
   document.body.style.paddingBottom='';
@@ -3816,6 +4175,14 @@ function reportHtml(r,c){
 /* レポート内ボタン（描き直されるので委譲で受ける） */
 document.addEventListener('click',e=>{
   const c=app.chat;
+  if(e.target.closest('#hearStop')){ stopRec(); return; }
+  if(e.target.closest('[data-envsafari]')){ safariHow(); return; }
+  if(e.target.closest('[data-envkey]')){ app.tab='set'; render(); return; }
+  if(e.target.closest('[data-envhide]')){ cfg.hideEnvTip=true; saveCfg(); render(); return; }
+  if(e.target.closest('[data-envmore]')){ envOpen=!envOpen; render(); return; }
+  if(e.target.closest('[data-eretry]') && c){ const f=c.retry; c.error=null; c.retry=null; paintMsgs(); if(f) f(); return; }
+  if(e.target.closest('[data-ecfg]')){ if(c) c.error=null; app.chat=null; app.tab='set'; stopSpeak(); render(); return; }
+  if(e.target.closest('[data-eend]') && c){ c.error=null; c.retry=null; finishChat(); return; }
   if(e.target.closest('#keepNext') && c&&c.report){
     (c.report.next_expressions||[]).forEach(p=>addPhrase(p.en,p.ja,'次に狙う表現',true));
     save(LS.ph,phrases); toast('フレーズ帳に入れました');
@@ -3836,19 +4203,40 @@ txt.addEventListener('keydown',e=>{
   if(e.key==='Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); sendMsg(txt.value); }
 });
 function setMicUI(btn,on){ btn.classList.toggle('rec',on); }
+/* マイクが使えるかどうかを、押す前に見て分かるようにする */
+function syncMicUI(){
+  const mode=micMode(), en=$('#micEn'), ja=$('#micJa');
+  if(!en||!ja) return;
+  const dead = mode==='none';
+  en.classList.toggle('off',dead);
+  en.title = dead? 'この端末では音声が使えません（設定でAIキーを入れると使えます）'
+           : mode==='cloud'? '英語で話す（録音してAIが文字にします）' : '英語で話す';
+  const jaDead = dead || !hasKey();
+  ja.classList.toggle('off',jaDead);
+  ja.title = jaDead? 'AIキーが必要です' : '日本語で言う → 英語にしてもらう';
+  txt.placeholder = dead? '英語で入力（この端末はマイク非対応）' : '英語で入力 / マイクで話す';
+}
+function micUnavailable(){
+  if(micMode()!=='none') return false;
+  if(IOS_NON_SAFARI) alert('この端末（iPhone/iPad の Chrome）では、Apple の制約で音声認識が使えません。\n\n直し方は2つ：\n① Safari で開く（すぐ話せます）\n② 設定で無料のAIキーを入れる（Chromeのままでも、録音して文字にする方式で話せます）');
+  else alert('このブラウザでは音声が使えません。設定で無料のAIキーを入れると、録音して文字にする方式で話せます。');
+  return true;
+}
 function listenEn(){
   const b=$('#micEn');
   if(!b || b.classList.contains('rec')) return;
+  if(micUnavailable()) return;
   setMicUI(b,true); txt.placeholder=`聞いています…（${(cfg.silence||4.5).toFixed(1)}秒だまると送信）`;
   startRec('en-US',
     fin=>{ txt.value=fin; autoGrow(); if(cfg.autoSend) setTimeout(()=>sendMsg(fin),250); },
     itr=>{ txt.value=itr; autoGrow(); },
-    ()=>{ setMicUI(b,false); txt.placeholder='英語で入力 / マイクで話す'; });
+    ()=>{ setMicUI(b,false); syncMicUI(); });
 }
 /* AIが話し終わったら、そのまま自分の番にする（ハンズフリー） */
 function afterAiSpoke(text){
   const go=()=>{
     if(!cfg.handsFree) return;
+    if(micMode()==='none') return;
     if(!app.chat || app.chat.ended || app.busy) return;
     if(txt.value.trim()) return;                    // 手で打っている途中なら邪魔しない
     setTimeout(()=>{ if(app.chat && !app.chat.ended && !app.busy && !txt.value.trim()) listenEn(); },400);
@@ -3862,12 +4250,13 @@ $('#micJa').onclick=()=>{
   const b=$('#micJa');
   if(b.classList.contains('rec')){ stopRec(); return; }
   if(!hasKey()){ toast('この機能はAIキーが必要です'); return; }
+  if(micUnavailable()) return;
   setMicUI(b,true); txt.placeholder='日本語でどうぞ（英語に直します）';
   let got='';
   startRec('ja-JP',
     fin=>{ got=fin; },
     itr=>{ txt.value=itr; autoGrow(); },
-    ()=>{ setMicUI(b,false); txt.placeholder='英語で入力 / マイクで話す';
+    ()=>{ setMicUI(b,false); syncMicUI();
       if(!got) return;
       txt.value='';
       if(app.chat && app.chat.wordPanel){ app.chat.wordPanel.q=got; paintMsgs(); askWord(); }
@@ -4015,7 +4404,8 @@ function renderShadowRun(m){
   $('#slow').onclick=()=>speak(it.en,Math.max(0.55,cfg.rate-0.25));
   $('#pmic').onclick=()=>{
     const b=$('#pmic'); if(b.classList.contains('rec')){ stopRec(); return; }
-    b.classList.add('rec'); $('#pmsg').textContent='聞いています…';
+    if(micUnavailable()) return;
+    b.classList.add('rec'); $('#pmsg').textContent = micMode()==='cloud'? '録音しています…（話し終わると自動でとまります）' : '聞いています…';
     startRec('en-US', fin=>{ q.pron=pronScore(it.en,fin); render(); },
       itr=>{ const el=$('#pmsg'); if(el) el.textContent='「'+itr+'」'; },
       ()=>{ const el=$('#pmic'); if(el) el.classList.remove('rec'); });
@@ -4137,7 +4527,8 @@ function renderPronDrill(m){
      <div class="row"><button class="btn ghost grow" id="prSkip">とばす</button><button class="btn grow" id="prNext">次へ</button></div>`;
     $('#pmic').onclick=()=>{
       const b=$('#pmic'); if(b.classList.contains('rec')){ stopRec(); return; }
-      b.classList.add('rec'); $('#pmsg').textContent='聞いています…';
+      if(micUnavailable()) return;
+      b.classList.add('rec'); $('#pmsg').textContent = micMode()==='cloud'? '録音しています…（話し終わると自動でとまります）' : '聞いています…';
       startRec('en-US', fin=>{ q.pron=pronScore(pair.a,fin); render(); },
         itr=>{ const el=$('#pmsg'); if(el) el.textContent='「'+itr+'」'; },
         ()=>{ const el=$('#pmic'); if(el) el.classList.remove('rec'); });
@@ -4182,7 +4573,8 @@ function renderPronDrill(m){
   $('#slow').onclick=()=>speak(st.en,Math.max(0.55,cfg.rate-0.25));
   $('#pmic').onclick=()=>{
     const b=$('#pmic'); if(b.classList.contains('rec')){ stopRec(); return; }
-    b.classList.add('rec'); $('#pmsg').textContent='聞いています…';
+    if(micUnavailable()) return;
+    b.classList.add('rec'); $('#pmsg').textContent = micMode()==='cloud'? '録音しています…（話し終わると自動でとまります）' : '聞いています…';
     startRec('en-US', fin=>{ q.pron=pronScore(st.en,fin); render(); },
       itr=>{ const el=$('#pmsg'); if(el) el.textContent='「'+itr+'」'; },
       ()=>{ const el=$('#pmic'); if(el) el.classList.remove('rec'); });
@@ -4344,7 +4736,8 @@ function renderQuiz(m){
     $('#pmic').onclick=()=>{
       const b=$('#pmic');
       if(b.classList.contains('rec')){ stopRec(); return; }
-      b.classList.add('rec'); $('#pmsg').textContent='聞いています…';
+      if(micUnavailable()) return;
+      b.classList.add('rec'); $('#pmsg').textContent = micMode()==='cloud'? '録音しています…（話し終わると自動でとまります）' : '聞いています…';
       startRec('en-US',
         fin=>{ quiz.pron=pronScore(p.en,fin); render(); },
         itr=>{ const el=$('#pmsg'); if(el) el.textContent='「'+itr+'」'; },

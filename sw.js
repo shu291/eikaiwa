@@ -1,5 +1,5 @@
 /* Talkie service worker — 台本モードと復習をオフラインでも動かす */
-const CACHE = 'talkie-v3';
+const CACHE = 'talkie-v4';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e=>{
